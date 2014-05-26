@@ -5,7 +5,7 @@
 
 #include "mpc.h"
 
-#include "lval.h"
+#include "ltypes.h"
 
 int main(int argc, char *argv[])
 {
