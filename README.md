@@ -22,11 +22,11 @@ run `$ make all`. This should generate a `repl` executable.
 
 Execute `$ ./repl`.
 
-`λ *> ./repl 
-Lispy version 0.0.0.5
+	λ *> ./repl 
+	Lispy version 0.0.0.5
 
-Press Ctrl-C to exit
+	Press Ctrl-C to exit
 
-lispy> (+ 1 1)
-2`
+	lispy> (+ 1 1)
+	2
 
