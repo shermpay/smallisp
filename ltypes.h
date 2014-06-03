@@ -1,5 +1,9 @@
 #include "mpc.h"
-enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_FUN, LVAL_QEXP, LVAL_SEXP };
+enum { LVAL_BOOL, LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_FUN, LVAL_QEXP, LVAL_SEXP };
+
+typedef int bool_t;
+#define FALSE 0
+#define TRUE 1
 
 struct lval;
 typedef struct lval lval;
@@ -32,6 +36,7 @@ struct lenv {
     int count;
 };
 
+
 #define LASSERT(args, cond, fmt, ...)			  \
     if ((!(cond))) {					  \
 	lval *err = lval_err(fmt, ##__VA_ARGS__);	  \
@@ -39,8 +44,14 @@ struct lenv {
 	return err;					  \
     }
 
+#define LASSERT_TYPE(func, args, index, extype)			\
+    LASSERT(args, ((args->cell[index]->type) == (extype)),	\
+	    "TypeError. In '%s': Expected %s; Got %s", func,	\
+	    ltype_name(extype), ltype_name(args->cell[index]->type))
+
 /* Contstructors */
 lval *lval_num(long x);
+lval *lval_bool(bool_t p);
 lval *lval_err(char *fmt, ...);
 lval *lval_sym(char *s);
 lval *lval_sexp(void);
@@ -87,6 +98,7 @@ lval *builtin_eval(lenv *e, lval *v);
 lval *builtin_var(lenv *e, lval *v, char *func);
 lval *builtin_def(lenv *e, lval *v);
 lval *builtin_let(lenv *e, lval *v);
+lval *builtin_if(lenv *e, lval *v);
 
 void lenv_add_builtin(lenv *e, char *name, lbuiltin builtin);
 void lenv_add_builtins(lenv *e);

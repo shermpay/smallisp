@@ -69,10 +69,7 @@ lval *builtin_head(lenv *e, lval *v)
     LASSERT(v, (v->cell[0]->count != 0), "Passed in empty list"); 
 
     lval *result = lval_take(v, 0);
-    while (result->count > 1) {
-	lval_del(lval_pop(result, 1));
-    }
-    return result->cell[0];
+    return lval_take(result, 0);
 }
 
 lval *builtin_tail(lenv *e, lval *v)
@@ -98,7 +95,7 @@ lval *builtin_list(lenv *e, lval *v)
 lval *builtin_eval(lenv *e, lval *v)
 {
     LASSERT(v, (v->count == 1), "Function 'eval' passed too many arguments!");
-    LASSERT(v, (v->cell[0]->type == LVAL_QEXP), "Function 'eval' passed incorrect type!");
+    LASSERT_TYPE("eval", v, 0, LVAL_QEXP);
 
     lval* x = lval_take(v, 0);
     x->type = LVAL_SEXP;
@@ -107,15 +104,12 @@ lval *builtin_eval(lenv *e, lval *v)
 
 lval *builtin_var(lenv *e, lval *v, char *func)
 {
-    LASSERT(v, v->cell[0]->type == LVAL_QEXP,
-	    "'%s': Passed incorrect type for arg 1. Got %s. Got Expected %s",
-	    func, ltype_name(v->cell[0]->type), ltype_name(LVAL_QEXP));
+    LASSERT_TYPE(func, v, 0, LVAL_QEXP);
 
     lval *syms = v->cell[0];
     int i;
     for (i = 0; i < syms->count; i++) {
-	LASSERT(v, (syms->cell[i]->type == LVAL_SYM),
-		"'%s': Cannot define non-symbol", func);
+    	LASSERT_TYPE(func, syms, i, LVAL_SYM);
     }
 
     LASSERT(v, (syms->count == v->count - 1),
@@ -150,54 +144,19 @@ lval *builtin_todo(lenv *e, lval *v)
     return v;
 }
 
-/* Evaluates Sexps */
-lval *lval_eval_sexp(lenv *e, lval *v)
+lval *builtin_if(lenv *e, lval *v)
 {
-    int i;
-    /* Evaluate children */
-    for (i = 0; i < v->count; i++) {
-	v->cell[i] = lval_eval(e, v->cell[i]);
+    LASSERT_TYPE("if", v, 0, LVAL_BOOL);
+    lval *result = malloc(sizeof(lval));
+
+    if (v->cell[0]->num == 1) {
+	result = lval_take(v, 1);
+    } else {
+	result = lval_take(v, 2);
     }
 
-    /* Error checking */
-    for (i = 0; i < v->count; i++) {
-	if (v->cell[i]->type == LVAL_ERR) {
-	    return lval_take(v, i);
-	}
-    }
-
-    if (v->count == 0) { return v; }
-    if (v->count == 1) { return lval_take(v, 0); }
-
-    /* Checks first element is Symbol */
-    lval *f = lval_pop(v, 0);
-    if (f->type != LVAL_FUN) {
-	lval *err =
-	    lval_err("S-expressions starts with incorrect type. Got %s, Expected %s.",
-		     ltype_name(f->type), ltype_name(LVAL_FUN));
-	lval_del(f); lval_del(v);
-	return err;
-    }
-
-    /* lookup symbol */
-    lval *result = lval_call(e, f, v);
-    lval_del(f);
     return result;
 }
-
-lval *lval_eval(lenv *e, lval *v)
-{
-    if (v->type == LVAL_SYM) {
-	lval *x = lenv_lkup(e, v);
-	lval_del(v);
-	return x;
-    }
-    if (v->type == LVAL_SEXP) {
-	return lval_eval_sexp(e, v);
-    }
-    return v;
-}
-
 
 void lenv_add_builtin(lenv *e, char *name, lbuiltin func)
 {
@@ -223,6 +182,7 @@ void lenv_add_builtins(lenv *e)
     lenv_add_builtin(e, "def", builtin_def);
     lenv_add_builtin(e, "let", builtin_let);
     lenv_add_builtin(e, "eval", builtin_eval);
+    lenv_add_builtin(e, "if", builtin_if);
 
     /* Dev functions */
 }

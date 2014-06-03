@@ -23,11 +23,11 @@ int main(int argc, char *argv[])
 	      "symbol   : /[a-zA-z0-9_+\\-*\\/\\\\=<>!&]+/;		"
 	      "sexp     : '(' <expr>* ')';				"
 	      "qexp	: '{' <expr>* '}';				"
-	      "expr     : <number> | <symbol> | <sexp> | <qexp>;	"
+	      "expr     : <number> | <bool> |<symbol> | <sexp> | <qexp>;	"
 	      "lispy : /^/ <expr>* /$/ ;				",
 	      Number, Symbol, Sexp, Qexp, Expr, Lispy, NULL);
 
-    puts("Lispy version 0.0.0.5\n");
+    puts("Lispy version 0.0.0.7\n");
     puts("Press Ctrl-C to exit\n");
 
     lenv *env = lenv_new();
@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 	    
 	    lval_println(result);
 	    lval_del(result);
+	    mpc_ast_print(r.output);
 	    mpc_ast_delete(r.output);
 	} else {
 	    /* Print error */
@@ -55,6 +56,6 @@ int main(int argc, char *argv[])
     }
     lenv_del(env);
 	
-    mpc_cleanup(6, Number, Symbol, Sexp, Qexp, Expr, Lispy);
+    mpc_cleanup(7, Number, Symbol, Sexp, Qexp, Expr, Lispy);
     return 0;
 }

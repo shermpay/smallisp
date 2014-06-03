@@ -37,6 +37,15 @@ lval *lval_sym(char *s)
     v->type = LVAL_SYM;
     v->sym = malloc(strlen(s) + 1);
     strcpy(v->sym, s);
+    int istrue = strcmp(s, "true");
+    int isfalse = strcmp(s, "false");
+    if (istrue == 0) {
+	v->type = LVAL_BOOL;
+	v->num = TRUE;
+    } else if (isfalse == 0) {
+	v->type = LVAL_BOOL;
+	v->num = FALSE;
+    }
     return v;
 }
 
@@ -84,7 +93,9 @@ lval *lval_lambda(lval *formals, lval *body)
 void lval_del(lval *v)
 {
     switch (v->type) {
-	case LVAL_NUM: break;
+	case LVAL_NUM:
+	case LVAL_BOOL:
+	    break;
 
 	case LVAL_FUN:
 	    if (!v->builtin) {
@@ -117,6 +128,7 @@ lval *lval_add(lval *v, lval *x)
     return v;
 }
 
+/* Removes an lval at a specific index, and returns it */
 lval *lval_pop(lval *v, int i)
 {
     lval *result = v->cell[i];
@@ -127,6 +139,7 @@ lval *lval_pop(lval *v, int i)
     return result;
 }
 
+/* Removes and returns an lval at a specific index */
 lval *lval_take(lval *v, int i)
 {
     lval *result = lval_pop(v, i);
@@ -155,6 +168,8 @@ lval *lval_copy(lval *v)
 	    result->err = malloc(strlen(v->err) + 1);
 	    strcpy(result->err, v->err);
 	    break;
+	case LVAL_BOOL:
+	    result->num = v->num;
 	case LVAL_SYM:
 	    result->sym = malloc(strlen(v->sym) + 1);
 	    strcpy(result->sym, v->sym);
@@ -177,6 +192,7 @@ char *ltype_name(int t)
     switch(t) {
 	case LVAL_FUN: return "<function>";
 	case LVAL_NUM: return "<number>";
+	case LVAL_BOOL: return "<bool>";
 	case LVAL_ERR: return "<error>";
 	case LVAL_SYM: return "<symbol>";
 	case LVAL_SEXP: return "<sexp>";
@@ -239,6 +255,7 @@ void lval_print(lval *v)
 {
     switch (v->type){
 	case LVAL_NUM: printf("%li", v->num); break;
+	case LVAL_BOOL: printf("%s", v->sym); break;
 	case LVAL_ERR: printf("Error: %s", v->err); break;
 	case LVAL_SYM: printf("%s", v->sym); break;
 	case LVAL_FUN:
@@ -260,6 +277,53 @@ void lval_print(lval *v)
 /* Prints lval with a new line */
 void lval_println(lval *v) { lval_print(v); putchar('\n'); }
 
+/* Evaluates Sexps */
+lval *lval_eval_sexp(lenv *e, lval *v)
+{
+    int i;
+    /* Evaluate children */
+    for (i = 0; i < v->count; i++) {
+	v->cell[i] = lval_eval(e, v->cell[i]);
+    }
+
+    /* Error checking */
+    for (i = 0; i < v->count; i++) {
+	if (v->cell[i]->type == LVAL_ERR) {
+	    return lval_take(v, i);
+	}
+    }
+
+    if (v->count == 0) { return v; }
+    if (v->count == 1) { return lval_take(v, 0); }
+
+    /* Checks first element is Symbol */
+    lval *f = lval_pop(v, 0);
+    if (f->type != LVAL_FUN) {
+	lval *err =
+	    lval_err("S-expressions starts with incorrect type. Got %s, Expected %s.",
+		     ltype_name(f->type), ltype_name(LVAL_FUN));
+	lval_del(f); lval_del(v);
+	return err;
+    }
+
+    /* lookup symbol */
+    lval *result = lval_call(e, f, v);
+    lval_del(f);
+    return result;
+}
+
+lval *lval_eval(lenv *e, lval *v)
+{
+    if (v->type == LVAL_SYM) {
+	lval *x = lenv_lkup(e, v);
+	lval_del(v);
+	return x;
+    }
+    if (v->type == LVAL_SEXP) {
+	return lval_eval_sexp(e, v);
+    }
+    return v;
+}
 lval *lval_call(lenv *e, lval *func, lval *arg_vals)
 {
     if (func->builtin) { return func->builtin(e, arg_vals); }
