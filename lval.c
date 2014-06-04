@@ -13,6 +13,20 @@ lval *lval_num(long x)
     return v;
 }
 
+/* Creates a new lval type of Bool */
+lval *lval_bool(bool_t b)
+{
+    if (b != TRUE && b != FALSE) {
+	fprintf(stderr, "Attempting to construct Bool from non-boolean value: %d\n",
+		(int)b);
+    }
+    lval *v = malloc(sizeof(lval));
+    v->type = LVAL_BOOL;
+    v->sym = b == TRUE ? "true" : "false";
+    v->num = b;
+    return v;
+}
+
 /* Creates a new lval type of Error */
 lval *lval_err(char *fmt, ...)
 {
@@ -37,15 +51,6 @@ lval *lval_sym(char *s)
     v->type = LVAL_SYM;
     v->sym = malloc(strlen(s) + 1);
     strcpy(v->sym, s);
-    int istrue = strcmp(s, "true");
-    int isfalse = strcmp(s, "false");
-    if (istrue == 0) {
-	v->type = LVAL_BOOL;
-	v->num = TRUE;
-    } else if (isfalse == 0) {
-	v->type = LVAL_BOOL;
-	v->num = FALSE;
-    }
     return v;
 }
 
@@ -187,6 +192,36 @@ lval *lval_copy(lval *v)
     return result;
 }
 
+lval *lval_equal(lval *x, lval *y,  lval *arg, int arg_idx)
+{
+    if (x->type != y->type) {
+    	int type1 = x->type;
+    	int type2 = y->type;
+    	return lval_err("'=': incoherent types arg 1: %s, arg %d: %s",
+    			ltype_name(type1), arg_idx, ltype_name(type2));
+    }
+    int type = x->type;
+    switch (type) {
+	case LVAL_NUM:
+	case LVAL_BOOL:
+	    return lval_bool(x->num == y->num);
+	case LVAL_QEXP:
+	    if (x->count != y->count) {
+		return lval_bool(FALSE);
+	    }
+	    lval *result;
+	    for (int i = 0; i < x->count; i++) {
+		result = lval_equal(x->cell[i], y->cell[i], arg, arg_idx);
+		if (result->num == FALSE) {
+		    return result;
+		}
+	    }
+	    return result;
+	default:
+	    return lval_bool(FALSE);
+    }
+}
+
 char *ltype_name(int t)
 {
     switch(t) {
@@ -209,9 +244,19 @@ lval *lval_read_num(mpc_ast_t *t)
     return result;
 }
 
+lval *lval_read_bool(mpc_ast_t *t)
+{
+    if (strcmp(t->contents, "true") == 0) {
+	return lval_bool(TRUE);
+    } else {
+	return lval_bool(FALSE);
+    }
+}
+
 lval *lval_read(mpc_ast_t *t)
 {
     if (strstr(t->tag, "number")) { return lval_read_num(t); }
+    if (strstr(t->tag, "bool")) { return lval_read_bool(t); }
     if (strstr(t->tag, "symbol")) { return lval_sym(t->contents); }
 
     /* if root(>) or sexp than create empty list */

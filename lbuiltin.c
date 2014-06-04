@@ -92,6 +92,14 @@ lval *builtin_list(lenv *e, lval *v)
     return v;
 }
 
+lval *builtin_count(lenv *e, lval *v)
+{
+    LASSERT_TYPE("count", v, 0, LVAL_QEXP);
+    lval *result = lval_num(v->cell[0]->count);
+    lval_del(v);
+    return result;
+}
+
 lval *builtin_eval(lenv *e, lval *v)
 {
     LASSERT(v, (v->count == 1), "Function 'eval' passed too many arguments!");
@@ -147,14 +155,47 @@ lval *builtin_todo(lenv *e, lval *v)
 lval *builtin_if(lenv *e, lval *v)
 {
     LASSERT_TYPE("if", v, 0, LVAL_BOOL);
-    lval *result = malloc(sizeof(lval));
+    lval *result;
 
+    lval_println(v);
     if (v->cell[0]->num == 1) {
 	result = lval_take(v, 1);
     } else {
 	result = lval_take(v, 2);
     }
+    
 
+    return result;
+}
+
+lval *builtin_equal(lenv *e, lval *v)
+{
+    int i;
+    lval *base_val = v->cell[0];
+    lval *result;
+    for (i = 1; i < v->count; i++) {
+	result = lval_equal(base_val, v->cell[i], v, (i + 1));
+	if (result->type == LVAL_ERR) {
+	    lval_del(v);
+	    return result;
+	}
+	if (result->num != 0) {
+	    lval_del(v);
+	    return result;
+	}
+    }
+    lval_del(v);
+    return result;
+}
+
+lval *builtin_cmp(lenv *e, lval *v)
+{
+    LASSERT(v, v->count == 2, "'compare': accepts 2 args. Got %d", v->count);
+    LASSERT_TYPE("comp", v, 0, LVAL_NUM);
+    LASSERT_TYPE("comp", v, 1, LVAL_NUM);
+
+    lval* result = lval_num(v->cell[1]->num - v->cell[0]->num);
+    lval_del(v);
     return result;
 }
 
@@ -176,6 +217,7 @@ void lenv_add_builtins(lenv *e)
     lenv_add_builtin(e, "head", builtin_head);
     lenv_add_builtin(e, "tail", builtin_tail);
     lenv_add_builtin(e, "list", builtin_list);
+    lenv_add_builtin(e, "count", builtin_count);
 
     /* Core functions */
     lenv_add_builtin(e, "lambda", builtin_lambda);
@@ -184,5 +226,8 @@ void lenv_add_builtins(lenv *e)
     lenv_add_builtin(e, "eval", builtin_eval);
     lenv_add_builtin(e, "if", builtin_if);
 
+    /* Comparison functions */
+    lenv_add_builtin(e, "=", builtin_equal);
+    lenv_add_builtin(e, "cmp", builtin_cmp);
     /* Dev functions */
 }

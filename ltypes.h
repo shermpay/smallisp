@@ -1,5 +1,5 @@
 #include "mpc.h"
-enum { LVAL_BOOL, LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_FUN, LVAL_QEXP, LVAL_SEXP };
+enum { LVAL_NUM, LVAL_BOOL, LVAL_CHAR, LVAL_ERR, LVAL_SYM, LVAL_FUN, LVAL_QEXP, LVAL_SEXP };
 
 typedef int bool_t;
 #define FALSE 0
@@ -64,6 +64,7 @@ lval *lval_add(lval *v, lval *x);
 lval *lval_pop(lval *v, int i);
 lval *lval_take(lval *v, int i);
 lval *lval_copy(lval *v);
+lval *lval_equal(lval *x, lval *y, lval *arg, int arg_idx);
 /* Reading functions */
 lval *lval_read_num(mpc_ast_t *t);
 lval *lval_read(mpc_ast_t *t);
@@ -105,3 +106,4 @@ void lenv_add_builtins(lenv *e);
 
 /* Other functions */
 char *ltype_name(int t);
+

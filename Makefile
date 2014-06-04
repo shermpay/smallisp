@@ -18,5 +18,5 @@ lenv.o: lenv.c ltypes.h
 lbuiltin.o: lbuiltin.c ltypes.h
 	$(CC) $(CFLAGS) -c $<
 
-clean: *.o repl
+clean: 
 	rm *.o
