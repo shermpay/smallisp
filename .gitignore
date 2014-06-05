@@ -2,3 +2,4 @@ repl
 mpc.*
 #*
 *.o
+org/*

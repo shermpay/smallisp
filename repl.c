@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     mpc_parser_t *Sexp = mpc_new("sexp");
     mpc_parser_t *Qexp = mpc_new("qexp");
     mpc_parser_t *Expr = mpc_new("expr");
-    mpc_parser_t *Lispy = mpc_new("lispy");
+    mpc_parser_t *Smallisp = mpc_new("Smallisp");
     
     /* Definintions */
     mpca_lang(MPC_LANG_DEFAULT,
@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
 	      "sexp     : '(' <expr>* ')';				"
 	      "qexp	: '{' <expr>* '}';				"
 	      "expr     : <number> | <bool> | <char> | <symbol> | <sexp> | <qexp>;	"
-	      "lispy : /^/ <expr>* /$/ ;				",
-	      Number, Bool, Symbol, Sexp, Qexp, Expr, Lispy, NULL);
+	      "Smallisp : /^/ <sexp>* /$/ ;				",
+	      Number, Bool, Symbol, Sexp, Qexp, Expr, Smallisp, NULL);
 
     puts("Lispy version 0.0.0.7\n");
     puts("Press Ctrl-C to exit\n");
@@ -35,17 +35,17 @@ int main(int argc, char *argv[])
     lenv *env = lenv_new();
     lenv_add_builtins(env);
     while(1) {
-	char *input = readline("lispy> ");
+	char *input = readline("slisp> ");
 
 	add_history(input);
 	
 	mpc_result_t r;
-	if (mpc_parse("<stdin>", input, Lispy, &r)) {
+	if (mpc_parse("<stdin>", input, Smallisp, &r)) {
 	    /* On success print AST */
-	    /* lval *result = lval_eval(env, lval_read(r.output)); */
+	    lval *result = lval_eval(env, lval_read(r.output));
 	    
-	    /* lval_println(result); */
-	    /* lval_del(result); */
+	    lval_println(result);
+	    lval_del(result);
 	    mpc_ast_print(r.output);
 	    mpc_ast_delete(r.output);
 	} else {
@@ -58,6 +58,6 @@ int main(int argc, char *argv[])
     }
     lenv_del(env);
 	
-    mpc_cleanup(7, Number, Bool, Symbol, Sexp, Qexp, Expr, Lispy);
+    mpc_cleanup(7, Number, Bool, Symbol, Sexp, Qexp, Expr, Smallisp);
     return 0;
 }

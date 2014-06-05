@@ -1,4 +1,4 @@
-lispy
+Smallisp
 =====
 
 Lisp Implementation in C.
@@ -9,6 +9,7 @@ Lisp Implementation in C.
 Simple Lisp implementation in C.
 
 Currently following www.buildyourownlisp.com
+Transistion Phase, reimplementing language to various personal preferences.
 
 
 ## Requirements
