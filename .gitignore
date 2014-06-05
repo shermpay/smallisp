@@ -3,3 +3,5 @@ mpc.*
 #*
 *.o
 org/*
+bin/*
+obj/*
