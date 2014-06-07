@@ -1,0 +1,10 @@
++
+-
+*
+/
+*20
+-a
++b
+1-1 ; This should match as NUMBER not SYMBOL
+1+1 ; This should match as NUMBER not SYMBOL
+
