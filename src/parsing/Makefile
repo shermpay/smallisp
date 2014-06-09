@@ -4,11 +4,19 @@ CFLAGS = -g
 LIBS = -lfl
 TESTDIR = ./tests
 
-lexer: lex.yy.c
-	$(CC) $(CFLAGS) $< $(LIBS) -o $@
+parser: lex.yy.c grammar.tab.c
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+lexer: lex.yy.c 
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 lex.yy.c: smallisp.flex
 	flex $<
+
+grammar.tab.h: grammar.tab.c
+
+grammar.tab.c: grammar.y
+	bison -d $<
 
 tests: lexer
 	for file in $(TESTDIR)/* ; do \
@@ -17,5 +25,5 @@ tests: lexer
 		echo "\n" ; \
 	done
 
-clean:	lexer
-	rm lexer
+clean:
+	rm parser grammar.tab.h grammar.tab.c lex.yy.c

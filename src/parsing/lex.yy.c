@@ -1,9 +1,10 @@
 #line 2 "smallisp.flex"
 #include <stdio.h>
+#include "grammar.tab.h"
 
 
 
-#line 7 "lex.yy.c"
+#line 8 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -522,7 +523,7 @@ char *yytext;
 #line 1 "smallisp.flex"
 
 
-#line 526 "lex.yy.c"
+#line 527 "lex.yy.c"
 
 #define INITIAL 0
 #define INSTR 1
@@ -710,12 +711,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 8 "smallisp.flex"
+#line 9 "smallisp.flex"
 
-
-    static int linum = 0;
-
-#line 719 "lex.yy.c"
+#line 717 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -801,123 +799,133 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 12 "smallisp.flex"
-ECHO; puts(" -> Matched STRING"); linum++;
+#line 10 "smallisp.flex"
+
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 13 "smallisp.flex"
-ECHO; puts(" -> Matched IN_QUOTE");
+#line 11 "smallisp.flex"
+
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 14 "smallisp.flex"
-ECHO; puts(" -> Matched BACKSLASH");
+#line 12 "smallisp.flex"
+
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 15 "smallisp.flex"
-ECHO; puts(" -> Matched NEWLINE");
+#line 13 "smallisp.flex"
+
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 16 "smallisp.flex"
-ECHO; puts(" -> Matched TAB");
+#line 14 "smallisp.flex"
+
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 17 "smallisp.flex"
-ECHO; puts(" -> Matched FORM_FEED");
+#line 15 "smallisp.flex"
+
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 18 "smallisp.flex"
-ECHO; puts(" -> Matched BACKSPACE");
+#line 16 "smallisp.flex"
+
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 19 "smallisp.flex"
-ECHO; puts(" -> Matched RETURN");
+#line 17 "smallisp.flex"
+
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 20 "smallisp.flex"
-ECHO; puts(" -> INVALID escape character");
+#line 18 "smallisp.flex"
+
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 21 "smallisp.flex"
+#line 19 "smallisp.flex"
 {
-						ECHO;
-						puts(" -> Matched DBL_QUOTE(closing)");
-						BEGIN(INITIAL);
-					}
+    
+    BEGIN(INITIAL);
+ }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 26 "smallisp.flex"
+#line 23 "smallisp.flex"
 
 	YY_BREAK
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-#line 27 "smallisp.flex"
-linum++;
+#line 24 "smallisp.flex"
+
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 28 "smallisp.flex"
-ECHO; puts(" -> Matched SEMI"); linum++;
+#line 25 "smallisp.flex"
+
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 29 "smallisp.flex"
-ECHO; puts(" -> Matched LEFT_PAREN");
+#line 26 "smallisp.flex"
+return LPAREN;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 30 "smallisp.flex"
-ECHO; puts(" -> Matched RIGHT_PAREN");
+#line 27 "smallisp.flex"
+return RPAREN;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 31 "smallisp.flex"
-ECHO; puts(" -> Matched NUMBER");
+#line 28 "smallisp.flex"
+{
+    fprintf(stderr, "%s\n", yytext);
+    yylval.num = atoi(yytext);
+    return NUMBER;
+    
+} 
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 32 "smallisp.flex"
-ECHO; puts(" -> Matched BOOL");
+#line 34 "smallisp.flex"
+return BOOL;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 33 "smallisp.flex"
-ECHO; puts(" -> Matched CHAR");
+#line 35 "smallisp.flex"
+return CHAR;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 34 "smallisp.flex"
-ECHO; puts(" -> Matched DBL_QUOTE"); BEGIN(INSTR);
+#line 36 "smallisp.flex"
+BEGIN(INSTR);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 35 "smallisp.flex"
-ECHO; puts(" -> Matched SYMBOL");
+#line 37 "smallisp.flex"
+{
+    fprintf(stderr, "%s\n", yytext);
+    yylval.sym = strdup(yytext); return SYMBOL;
+    
+}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 36 "smallisp.flex"
-ECHO; puts(" -> Unmatched Delimiter"); /* This is for any unmatched delims*/
+#line 42 "smallisp.flex"
+puts(" -> Unmatched Delimiter"); 
+	YY_BREAK
+case YY_STATE_EOF(INITIAL):
+case YY_STATE_EOF(INSTR):
+#line 43 "smallisp.flex"
+puts("END OF FILE"); return END_OF_FILE;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 38 "smallisp.flex"
+#line 44 "smallisp.flex"
 ECHO;
 	YY_BREAK
-#line 918 "lex.yy.c"
-case YY_STATE_EOF(INITIAL):
-case YY_STATE_EOF(INSTR):
-	yyterminate();
+#line 929 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1913,18 +1921,19 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 38 "smallisp.flex"
+#line 44 "smallisp.flex"
 
 
-int main(int argc, char* argv[])
-{
-    if (argc < 2) {
-	fprintf(stderr, "Need to pass in a smallisp file to analyze\n");
-	exit(0);
-    }
-    FILE *input_file = fopen(argv[1], "r");
-    printf("Analyzing file: %s ...", argv[1]);
-    yyin = input_file;
-    yylex();
-}
+/* int main(int argc, char* argv[]) */
+/* { */
+/*     if (argc < 2) { */
+/* 	fprintf(stderr, "Need to pass in a smallisp file to analyze\n"); */
+/* 	exit(0); */
+/*     } */
+/*     FILE *input_file = fopen(argv[1], "r"); */
+/*     printf("Analyzing file: %s ...", argv[1]); */
+/*     yyin = input_file; */
+/*     yylex(); */
+/*     fclose(yyin); */
+/* } */
 
