@@ -4,6 +4,12 @@ CFLAGS = -g
 LIBS = -lfl
 TESTDIR = ./tests
 
+slist_test: slist_test.c slist.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+slist.o: slist.c slist.h
+	$(CC) $(CFLAGS) $< -c
+
 ast_test: ast_test.c ast.o
 	$(CC) $(CFLAGS) $^ -o $@
 
