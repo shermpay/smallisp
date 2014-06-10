@@ -1,10 +1,11 @@
 #line 2 "smallisp.flex"
 #include <stdio.h>
+#include "types.h"
 #include "grammar.tab.h"
 
 
 
-#line 8 "lex.yy.c"
+#line 9 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -523,7 +524,7 @@ char *yytext;
 #line 1 "smallisp.flex"
 
 
-#line 527 "lex.yy.c"
+#line 528 "lex.yy.c"
 
 #define INITIAL 0
 #define INSTR 1
@@ -711,9 +712,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 9 "smallisp.flex"
+#line 10 "smallisp.flex"
 
-#line 717 "lex.yy.c"
+#line 718 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -799,52 +800,52 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 10 "smallisp.flex"
+#line 11 "smallisp.flex"
 
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 11 "smallisp.flex"
+#line 12 "smallisp.flex"
 
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 12 "smallisp.flex"
+#line 13 "smallisp.flex"
 
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 13 "smallisp.flex"
+#line 14 "smallisp.flex"
 
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 14 "smallisp.flex"
+#line 15 "smallisp.flex"
 
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 15 "smallisp.flex"
+#line 16 "smallisp.flex"
 
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 16 "smallisp.flex"
+#line 17 "smallisp.flex"
 
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 17 "smallisp.flex"
+#line 18 "smallisp.flex"
 
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 18 "smallisp.flex"
+#line 19 "smallisp.flex"
 
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 19 "smallisp.flex"
+#line 20 "smallisp.flex"
 {
     
     BEGIN(INITIAL);
@@ -852,80 +853,81 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 23 "smallisp.flex"
+#line 24 "smallisp.flex"
 
 	YY_BREAK
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-#line 24 "smallisp.flex"
+#line 25 "smallisp.flex"
 
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 25 "smallisp.flex"
+#line 26 "smallisp.flex"
 
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 26 "smallisp.flex"
+#line 27 "smallisp.flex"
 return LPAREN;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 27 "smallisp.flex"
+#line 28 "smallisp.flex"
 return RPAREN;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 28 "smallisp.flex"
+#line 29 "smallisp.flex"
 {
-    fprintf(stderr, "%s\n", yytext);
-    yylval.num = atoi(yytext);
+    yylval.val.sl_num = atoi(yytext);
     return NUMBER;
     
 } 
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 34 "smallisp.flex"
-return BOOL;
+#line 35 "smallisp.flex"
+{
+    yylval.val.sl_bool = strcmp(yytext, "true") == 0 ? 1 : 0;
+    return BOOL;
+}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 35 "smallisp.flex"
-return CHAR;
+#line 40 "smallisp.flex"
+{
+    yylval.val.sl_char = yytext[0];
+    return CHAR;
+}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 36 "smallisp.flex"
+#line 44 "smallisp.flex"
 BEGIN(INSTR);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 37 "smallisp.flex"
-{
-    fprintf(stderr, "%s\n", yytext);
-    yylval.sym = strdup(yytext); return SYMBOL;
-    
-}
+#line 45 "smallisp.flex"
+{ yylval.val.sym = strdup(yytext); return SYMBOL; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 42 "smallisp.flex"
+#line 46 "smallisp.flex"
 puts(" -> Unmatched Delimiter"); 
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(INSTR):
-#line 43 "smallisp.flex"
+#line 47 "smallisp.flex"
 puts("END OF FILE"); return END_OF_FILE;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 44 "smallisp.flex"
+#line 48 "smallisp.flex"
 ECHO;
 	YY_BREAK
-#line 929 "lex.yy.c"
+#line 931 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1921,7 +1923,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 44 "smallisp.flex"
+#line 48 "smallisp.flex"
 
 
 /* int main(int argc, char* argv[]) */

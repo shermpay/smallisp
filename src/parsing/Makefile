@@ -4,6 +4,12 @@ CFLAGS = -g
 LIBS = -lfl
 TESTDIR = ./tests
 
+ast_test: ast_test.c ast.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+ast.o: ast.c ast.h
+	$(CC) $(CFLAGS) $< -c
+
 parser: lex.yy.c grammar.tab.c
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 

@@ -1,5 +1,6 @@
 %top{
 #include <stdio.h>
+#include "sltypes.h"
 #include "grammar.tab.h"
 }
 %x INSTR
@@ -26,19 +27,22 @@ SYMBOL	[[:alpha:]\+\-\*\!\?]+[0-9\-]*|\/
 \(					  return LPAREN;
 \)					  return RPAREN;
 [-+]?[0-9]+				{
-    fprintf(stderr, "%s\n", yytext);
-    yylval.num = atoi(yytext);
+    yylval.val.sl_num = atoi(yytext);
     return NUMBER;
     
 } 
-true|false				  return BOOL;
-{CHAR}					  return CHAR;
-\"					  BEGIN(INSTR);
-{SYMBOL}			 	{
-    fprintf(stderr, "%s\n", yytext);
-    yylval.sym = strdup(yytext); return SYMBOL;
-    
+
+true|false				{
+    yylval.val.sl_bool = strcmp(yytext, "true") == 0 ? 1 : 0;
+    return BOOL;
 }
+
+{CHAR}					{
+    yylval.val.sl_char = yytext[0];
+    return CHAR;
+}
+\"					  BEGIN(INSTR);
+{SYMBOL}			 	{ yylval.val.sym = strdup(yytext); return SYMBOL; }
 .					puts(" -> Unmatched Delimiter"); 
 <<EOF>>					puts("END OF FILE"); return END_OF_FILE;
 %%
