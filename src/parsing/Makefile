@@ -3,7 +3,7 @@
 # Makefile for lexer/parser and Ast related
 # Flex: smallist.flex
 # Bison: grammar.y
-# AST: slist.c, ast.c
+# AST: list.c, ast.c
 # Execute tests via 'make test_(name)'
 
 CC = clang
@@ -12,10 +12,16 @@ LIBS = -lfl
 TESTDIR = ./tests
 EXDIR = ./examples
 
-test_slist: $(TESTDIR)/test_slist.c slist.o
+test_list: $(TESTDIR)/test_list.c list.o
 	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && $(TESTDIR)/$@
 
-slist.o: slist.c slist.h
+list.o: list.c list.h 
+	$(CC) $(CFLAGS) $< -c
+
+test_sltypes: $(TESTDIR)/test_sltypes.c sltypes.o
+	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && $(TESTDIR)/$@
+
+sltypes.o: sltypes.c
 	$(CC) $(CFLAGS) $< -c
 
 test_ast: ast_test.c ast.o

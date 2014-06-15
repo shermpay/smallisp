@@ -1,35 +1,25 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "types.h"
+#include "sltypes.h"
+#include "list.h"
 #include "ast.h"
 
-
-Node *new_node(int x)
-{
-    Node *n = malloc(sizeof(Node));
-    n->val = x;
-    n->left = NULL;
-    n->right = NULL;
-    return n;
-}
 
 Ast *new_tree()
 {
     Ast *t = malloc(sizeof(Ast));
-    t->root = new_node(0);
+    t->root = NULL;
     return t;
 }
 
-void print_node(Node *n)
+void print_tree(Ast *tree)
 {
-    if (n == NULL) {
-	fprintf(stderr, "Encountered NULL node\n");
-	return;
-    }
-    printf("%d\n", n->val);
+    print_tree_aux(tree->root);
 }
 
-void print_tree()
+void print_tree_aux(List *root)
 {
-    return;
+    if (root != NULL) {
+	print_list(root);
+    }
 }

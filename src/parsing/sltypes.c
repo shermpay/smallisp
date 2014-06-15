@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include "sltypes.h"
 
+SlType new_sl_num(SlType *type, int x)
+{
+    
+}
+
 Object *new_object(SlType x, int type)
 {
     Object *res = malloc(sizeof(Object));
