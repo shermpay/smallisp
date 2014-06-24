@@ -1,0 +1,64 @@
+#+TITLE: Development
+
+* Current Implementation
+
+** Lexer & Parser
+    - Using /mpc/ -> open source library
+    - Treats number literals right
+    - Parses '{' <expr> '}' as QEXP
+    - Parses '( <expr> ')' as SEXP
+    - Evaluates <expr> alone. _Incorrect_
+    - Tokens for  ~Num~ ~Bool~ and ~Symbol~
+    - _NO Tokens_ have ~Char~ or ~String~
+
+** Types
+    - LVAL_NUM
+    - LVAL_BOOL
+    - LVAL_SYMBOL
+    - LVAL_SEXP
+    - LVAL_QEXP
+
+** Semantics
+   - Arithmetic operators work
+   - *lambda* for creating functions
+   - *def* for defining globals
+   - *let* for defining locals
+   - *if* for 'if' statements
+   - ~{ expr }~ for instantiating lists/qexp
+     
+** Details
+   - Expressions are stored as an lval of cells
+   - Cells are implemented as a C array
+   - qexp/list is an lval of cells
+   - Symbols do not hold the variables, rather, they are binded to the variable.
+
+* Intended Implementation
+
+** Lexer & Parser
+    - Migrate to Custom lexer/parser
+    - Tokens for ~Char~ ~String~
+    - Does not evaluate <expr> alone
+    - Parses ~[ <expr> ]~ as VECT
+    - Parses ~{ <expr> }~ as DICT
+    - Supports _Syntax Quoting_
+      
+   
+** Types
+    - _REMOVE_ Qexps
+    - _ADD_ Lists
+    - _ADD_ Vects
+    - _ADD_ Dicts
+
+** Semantics
+    
+* Milestones
+   
+** DONE Migrate to flex/bison 
+** DONE Implement Con cells and List
+** TODO Implement Object and SlTypes
+** TODO Build AST with bison
+
+** TODO Implement Quoted Expr
+
+** TODO Implement Chars and Strings
+    

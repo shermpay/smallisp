@@ -1,0 +1,41 @@
+#+TITLE: Specification
+
+* Smallisp
+  *Smallisp* is a functional programming language that resembles a Lisp. This
+  entails the following features:
+  - Dynamic Typing
+  - First class functions
+  - Homoiconicity
+  - Interpreter
+  - Garbage Collection
+  - Arbitrary precision and size numbers
+
+    Having said so, it will follow /Clojure's/ implementation closely.
+
+    _These might or not be implemented_
+  - Persistent Data Structures?
+  - Concurrency Support? Laziness?
+
+* Dynamic Typing
+  - Everything is of type ~Object~
+  - Type errors will only occur during runtime when the types are resolved
+  - Runtime polymorphism
+
+* First Class Functions
+  - Functions can be used or defined in the same manner as value types
+
+* Homoiconicity
+  - Code as Data
+  - Supports List, Vector, Dict, Set literals
+  - Allows for Hygienic Macros
+    
+* Interpreter
+  - REPL (Read Eval Print Loop)
+  - No compilation required
+  - Code is evaluated directly by the interpreter, no compilation to machine
+    code
+    
+* Garbage Collection
+  - Automatic memory management
+
+* Arbitary Precision and size numbers

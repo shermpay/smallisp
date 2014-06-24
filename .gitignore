@@ -2,7 +2,6 @@ repl
 mpc.*
 #*
 *.o
-org/*
 bin/*
 obj/*
 .*
