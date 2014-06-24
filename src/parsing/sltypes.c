@@ -1,40 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "sltypes.h"
 
-SlType new_sl_num(SlType *type, int x)
+SlType *new_num(int x)
 {
-    
+    SlType *type = malloc(sizeof(SlType));
+    type->sl_num = x;
+    return type;
 }
 
-Object *new_object(SlType x, int type)
+SlType *new_symbol(char *x)
+{
+    SlType *type = malloc(sizeof(SlType));
+    type->symbol = x;
+    return type;
+}
+
+SlType *new_char(char x)
+{
+    SlType *type = malloc(sizeof(SlType));
+    type->sl_char = x;
+    return type;
+}
+
+SlType *new_bool(int x)
+{
+    SlType *type = malloc(sizeof(SlType));
+    type->sl_bool = x;
+    return type;
+}
+
+Object *new_object(SlType *x, int type)
 {
     Object *res = malloc(sizeof(Object));
     res->type = type;
-    switch (type) {
-	case SL_NUM:
-	    res->val.sl_num = x.sl_num;
-	    break;
-	case SYMBOL:
-	    res->val.symbol = x.symbol;
-	    break;
-	case SL_CHAR:
-	    res->val.sl_char = x.sl_char;
-	    break;
-	case SL_BOOL:
-	    res->val.sl_bool = x.sl_bool;
-	    break;
-	case LIST:
-	    res->val.list = x.list;
-	    break;
-	default:
-	    fprintf(stderr, "Invalid Type\n");
-	    return 0;
-    }
+    res->val = x;
     return res;
 }
 
 void del_object(Object *x)
+{
+    free(x->val);
+    free(x);
+}
+
+char *to_string(Object *x)
 {
     
 }

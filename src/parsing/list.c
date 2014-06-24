@@ -10,6 +10,9 @@
   3. Bare minimal functions
   4. Cons cell of SlObj
   
+  Todo:
+  1. Use dynamic types
+
   Future:
   1. Garbage Collection
   2. Persistent Linked-list

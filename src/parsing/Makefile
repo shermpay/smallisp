@@ -13,19 +13,19 @@ TESTDIR = ./tests
 EXDIR = ./examples
 
 test_list: $(TESTDIR)/test_list.c list.o
-	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && $(TESTDIR)/$@
+	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
 
 list.o: list.c list.h 
 	$(CC) $(CFLAGS) $< -c
 
 test_sltypes: $(TESTDIR)/test_sltypes.c sltypes.o
-	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && $(TESTDIR)/$@
+	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
 
 sltypes.o: sltypes.c
 	$(CC) $(CFLAGS) $< -c
 
 test_ast: ast_test.c ast.o
-	$(CC) $(CFLAGS) $^ -o $(TESTDIR)/$@ && $(TESTDIR)/$@
+	$(CC) $(CFLAGS) $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
 
 ast.o: ast.c ast.h
 	$(CC) $(CFLAGS) $< -c

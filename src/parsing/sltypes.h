@@ -26,9 +26,13 @@ typedef union sltype_t {
 } SlType;
 
 typedef struct object_t {
-    SlType val;
+    SlType *val;
     int type;
 } Object;
 
-Object *new_object(SlType x, int type);
-void del_objet(Object *x);
+SlType *new_num(int x);
+SlType *new_symbol(char *x);
+SlType *new_char(char x);
+SlType *new_bool(int x);
+Object *new_object(SlType *x, int type);
+void del_object(Object *x);

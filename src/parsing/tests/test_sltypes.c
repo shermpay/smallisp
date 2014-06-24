@@ -4,7 +4,8 @@
 
 int main(int argc, char *argv[])
 {
-    SlType x; x.sl_num = 1;
-    Object *obj = new_object(x, SL_NUM);
-    
+    Object *num = new_object(new_num(1), SL_NUM);
+    Object *sym = new_object(new_symbol("foo"), SYMBOL);
+    del_object(num);
+    del_object(sym);
 }
