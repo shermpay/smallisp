@@ -31,6 +31,13 @@ SlType *new_bool(int x)
     return type;
 }
 
+SlType *new_string(char *x)
+{
+    SlType *type = malloc(sizeof(SlType));
+    type->sl_string = x;
+    return type;
+}
+
 Object *new_object(SlType *x, int type)
 {
     Object *res = malloc(sizeof(Object));
@@ -45,7 +52,3 @@ void del_object(Object *x)
     free(x);
 }
 
-char *to_string(Object *x)
-{
-    
-}

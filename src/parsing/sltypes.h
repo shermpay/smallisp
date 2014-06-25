@@ -1,8 +1,14 @@
-/* Sherman Pay Jing Hao
+/* 
+   Sherman Pay Jing Hao
    Friday, 13. June 2014
-Smallisp type definitions*/
+   Smallisp type definitions
+*/
 
-enum SlTypes {SL_NUM, SYMBOL, SL_CHAR, SL_BOOL, LIST};
+#define MAX_STR_LEN 512
+#define TRUE_STR "true"
+#define FALSE_STR "false"
+
+enum SlTypes {SL_NUM, SYMBOL, SL_CHAR, SL_BOOL, SL_STRING, LIST};
 
 /* Struct representing a single Cons cell */
 typedef struct cons_t {
@@ -18,10 +24,11 @@ typedef struct list_t {
 
 /* Union representing all Smallisp types */
 typedef union sltype_t {
-    int sl_num;		
+    long sl_num;		
     char *symbol;
     char sl_char;	
     int sl_bool;	
+    char *sl_string;
     List list;
 } SlType;
 
@@ -34,5 +41,6 @@ SlType *new_num(int x);
 SlType *new_symbol(char *x);
 SlType *new_char(char x);
 SlType *new_bool(int x);
+SlType *new_string(char *x);
 Object *new_object(SlType *x, int type);
 void del_object(Object *x);
