@@ -44,8 +44,3 @@ void del_object(Object *x)
     free(x->val);
     free(x);
 }
-
-char *to_string(Object *x)
-{
-    
-}
