@@ -50,6 +50,7 @@ List *new_list()
 /* Destructor for list */
 void del_list(List *sl)
 {
+    Cons *cur = sl->head;
     int c_count = sl->length;	/* Amount of cons cells */
     for (int i = 0; i < c_count; i++) {
 	free(list_pop(sl));
@@ -84,4 +85,19 @@ Cons *list_pop(List *sl)
     sl->head = sl->head->next;
     sl->length--;
     return res;
+}
+
+/* Prints list in (a b c) format */
+void print_list(List *sl)
+{
+    Cons *cur = sl->head;
+    putchar('(');
+    if (!list_empty(sl)) {
+	printf("%d", cur->val);
+	cur = cur->next;
+	for (int i = 1; i < sl->length; i++) {
+	    printf(" %d", cur->val);
+	}
+    }
+    puts(")");
 }
