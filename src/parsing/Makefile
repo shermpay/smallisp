@@ -30,8 +30,8 @@ test_ast: ast_test.c ast.o
 ast.o: ast.c ast.h
 	$(CC) $(CFLAGS) $< -c
 
-parser: lex.yy.c grammar.tab.c
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+# parser: lex.yy.c grammar.tab.c
+# 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 lexer: lex.yy.c 
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
@@ -43,6 +43,9 @@ grammar.tab.h: grammar.tab.c
 
 grammar.tab.c: grammar.y
 	bison -d $<
+
+parser: parser.c
+	$(CC) $(CFLAGS) $< $(LIBS) -o $@
 
 test_parser: parser
 	for file in $(EXDIR)/* ; do \
