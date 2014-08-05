@@ -15,6 +15,7 @@ union token_val {
 };
     
 typedef struct {
+    int linum;
     enum token_type type;
     union token_val val;
 } Token;
@@ -24,45 +25,50 @@ char *token_tostr(Token *token)
     char *str = malloc(30);
     switch (token->type){
 	case WHITESPACE:
-	    sprintf(str, "(WHITESPACE)");
+	    sprintf(str, "(WHITESPACE, ln: %d)", token->linum);
 	    break;
 	case OPEN_PAREN:
-	    sprintf(str, "(OPEN_PAREN)");
+	    sprintf(str, "(OPEN_PAREN, ln: %d)", token->linum);
 	    break;
 	case CLOSE_PAREN:
-	    sprintf(str, "(CLOSE_PAREN)");
+	    sprintf(str, "(CLOSE_PAREN, ln: %d)", token->linum);
 	    break;
 	case OPEN_BRACK:
-	    sprintf(str, "(OPEN_BRACK)");
+	    sprintf(str, "(OPEN_BRACK, ln: %d)", token->linum);
 	    break;
 	case CLOSE_BRACK:
-	    sprintf(str, "(CLOSE_BRACK)");
+	    sprintf(str, "(CLOSE_BRACK, ln: %d)", token->linum);
 	    break;
 	case SYMBOL:
-	    sprintf(str, "(SYMBOL)");
-	    /* sprintf(str, "(SYMBOL, %s)", token->val.tok_str); */
+	    /* sprintf(str, "(SYMBOL)"); */
+	    sprintf(str, "(SYMBOL, %s, ln: %d)", token->val.tok_str, token->linum);
 	    break;
 	case NUMBER:
-	    sprintf(str, "(NUMBER, %li)", token->val.tok_num);
+	    sprintf(str, "(NUMBER, %li, ln: %d)", token->val.tok_num, token->linum);
 	    break;
 	case CHAR:
-	    sprintf(str, "(CHAR)");
+	    sprintf(str, "(CHAR, ln: %d)", token->linum);
 	    /* sprintf(str, "(CHAR, %c)", token->val.tok_char); */
 	    break;
 	default:
-	    sprintf(str,"Unexpected token");
+	    sprintf(str,"Unexpected token on line: %d", token->linum);
     }
     return str;
 }
 
-/* Get value of digit. Returns -1 if not a digit. 
- */
+/* Get value of digit. Returns -1 if not a digit. */
 int valof_digit(char n)
 {
     if (n < '0' || n > '9') {
 	return -1;
     }
     return n - '0';
+}
+
+/* Checks if char c is valid symbol char */
+int is_symbolc(char c)
+{
+    return isalpha(c) || c == '*' || c == '+' || c == '-' || c == '/';
 }
 
 int main(int argc, char *argv[])
@@ -72,22 +78,29 @@ int main(int argc, char *argv[])
     }
     char *file_name = argv[1];
     FILE *input_file = fopen(file_name, "r");
-    char c;
     char* buff = malloc(sizeof(char) * 24);
+    Token *tok = malloc(sizeof(Token));
+    char c;
+    int linum = 1;
     while ((c = fgetc(input_file)) != EOF) {
-	Token *tok = malloc(sizeof(Token));
 	int len = 0;
 	printf("%c", c);
 	enum token_type tok_type;
 	if (isspace(c) || c == ',') {
+	    if (c == '\n')
+		linum++;
 	    tok_type = WHITESPACE;
-	} else if (isalpha(c)) {
+	} else if (is_symbolc(c)) {
 	    tok_type = SYMBOL;
+	    buff[0] = c;
 	    char nc = fgetc(input_file);
-	    while (isalpha(nc)) {
+	    while (is_symbolc(nc)) {
 		printf("%c", nc);
+		buff[++len] = nc;
 		nc = fgetc(input_file);
 	    }
+	    buff[++len] = '\0';
+	    tok->val.tok_str = buff;
 	    ungetc(nc, input_file);
 	} else {
 	    switch (c) {
@@ -133,17 +146,18 @@ int main(int argc, char *argv[])
 		printf("%c", nc);
 		break;
 	    default:
-		tok_type = SYMBOL;
+		tok_type = INVALID;
 	    }
 	}
 	tok->type = tok_type;
+	tok->linum = linum;
 	char *str = token_tostr(tok);
 	printf("\t: %s\n", str);
-	free(tok);
 	free(str);
     }
+    free(tok);
     free(buff);
-    free(file_name);
+    fclose(input_file);
     return 0;
 }
 

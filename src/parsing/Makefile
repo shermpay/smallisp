@@ -45,7 +45,7 @@ grammar.tab.c: grammar.y
 	bison -d $<
 
 parser: parser.c
-	$(CC) $(CFLAGS) $< $(LIBS) -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
 test_parser: parser
 	for file in $(EXDIR)/* ; do \
