@@ -9,38 +9,60 @@ enum token_type { WHITESPACE,
 		  INVALID };
 
 union token_val {
-    long sl_num;
-    char sl_char;
-    char* sl_string;
+    long tok_num;
+    char tok_char;
+    char* tok_str;
 };
     
-struct Token {
+typedef struct {
     enum token_type type;
     union token_val val;
-};
+} Token;
 
-char *token_tostr(struct Token token)
+char *token_tostr(Token *token)
 {
-    switch (token.type){
+    char *str = malloc(30);
+    switch (token->type){
 	case WHITESPACE:
-	    return "(WHITESPACE)";
+	    sprintf(str, "(WHITESPACE)");
+	    break;
 	case OPEN_PAREN:
-	    return "(OPEN_PAREN)";
+	    sprintf(str, "(OPEN_PAREN)");
+	    break;
 	case CLOSE_PAREN:
-	    return "(CLOSE_PAREN)";
+	    sprintf(str, "(CLOSE_PAREN)");
+	    break;
 	case OPEN_BRACK:
-	    return "(OPEN_BRACK)";
+	    sprintf(str, "(OPEN_BRACK)");
+	    break;
 	case CLOSE_BRACK:
-	    return "(CLOSE_BRACK)";
+	    sprintf(str, "(CLOSE_BRACK)");
+	    break;
 	case SYMBOL:
-	    return "(SYMBOL, )";
+	    sprintf(str, "(SYMBOL)");
+	    /* sprintf(str, "(SYMBOL, %s)", token->val.tok_str); */
+	    break;
 	case NUMBER:
-	    return "(NUMBER, )";
+	    sprintf(str, "(NUMBER, %li)", token->val.tok_num);
+	    break;
 	case CHAR:
-	    return "(CHAR, )";
+	    sprintf(str, "(CHAR)");
+	    /* sprintf(str, "(CHAR, %c)", token->val.tok_char); */
+	    break;
 	default:
-	    return "Unexpected token";
+	    sprintf(str,"Unexpected token");
     }
+    return str;
+}
+
+/* Get value of digit. Returns -1 if not a digit. 
+ */
+int valof_digit(char n)
+{
+    if (n < '0' || n > '9') {
+	return -1;
+    }
+    return n - '0';
 }
 
 int main(int argc, char *argv[])
@@ -51,13 +73,16 @@ int main(int argc, char *argv[])
     char *file_name = argv[1];
     FILE *input_file = fopen(file_name, "r");
     char c;
-while ((c = fgetc(input_file)) != EOF) {
+    char* buff = malloc(sizeof(char) * 24);
+    while ((c = fgetc(input_file)) != EOF) {
+	Token *tok = malloc(sizeof(Token));
+	int len = 0;
 	printf("%c", c);
-	enum token_type token;
+	enum token_type tok_type;
 	if (isspace(c) || c == ',') {
-	    token = WHITESPACE;
+	    tok_type = WHITESPACE;
 	} else if (isalpha(c)) {
-	    token = SYMBOL;
+	    tok_type = SYMBOL;
 	    char nc = fgetc(input_file);
 	    while (isalpha(nc)) {
 		printf("%c", nc);
@@ -67,42 +92,58 @@ while ((c = fgetc(input_file)) != EOF) {
 	} else {
 	    switch (c) {
 	    case '(':
-		token = OPEN_PAREN;
+		tok_type = OPEN_PAREN;
 		break;
 	    case ')':
-		token = CLOSE_PAREN;
+		tok_type = CLOSE_PAREN;
 		break;
 	    case '[':
-		token = OPEN_BRACK;
+		tok_type = OPEN_BRACK;
 		break;
 	    case ']':
-		token = CLOSE_BRACK;
+		tok_type = CLOSE_BRACK;
 		break;
 	    case '0' ... '9':
-		token = NUMBER;
+		tok_type = NUMBER;
+		buff[0] = c;
 		char nc = fgetc(input_file);
 		while (isdigit(nc)) {
+		    buff[++len] = nc;
 		    printf("%c", nc);
 		    nc = fgetc(input_file);
 		}
 		if (nc != '(' && nc != ')' && !isspace(nc)) {
-		    token = INVALID;
+		    tok_type = INVALID;
 		    fprintf(stderr, "Invalid char: %c", nc);
 		    return 1;
 		}
+		long val = 0;
+		int mul = 1;
+		while (len >= 0) {
+		    int v = valof_digit(buff[len--]);
+		    val += v * mul;
+		    mul *= 10;
+		}
+		tok->val.tok_num = val;
 		ungetc(nc, input_file);
 		break;
 	    case '\\':
-		token = CHAR;
+		tok_type = CHAR;
 		nc = fgetc(input_file);
 		printf("%c", nc);
 		break;
 	    default:
-		token = SYMBOL;
+		tok_type = SYMBOL;
 	    }
 	}
-	printf("\t: %s\n", token_tostr(token));
+	tok->type = tok_type;
+	char *str = token_tostr(tok);
+	printf("\t: %s\n", str);
+	free(tok);
+	free(str);
     }
+    free(buff);
+    free(file_name);
     return 0;
 }
 
