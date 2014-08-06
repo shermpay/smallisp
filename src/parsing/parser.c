@@ -6,12 +6,11 @@ enum token_type { WHITESPACE,
 		  OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
 		  COMMENT, 
-		  NUMBER, CHAR, STRING, SYMBOL,
+		  NUMBER, STRING, SYMBOL,
 		  INVALID };
 
 union token_val {
     long tok_num;
-    char tok_char;
     char* tok_str;
 };
     
@@ -47,10 +46,6 @@ char *token_tostr(Token *token)
 	case NUMBER:
 	    sprintf(str, "(NUMBER, %li, ln: %d)", token->val.tok_num, token->linum);
 	    break;
-	case CHAR:
-	    sprintf(str, "(CHAR, ln: %d)", token->linum);
-	    /* sprintf(str, "(CHAR, %c)", token->val.tok_char); */
-	    break;
 	case STRING:
 	    sprintf(str, "(STRING, \"%s\", ln: %d)", token->val.tok_str, token->linum);
 	    break;
@@ -79,6 +74,23 @@ long valof_num(char *num, int len)
 	mul *= 10;
     }
     return val;
+}
+
+char escape_char(char c) {
+    switch (c) {
+	case 'n':
+	    return '\n';
+	case 't':
+	    return '\t';
+	case 'r':
+	    return '\r';
+	case 'b':
+	    return '\b';
+	case 'v':
+	    return '\v';
+	default:
+	    return c;
+    }
 }
 
 /* Checks if char c is valid symbol char */
@@ -124,10 +136,12 @@ int main(int argc, char *argv[])
 	    while (nc != '"') {
 		if (nc == '\n') {
 		    linum++;
-		    printf("\\newline");
-		} else {
-		    printf("%c", nc);
 		}
+		if (nc == '\\') {
+		    nc = fgetc(input_file);
+		    nc = escape_char(nc);
+		}
+		printf("%c", nc);
 		buff[len++] = nc;
 		nc = fgetc(input_file);
 	    }
@@ -164,11 +178,6 @@ int main(int argc, char *argv[])
 		}
 		tok->val.tok_num = valof_num(buff, len);
 		ungetc(nc, input_file);
-		break;
-	    case '\\':
-		tok_type = CHAR;
-		nc = fgetc(input_file);
-		printf("%c", nc);
 		break;
 	    default:
 		tok_type = INVALID;
