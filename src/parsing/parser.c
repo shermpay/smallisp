@@ -5,7 +5,8 @@
 enum token_type { WHITESPACE,
 		  OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
-		  NUMBER, CHAR, SYMBOL,
+		  COMMENT, 
+		  NUMBER, CHAR, STRING, SYMBOL,
 		  INVALID };
 
 union token_val {
@@ -22,7 +23,7 @@ typedef struct {
 
 char *token_tostr(Token *token)
 {
-    char *str = malloc(30);
+    char *str = malloc(128);
     switch (token->type){
 	case WHITESPACE:
 	    sprintf(str, "(WHITESPACE, ln: %d)", token->linum);
@@ -50,6 +51,9 @@ char *token_tostr(Token *token)
 	    sprintf(str, "(CHAR, ln: %d)", token->linum);
 	    /* sprintf(str, "(CHAR, %c)", token->val.tok_char); */
 	    break;
+	case STRING:
+	    sprintf(str, "(STRING, \"%s\", ln: %d)", token->val.tok_str, token->linum);
+	    break;
 	default:
 	    sprintf(str,"Unexpected token on line: %d", token->linum);
     }
@@ -65,6 +69,18 @@ int valof_digit(char n)
     return n - '0';
 }
 
+long valof_num(char *num, int len)
+{
+    long val = 0;
+    int mul = 1;
+    while (len >= 0) {
+	int v = valof_digit(num[len--]);
+	val += v * mul;
+	mul *= 10;
+    }
+    return val;
+}
+
 /* Checks if char c is valid symbol char */
 int is_symbolc(char c)
 {
@@ -78,7 +94,7 @@ int main(int argc, char *argv[])
     }
     char *file_name = argv[1];
     FILE *input_file = fopen(file_name, "r");
-    char* buff = malloc(sizeof(char) * 24);
+    char* buff = malloc(sizeof(char) * 128);
     Token *tok = malloc(sizeof(Token));
     char c;
     int linum = 1;
@@ -102,6 +118,22 @@ int main(int argc, char *argv[])
 	    buff[++len] = '\0';
 	    tok->val.tok_str = buff;
 	    ungetc(nc, input_file);
+	} else if (c == '"') {
+	    tok_type = STRING;
+	    char nc = fgetc(input_file);
+	    while (nc != '"') {
+		if (nc == '\n') {
+		    linum++;
+		    printf("\\newline");
+		} else {
+		    printf("%c", nc);
+		}
+		buff[len++] = nc;
+		nc = fgetc(input_file);
+	    }
+	    buff[len] = '\0';
+	    tok->val.tok_str = buff;
+	    printf("\"");
 	} else {
 	    switch (c) {
 	    case '(':
@@ -130,14 +162,7 @@ int main(int argc, char *argv[])
 		    fprintf(stderr, "Invalid char: %c", nc);
 		    return 1;
 		}
-		long val = 0;
-		int mul = 1;
-		while (len >= 0) {
-		    int v = valof_digit(buff[len--]);
-		    val += v * mul;
-		    mul *= 10;
-		}
-		tok->val.tok_num = val;
+		tok->val.tok_num = valof_num(buff, len);
 		ungetc(nc, input_file);
 		break;
 	    case '\\':
