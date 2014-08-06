@@ -5,3 +5,11 @@
 20
 foo
 bar
+
+(def foo 100)
+
+(defun add [x y] (+ x y))
+
+(defun f []
+  (*
+    (+ 1 2)))

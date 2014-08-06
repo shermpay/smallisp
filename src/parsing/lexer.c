@@ -4,6 +4,9 @@
 
 #define MAX_COLUMN 512
 
+static int linum = 1;
+static int column = 0;
+
 enum token_type { WHITESPACE,
 		  OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
@@ -68,18 +71,28 @@ int valof_digit(char n)
     return n - '0';
 }
 
-long valof_num(char *num, int len)
+/* Gets the value of a number string */
+long valof_numstr(char *numstr, int len)
 {
     long val = 0;
     int mul = 1;
-    while (len >= 0) {
-	int v = valof_digit(num[len--]);
+    while (len > 0) {
+	int v = valof_digit(numstr[len--]);
 	val += v * mul;
 	mul *= 10;
     }
-    return val;
+    if (isdigit(numstr[0])) {
+	val += mul * valof_digit(numstr[0]);
+	return val;
+    } else {
+	if (numstr[0] == '-') {
+	    val *= -1;
+	}
+	return val;
+    }
 }
 
+/* Given a character returns the escape sequence of it */
 char escape_char(char c) {
     switch (c) {
 	case 'n':
@@ -97,10 +110,74 @@ char escape_char(char c) {
     }
 }
 
-/* Checks if char c is valid symbol char */
+/* 
+ * Checks if char c is valid symbol char 
+ */
 int is_symbolc(char c)
 {
     return isalpha(c) || c == '*' || c == '+' || c == '-' || c == '/';
+}
+
+/* 
+ *  Reads in an entire symbol from file and stores it into buff. 
+ *  Returns an int for the length of the symbol.
+ *  Symbols are determined via the is_symbolc function.
+ */
+int read_symbol(FILE *file, char *buff)
+{
+    char nc = fgetc(file);
+    int len = 0;
+    while (is_symbolc(nc)) {
+	printf("%c", nc);
+	buff[++len] = nc;
+	nc = fgetc(file);
+    }
+    buff[++len] = '\0';
+    ungetc(nc, file);
+    return len--;
+}
+
+/* 
+ *  Reads in an entire string from file and stores it into buff. 
+ *  Length of string is stored in the front of buff.
+ *  Returns an int for the length of the string.
+ */
+int read_string(FILE *file, char *buff){
+    char nc = fgetc(file);
+    int len = 0;
+    while (nc != '"') {
+	if (nc == '\n') {
+	    linum++;
+	    column = 0;
+	}
+	if (nc == '\\') {
+	    nc = fgetc(file);
+	    nc = escape_char(nc);
+	}
+	printf("%c", nc);
+	buff[++len] = nc;
+	nc = fgetc(file);
+    }
+    buff[++len] = '\0';	// Terminate string 
+    buff[0] = len--;	// Store length at front of string
+    return len;
+}
+
+/*
+ * Reads in a number from the file and stores it into buff.
+ * Returns a long representing the number.
+ */
+long read_number(FILE *file, char *buff)
+{
+    char nc = fgetc(file);
+    int len = 0;
+    while (isdigit(nc)) {
+	buff[++len] = nc;
+	printf("%c", nc);
+	nc = fgetc(file);
+    }
+    ungetc(nc, file);
+    return valof_numstr(buff, len);
 }
 
 int main(int argc, char *argv[])
@@ -113,93 +190,61 @@ int main(int argc, char *argv[])
     char* buff = malloc(sizeof(char) * 128);
     Token *tok = malloc(sizeof(Token));
     char c;
-    int linum = 1;
-    int column = 0;
+    char nc;
     while ((c = fgetc(input_file)) != EOF) {
-	int len = 0;
 	printf("%c", c);
-	enum token_type tok_type;
 	tok->linum = linum;
-	if (c == ';') {
-	    tok_type = COMMENT;
+	if (c == ';') { // Comment
+	    tok->type = COMMENT;
 	    size_t line_len;
 	    fgetln(input_file, &line_len);
 	    linum++;
 	    column = 0;
-	} else if (isspace(c) || c == ',') {
+	} else if (isspace(c) || c == ',') { // Whitespace
 	    if (c == '\n') {
 		linum++;
 		column = 0;
 	    }
-	    tok_type = WHITESPACE;
-	} else if (is_symbolc(c)) {
-	    tok_type = SYMBOL;
+	    tok->type = WHITESPACE;
+	} else if (isdigit(c) || 
+		   ((c == '+' || c == '-') && isdigit(nc = fgetc(input_file)))) {
+	    if (c == '+' || c == '-') { // Read over one
+		ungetc(nc, input_file);
+	    }
+	    tok->type = NUMBER;
 	    buff[0] = c;
-	    char nc = fgetc(input_file);
-	    while (is_symbolc(nc)) {
-		printf("%c", nc);
-		buff[++len] = nc;
-		nc = fgetc(input_file);
+	    tok->val.tok_num = read_number(input_file, buff);
+	} else if (is_symbolc(c)) { // Symbol
+	    if (c == '+' || c == '-') { // Read over one
+		ungetc(nc, input_file);
 	    }
-	    buff[++len] = '\0';
+	    buff[0] = c;
+	    tok->type = SYMBOL;
+	    read_symbol(input_file, buff); 
 	    tok->val.tok_str = buff;
-	    ungetc(nc, input_file);
-	} else if (c == '"') {
-	    tok_type = STRING;
-	    char nc = fgetc(input_file);
-	    while (nc != '"') {
-		if (nc == '\n') {
-		    linum++;
-		    column = 0;
-		}
-		if (nc == '\\') {
-		    nc = fgetc(input_file);
-		    nc = escape_char(nc);
-		}
-		printf("%c", nc);
-		buff[++len] = nc;
-		nc = fgetc(input_file);
-	    }
-	    buff[++len] = '\0';	/* Terminate string */
-	    buff[0] = len--;	/* Store length at front of string */
+	} else if (c == '"') { // String
+	    tok->type = STRING;
+	    read_string(input_file, buff);
 	    tok->val.tok_str = buff;
 	    printf("\"");
 	} else {
-	    switch (c) {
-	    case '(':
-		tok_type = OPEN_PAREN;
-		break;
-	    case ')':
-		tok_type = CLOSE_PAREN;
-		break;
-	    case '[':
-		tok_type = OPEN_BRACK;
-		break;
-	    case ']':
-		tok_type = CLOSE_BRACK;
-		break;
-	    case '0' ... '9':
-		tok_type = NUMBER;
-		buff[0] = c;
-		char nc = fgetc(input_file);
-		while (isdigit(nc)) {
-		    buff[++len] = nc;
-		    printf("%c", nc);
-		    nc = fgetc(input_file);
-		}
-		if (nc != '(' && nc != ')' && !isspace(nc) && nc != ';') {
-		    tok_type = INVALID;
-		    fprintf(stderr, "Invalid char: %c @ line: %d, column: %d", nc, linum, column);
-		    return 1;
-		}
-		tok->val.tok_num = valof_num(buff, len);
-		ungetc(nc, input_file);
-		break;
-	    default:
-		tok_type = INVALID;
+	    switch (c) { // Delimiters
+		case '(':
+		    tok->type = OPEN_PAREN;
+		    break;
+		case ')':
+		    tok->type = CLOSE_PAREN;
+		    break;
+		case '[':
+		    tok->type = OPEN_BRACK;
+		    break;
+		case ']':
+		    tok->type = CLOSE_BRACK;
+		    break;
+		default:
+		    tok->type = INVALID;
 	    }
 	}
-	tok->type = tok_type;
 	column++;
 	char *str = token_tostr(tok);
 	printf("\t: %s\n", str);
