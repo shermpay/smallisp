@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#define MAX_COLUMN 512
+
 enum token_type { WHITESPACE,
 		  OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
@@ -24,6 +26,9 @@ char *token_tostr(Token *token)
 {
     char *str = malloc(128);
     switch (token->type){
+	case COMMENT:
+	    sprintf(str, "(COMMENT, ln: %d)", token->linum);
+	    break;
 	case WHITESPACE:
 	    sprintf(str, "(WHITESPACE, ln: %d)", token->linum);
 	    break;
@@ -40,14 +45,13 @@ char *token_tostr(Token *token)
 	    sprintf(str, "(CLOSE_BRACK, ln: %d)", token->linum);
 	    break;
 	case SYMBOL:
-	    /* sprintf(str, "(SYMBOL)"); */
 	    sprintf(str, "(SYMBOL, %s, ln: %d)", token->val.tok_str, token->linum);
 	    break;
 	case NUMBER:
 	    sprintf(str, "(NUMBER, %li, ln: %d)", token->val.tok_num, token->linum);
 	    break;
 	case STRING:
-	    sprintf(str, "(STRING, \"%s\", ln: %d)", token->val.tok_str, token->linum);
+	    sprintf(str, "(STRING, %s, ln: %d)", token->val.tok_str, token->linum);
 	    break;
 	default:
 	    sprintf(str,"Unexpected token on line: %d", token->linum);
@@ -110,13 +114,23 @@ int main(int argc, char *argv[])
     Token *tok = malloc(sizeof(Token));
     char c;
     int linum = 1;
+    int column = 0;
     while ((c = fgetc(input_file)) != EOF) {
 	int len = 0;
 	printf("%c", c);
 	enum token_type tok_type;
-	if (isspace(c) || c == ',') {
-	    if (c == '\n')
+	tok->linum = linum;
+	if (c == ';') {
+	    tok_type = COMMENT;
+	    size_t line_len;
+	    fgetln(input_file, &line_len);
+	    linum++;
+	    column = 0;
+	} else if (isspace(c) || c == ',') {
+	    if (c == '\n') {
 		linum++;
+		column = 0;
+	    }
 	    tok_type = WHITESPACE;
 	} else if (is_symbolc(c)) {
 	    tok_type = SYMBOL;
@@ -136,16 +150,18 @@ int main(int argc, char *argv[])
 	    while (nc != '"') {
 		if (nc == '\n') {
 		    linum++;
+		    column = 0;
 		}
 		if (nc == '\\') {
 		    nc = fgetc(input_file);
 		    nc = escape_char(nc);
 		}
 		printf("%c", nc);
-		buff[len++] = nc;
+		buff[++len] = nc;
 		nc = fgetc(input_file);
 	    }
-	    buff[len] = '\0';
+	    buff[++len] = '\0';	/* Terminate string */
+	    buff[0] = len--;	/* Store length at front of string */
 	    tok->val.tok_str = buff;
 	    printf("\"");
 	} else {
@@ -171,9 +187,9 @@ int main(int argc, char *argv[])
 		    printf("%c", nc);
 		    nc = fgetc(input_file);
 		}
-		if (nc != '(' && nc != ')' && !isspace(nc)) {
+		if (nc != '(' && nc != ')' && !isspace(nc) && nc != ';') {
 		    tok_type = INVALID;
-		    fprintf(stderr, "Invalid char: %c", nc);
+		    fprintf(stderr, "Invalid char: %c @ line: %d, column: %d", nc, linum, column);
 		    return 1;
 		}
 		tok->val.tok_num = valof_num(buff, len);
@@ -184,7 +200,7 @@ int main(int argc, char *argv[])
 	    }
 	}
 	tok->type = tok_type;
-	tok->linum = linum;
+	column++;
 	char *str = token_tostr(tok);
 	printf("\t: %s\n", str);
 	free(str);

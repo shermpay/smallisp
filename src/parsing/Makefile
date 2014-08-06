@@ -33,8 +33,8 @@ ast.o: ast.c ast.h
 # parser: lex.yy.c grammar.tab.c
 # 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
-lexer: lex.yy.c 
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+# lexer: lex.yy.c 
+# 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 lex.yy.c: smallisp.flex
 	flex $<
@@ -44,8 +44,15 @@ grammar.tab.h: grammar.tab.c
 grammar.tab.c: grammar.y
 	bison -d $<
 
-parser: parser.c
+lexer: lexer.c
 	$(CC) $(CFLAGS) $< -o $@
+
+test_lexer: lexer
+	for file in $(EXDIR)/* ; do \
+		echo $$file ; \
+		./lexer $$file ; \
+		echo "\n" ; \
+	done
 
 test_parser: parser
 	for file in $(EXDIR)/* ; do \
@@ -54,12 +61,5 @@ test_parser: parser
 		echo "\n" ; \
 	done
 
-test_lexer: parser
-	for file in $(EXDIR)/* ; do \
-		echo $$file ; \
-		./lexer $$file ; \
-		echo "\n" ; \
-	done
-
 clean:
-	rm parser grammar.tab.h grammar.tab.c lex.yy.c
+	rm parser lexer grammar.tab.h grammar.tab.c lex.yy.c

@@ -3,3 +3,8 @@
 ;; this is another comment
 (+ 1 ;; this is comment
 0)
+
+(+ 1 2) ;;
+
+(+ 1;
+(str " ;;")
