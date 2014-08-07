@@ -1,66 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <token.h>
 
 #define MAX_COLUMN 512
 
 static int linum = 1;
 static int column = 0;
-
-enum token_type { WHITESPACE,
-		  OPEN_PAREN, CLOSE_PAREN,
-		  OPEN_BRACK, CLOSE_BRACK,
-		  COMMENT, 
-		  NUMBER, STRING, SYMBOL,
-		  INVALID };
-
-union token_val {
-    long tok_num;
-    char* tok_str;
-};
-    
-typedef struct {
-    int linum;
-    enum token_type type;
-    union token_val val;
-} Token;
-
-char *token_tostr(Token *token)
-{
-    char *str = malloc(128);
-    switch (token->type){
-	case COMMENT:
-	    sprintf(str, "(COMMENT, ln: %d)", token->linum);
-	    break;
-	case WHITESPACE:
-	    sprintf(str, "(WHITESPACE, ln: %d)", token->linum);
-	    break;
-	case OPEN_PAREN:
-	    sprintf(str, "(OPEN_PAREN, ln: %d)", token->linum);
-	    break;
-	case CLOSE_PAREN:
-	    sprintf(str, "(CLOSE_PAREN, ln: %d)", token->linum);
-	    break;
-	case OPEN_BRACK:
-	    sprintf(str, "(OPEN_BRACK, ln: %d)", token->linum);
-	    break;
-	case CLOSE_BRACK:
-	    sprintf(str, "(CLOSE_BRACK, ln: %d)", token->linum);
-	    break;
-	case SYMBOL:
-	    sprintf(str, "(SYMBOL, %s, ln: %d)", token->val.tok_str, token->linum);
-	    break;
-	case NUMBER:
-	    sprintf(str, "(NUMBER, %li, ln: %d)", token->val.tok_num, token->linum);
-	    break;
-	case STRING:
-	    sprintf(str, "(STRING, %s, ln: %d)", token->val.tok_str, token->linum);
-	    break;
-	default:
-	    sprintf(str,"Unexpected token on line: %d", token->linum);
-    }
-    return str;
-}
 
 /* Get value of digit. Returns -1 if not a digit. */
 int valof_digit(char n)
