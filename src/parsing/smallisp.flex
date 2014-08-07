@@ -1,7 +1,7 @@
 %top{
 #include <stdio.h>
-#include "sltypes.h"
 #include "grammar.tab.h"
+#include "sltypes.h"
 }
 %x INSTR
 
