@@ -44,8 +44,14 @@ grammar.tab.h: grammar.tab.c
 grammar.tab.c: grammar.y
 	bison -d $<
 
-lexer: lexer.c
-	$(CC) $(CFLAGS) $< -o $@
+token.o: token.c token.h
+	$(CC) $(CFLAGS) $^ -c
+
+test_token: $(TESTDIR)/test_token.c token.o
+	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
+
+lexer: lexer.c token.o
+	$(CC) $(CFLAGS) $^ -o $@
 
 test_lexer: lexer
 	for file in $(EXDIR)/* ; do \

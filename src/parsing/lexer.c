@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <token.h>
+#include "token.h"
 
 #define MAX_COLUMN 512
 
@@ -142,8 +142,7 @@ int main(int argc, char *argv[])
 	tok->linum = linum;
 	if (c == ';') { // Comment
 	    tok->type = COMMENT;
-	    size_t line_len;
-	    fgetln(input_file, &line_len);
+	    fgets(NULL, 0, input_file);
 	    linum++;
 	    column = 0;
 	} else if (isspace(c) || c == ',') { // Whitespace

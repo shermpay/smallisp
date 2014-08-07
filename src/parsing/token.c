@@ -1,5 +1,7 @@
-#include <token.h>
+#include "token.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 char *token_tostr(Token *token)
 {
     char *str = malloc(128);
@@ -45,14 +47,78 @@ TokenStream* new_tokenstream(void)
     return stream;
 }
 
-TokenNode* new_tokennode(TokenNode* next)
+void flush_stream(TokenStream *stream)
 {
-    TokenNode *node = malloc(sizeof(TokenNode));
-    stream->next = next;
-    stream->prev = NULL;
-    return node;
+    
+    StreamNode *old;
+    StreamNode *curr = stream->front;
+    while(curr != NULL) {
+	old = curr;
+	curr = curr->next;
+	old->next = NULL;
+	old->prev = NULL;
+	free(old);
+    }
+    free(curr);
+    free(stream);
 }
 
 void push_token(TokenStream *stream, Token *token)
 {
+    StreamNode *node = malloc(sizeof(StreamNode));
+    node->token = token;
+    node->prev = stream->back;
+    node->next = NULL;
+    if (stream->back != NULL) {
+	stream->back->next = node;
+    } else {
+	stream->front = node;
+    }
+    stream->back = node;
+}
+
+Token *next_token(TokenStream *stream)
+{
+    StreamNode *node = stream->front;
+    stream->front = node->next;
+    node->next = NULL;
+    Token *result = node->token;
+    free(node);
+    return result;
+}
+
+void ret_token(TokenStream *stream, Token *token)
+{
+    StreamNode *node = malloc(sizeof(StreamNode));
+    node->token = token;
+    node->next = stream->front;
+    node->prev = NULL;
+    stream->front = node;
+    if (stream->back == NULL) {
+	stream->back = node;
+    }
+}
+
+bool has_token(TokenStream *stream)
+{
+    return stream->front != NULL;
+}
+
+char* stream_tostr(TokenStream *stream)
+{
+    int i;
+    char *buff = malloc(sizeof(char*) * 256);
+    buff[0] = '[';
+    buff[1] = '\0';
+    for (i = 1; has_token(stream); i++) {
+	Token *tok = next_token(stream);
+    	char *str = token_tostr(tok);
+	sprintf(str, "%s, ", str);
+	strncat(buff, str, 256);
+	free(str);
+    }
+    int len = strlen(buff);
+    buff[len - 2] = ']';
+    buff[len - 1] = '\0';
+    return buff;
 }
