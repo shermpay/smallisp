@@ -131,18 +131,21 @@ int main(int argc, char *argv[])
     if (argc != 2) {
 	return 1;
     }
-    char *file_name = argv[1];
-    FILE *input_file = fopen(file_name, "r");
-    char* buff = malloc(sizeof(char) * 128);
-    Token *tok = malloc(sizeof(Token));
+    FILE *input_file = fopen(argv[1], "r");
+    TokenStream *stream = new_tokenstream();
+
     char c;
     char nc;
+
     while ((c = fgetc(input_file)) != EOF) {
 	printf("%c", c);
+	Token *tok = malloc(sizeof(Token));
 	tok->linum = linum;
 	if (c == ';') { // Comment
 	    tok->type = COMMENT;
-	    fgets(NULL, 0, input_file);
+	    while(c != EOF && c != '\n')
+		  c = fgetc(input_file);
+	    
 	    linum++;
 	    column = 0;
 	} else if (isspace(c) || c == ',') { // Whitespace
@@ -156,10 +159,13 @@ int main(int argc, char *argv[])
 	    if (c == '+' || c == '-') { // Read over one
 		ungetc(nc, input_file);
 	    }
+	    char* buff = malloc(sizeof(char) * 64);
 	    tok->type = NUMBER;
 	    buff[0] = c;
 	    tok->val.tok_num = read_number(input_file, buff);
+	    free(buff);
 	} else if (is_symbolc(c)) { // Symbol
+	    char* buff = malloc(sizeof(char) * 64);
 	    if (c == '+' || c == '-') { // Read over one
 		ungetc(nc, input_file);
 	    }
@@ -168,6 +174,7 @@ int main(int argc, char *argv[])
 	    read_symbol(input_file, buff); 
 	    tok->val.tok_str = buff;
 	} else if (c == '"') { // String
+	    char* buff = malloc(sizeof(char) * 64);
 	    tok->type = STRING;
 	    read_string(input_file, buff);
 	    tok->val.tok_str = buff;
@@ -191,12 +198,10 @@ int main(int argc, char *argv[])
 	    }
 	}
 	column++;
-	char *str = token_tostr(tok);
-	printf("\t: %s\n", str);
-	free(str);
+	printf("\t: %s\n", token_tostr(tok));
+	push_token(stream, tok);
     }
-    free(tok);
-    free(buff);
+    printf("%s", stream_tostr(stream));
     fclose(input_file);
     return 0;
 }

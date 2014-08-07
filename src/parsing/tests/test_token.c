@@ -26,8 +26,36 @@ int main(int argc, char *argv[])
     char *str = stream_tostr(stream);
     printf("%s\n", str);
     free(str);
-    stream_tostr(stream);
     for (i = 0; i < len; i++) {
 	free(arr[i]);
     }
+
+    flush_stream(stream);
+    /* Token *t1 = malloc(sizeof(Token)); */
+    /* t1->type = SYMBOL; */
+    /* t1->linum = 0; */
+    /* t1->val.tok_str = "defn"; */
+    /* Token *t2 = malloc(sizeof(Token)); */
+    /* t2->type = SYMBOL; */
+    /* t2->linum = 1; */
+    /* t2->val.tok_str = "map"; */
+    /* Token *t3 = malloc(sizeof(Token)); */
+    /* t3->type = SYMBOL; */
+    /* t3->linum = 2; */
+    /* t3->val.tok_str = "reduce"; */
+    /* printf("1) %s", token_tostr(t1)); */
+    /* printf("2) %s", token_tostr(t2)); */
+    /* printf("3) %s", token_tostr(t3)); */
+
+    /* TokenStream *s2 = new_tokenstream(); */
+    /* push_token(s2, t1); */
+    /* push_token(s2, t2); */
+    /* push_token(s2, t3); */
+    /* str = stream_tostr(s2); */
+    /* printf("%s\n", str); */
+    /* free(str); */
+    /* flush_stream(s2); */
+    /* free(t1); */
+    /* free(t2); */
+    /* free(t3); */
 }

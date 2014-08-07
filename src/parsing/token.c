@@ -4,7 +4,7 @@
 #include <string.h>
 char *token_tostr(Token *token)
 {
-    char *str = malloc(128);
+    char *str = malloc(64);
     switch (token->type){
 	case COMMENT:
 	    sprintf(str, "(COMMENT, ln: %d)", token->linum);
@@ -80,8 +80,9 @@ void push_token(TokenStream *stream, Token *token)
 Token *next_token(TokenStream *stream)
 {
     StreamNode *node = stream->front;
-    stream->front = node->next;
+    stream->front = stream->front->next;
     node->next = NULL;
+    node->prev = NULL;
     Token *result = node->token;
     free(node);
     return result;
@@ -113,12 +114,11 @@ char* stream_tostr(TokenStream *stream)
     for (i = 1; has_token(stream); i++) {
 	Token *tok = next_token(stream);
     	char *str = token_tostr(tok);
-	sprintf(str, "%s, ", str);
 	strncat(buff, str, 256);
 	free(str);
     }
     int len = strlen(buff);
-    buff[len - 2] = ']';
-    buff[len - 1] = '\0';
+    buff[len - 1] = ']';
+    buff[len] = '\0';
     return buff;
 }
