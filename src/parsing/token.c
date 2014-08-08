@@ -1,3 +1,9 @@
+/*
+  Author: Sherman Pay
+  Version: 0.1; Thursday, 07. August 2014
+  TokenStreams are implemented as a Doubly Linked List with a small interface.
+  Memory usage is not optimized for string outputs.
+ */
 #include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,7 +83,7 @@ void push_token(TokenStream *stream, Token *token)
     stream->back = node;
 }
 
-Token *next_token(TokenStream *stream)
+Token *take_token(TokenStream *stream)
 {
     StreamNode *node = stream->front;
     stream->front = stream->front->next;
@@ -112,7 +118,7 @@ char* stream_tostr(TokenStream *stream)
     buff[0] = '[';
     buff[1] = '\0';
     for (i = 1; has_token(stream); i++) {
-	Token *tok = next_token(stream);
+	Token *tok = take_token(stream);
     	char *str = token_tostr(tok);
 	strncat(buff, str, 256);
 	free(str);

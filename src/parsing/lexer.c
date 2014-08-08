@@ -1,12 +1,18 @@
+/*
+  Author: Sherman Pay
+  Version: 0.1; Thursday, 07. August 2014
+  Lexer that reads from an input_file, and constructs a TokenStream.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "token.h"
+#include "lexer.h"
 
-#define MAX_COLUMN 512
+#define MAX_COLUMN 512		/* Maximum Columns accepted on a line */
 
-static int linum = 1;
-static int column = 0;
+static int linum = 1;		/* Keeping track of line number */
+static int column = 0;		/* Keeping track of column number */
 
 /* Get value of digit. Returns -1 if not a digit. */
 int valof_digit(char n)
@@ -126,12 +132,12 @@ long read_number(FILE *file, char *buff)
     return valof_numstr(buff, len);
 }
 
-int main(int argc, char *argv[])
+/*
+  Takes in a file to do lexical analysis on, 
+  and produce a token stream via the TokenStream API.
+ */
+TokenStream* lexer(FILE *input_file)
 {
-    if (argc != 2) {
-	return 1;
-    }
-    FILE *input_file = fopen(argv[1], "r");
     TokenStream *stream = new_tokenstream();
 
     char c;
@@ -203,6 +209,17 @@ int main(int argc, char *argv[])
     }
     printf("%s", stream_tostr(stream));
     fclose(input_file);
-    return 0;
+    return stream;
 }
 
+
+int main(int argc, char *argv[])
+{
+    if (argc != 2) {
+	fprintf(stderr, "Expected 1 argument, received %d", argc);
+	return 1;
+    }
+    FILE *input_file = fopen(argv[1], "r");
+    lexer(input_file);
+    return 0;
+}
