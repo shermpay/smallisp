@@ -40,8 +40,8 @@ token.o: token.c token.h
 test_token: $(TESTDIR)/test_token.c token.o
 	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
 
-lexer: lexer.c token.o
-	$(CC) $(CFLAGS) $^ -o $@
+lexer.o: lexer.c lexer.h token.o
+	$(CC) $(CFLAGS) $^ -c
 
 test_lexer: lexer
 	for file in $(EXDIR)/* ; do \

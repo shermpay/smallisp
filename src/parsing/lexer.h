@@ -5,4 +5,5 @@
   TokenStream is an object defined in token.h
  */
 #include <stdio.h>
+#include "token.h"
 TokenStream* lexer(FILE *input_file);

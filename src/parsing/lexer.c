@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "token.h"
 #include "lexer.h"
 
 #define MAX_COLUMN 512		/* Maximum Columns accepted on a line */
@@ -144,7 +143,6 @@ TokenStream* lexer(FILE *input_file)
     char nc;
 
     while ((c = fgetc(input_file)) != EOF) {
-	printf("%c", c);
 	Token *tok = malloc(sizeof(Token));
 	tok->linum = linum;
 	if (c == ';') { // Comment
@@ -184,7 +182,6 @@ TokenStream* lexer(FILE *input_file)
 	    tok->type = STRING;
 	    read_string(input_file, buff);
 	    tok->val.tok_str = buff;
-	    printf("\"");
 	} else {
 	    switch (c) { // Delimiters
 		case '(':
@@ -204,10 +201,8 @@ TokenStream* lexer(FILE *input_file)
 	    }
 	}
 	column++;
-	printf("\t: %s\n", token_tostr(tok));
 	push_token(stream, tok);
     }
-    printf("%s", stream_tostr(stream));
     fclose(input_file);
     return stream;
 }
