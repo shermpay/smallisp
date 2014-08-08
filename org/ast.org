@@ -1,2 +1,0 @@
-* (A)bstract (S)yntax (T)ree
-  

@@ -1,0 +1,10 @@
+* Grammar Rules
+
+  program = sexp* | ~
+  sexp = '(' form* ')' | ~ 
+  form = number | string | symbol | sexp | ~
+  number = digit*
+  string = \" char* \"
+  symbol = char*
+  list = \''(' form* ')'
+  vector = '[' form* ']'
