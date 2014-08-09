@@ -79,7 +79,6 @@ int read_symbol(FILE *file, char *buff)
     char nc = fgetc(file);
     int len = 0;
     while (is_symbolc(nc)) {
-	printf("%c", nc);
 	buff[++len] = nc;
 	nc = fgetc(file);
     }
@@ -105,7 +104,6 @@ int read_string(FILE *file, char *buff){
 	    nc = fgetc(file);
 	    nc = escape_char(nc);
 	}
-	printf("%c", nc);
 	buff[++len] = nc;
 	nc = fgetc(file);
     }
@@ -124,7 +122,6 @@ long read_number(FILE *file, char *buff)
     int len = 0;
     while (isdigit(nc)) {
 	buff[++len] = nc;
-	printf("%c", nc);
 	nc = fgetc(file);
     }
     ungetc(nc, file);
@@ -205,16 +202,4 @@ TokenStream* lexer(FILE *input_file)
     }
     fclose(input_file);
     return stream;
-}
-
-
-int main(int argc, char *argv[])
-{
-    if (argc != 2) {
-	fprintf(stderr, "Expected 1 argument, received %d", argc);
-	return 1;
-    }
-    FILE *input_file = fopen(argv[1], "r");
-    lexer(input_file);
-    return 0;
 }

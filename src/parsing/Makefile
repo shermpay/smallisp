@@ -43,6 +43,12 @@ test_token: $(TESTDIR)/test_token.c token.o
 lexer.o: lexer.c lexer.h token.o
 	$(CC) $(CFLAGS) $^ -c
 
+lexer: lexer.o token.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+parser: parser.c lexer.o token.o
+	$(CC) $(CFLAGS) $^ -o $@
+
 test_lexer: lexer
 	for file in $(EXDIR)/* ; do \
 		echo $$file ; \
@@ -58,4 +64,4 @@ test_parser: parser
 	done
 
 clean:
-	rm parser lexer grammar.tab.h grammar.tab.c lex.yy.c
+	rm parser lexer grammar.tab.h grammar.tab.c lex.yy.c *.o
