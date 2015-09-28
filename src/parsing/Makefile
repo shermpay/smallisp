@@ -9,7 +9,7 @@
 
 CC = clang
 CFLAGS = -g -Wall
-LIBS = -lfl
+LIBS = -lfl -ledit -lm
 TESTDIR = ./tests
 EXDIR = ./examples
 
@@ -33,6 +33,9 @@ grammar.tab.h: grammar.tab.c
 
 grammar.tab.c: grammar.y
 	bison -d $<
+
+repl: repl.c lexer.o token.o
+	$(CC) $(CFLAGS) $^ -ledit -o repl
 
 token.o: token.c token.h
 	$(CC) $(CFLAGS) $^ -c

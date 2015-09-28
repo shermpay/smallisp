@@ -39,7 +39,7 @@
     - Tokens for ~Char~ ~String~
     - Does not evaluate <expr> alone
     - Parses ~[ <expr> ]~ as VECT
-    - Parses ~{ <expr> }~ as DICT
+    - Parses ~{ <expr> }~ as HASHTABLE
     - Supports _Syntax Quoting_
       
    
@@ -61,4 +61,17 @@
 ** TODO Implement Quoted Expr
 
 ** TODO Implement Chars and Strings
-    
+
+
+* Lisp Reader
+** Overview
+   This will be the core behind the interpreter.
+   Current idea is to implement it with 4 phases:
+   - Lexer
+     string/file_stream -> token_stream
+   - Parser
+     token_stream -> AST
+   - Macro Expander
+     AST -> AST
+   - Evaluator
+     AST -> Program
