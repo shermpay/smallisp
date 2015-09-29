@@ -1,3 +1,0 @@
-"this string has basic escaped characters \n \f \t \b \r "
-"this string has advanced escape characters \' \" \\ \\\\ "
-"this string has unaccepted escape characters \a \c"
