@@ -1,9 +1,16 @@
 #ifndef _PARSER_DEF
 #define _PARSER_DEF
 
-typedef enum parser_error_t {
-  NO_MATCH,
-  NO_ERROR,
-} ParserError;
+enum  ParserErrorType {
+  Parser_Error_No_Error,
+  Parser_Error_No_Match,
+};
+
+struct ParserError {
+  ParserErrorType Type;
+  int Linum;
+};
+
+ParserError makeError(ParserErrorType Type, int Linum);
 
 #endif

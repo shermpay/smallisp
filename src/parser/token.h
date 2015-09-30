@@ -3,10 +3,8 @@
   Version: 0.1; Thursday, 07. August 2014
   Token and TokenStream definitions here.
  */
-enum token_type { WHITESPACE,
-		  OPEN_PAREN, CLOSE_PAREN,
+enum token_type { OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
-		  COMMENT, 
 		  NUMBER, STRING, SYMBOL_TOK,
 		  INVALID };
 

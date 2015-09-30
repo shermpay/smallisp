@@ -1,0 +1,4 @@
+/* -*- mode: C++ -*-
+ */
+
+int StartRepl();

@@ -12,12 +12,6 @@ char *token_tostr(Token *token)
 {
     char *str = (char*)malloc(64);
     switch (token->type){
-	case COMMENT:
-	    sprintf(str, "(COMMENT, ln: %d)", token->linum);
-	    break;
-	case WHITESPACE:
-	    sprintf(str, "(WHITESPACE, ln: %d)", token->linum);
-	    break;
 	case OPEN_PAREN:
 	    sprintf(str, "(OPEN_PAREN, ln: %d)", token->linum);
 	    break;

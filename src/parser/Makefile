@@ -9,7 +9,7 @@
 
 CC=clang
 CPP=clang++
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -std=c++11
 LIBS=-lfl -ledit -lm
 TESTDIR=./tests
 EXDIR=./examples
@@ -29,17 +29,8 @@ token.o: token.cc
 lexer.o: lexer.cc token.o
 	$(CPP) $(CFLAGS) $^ -c
 
-lexer: lexer.cc token.o
-	$(CPP) $(CFLAGS) $^ -o $@
-
 parser.o: parser.cc lexer.o token.o list.o sltypes.o
 	$(CPP) $(CFLAGS) $^ -c
-
-parser: parser.o lexer.o token.o list.o sltypes.o
-	$(CPP) $(CFLAGS) $^ -o $@
-
-repl: repl.cc lexer.o token.o
-	$(CPP) $(CFLAGS) $^ -ledit -o $@
 
 
 # ===========

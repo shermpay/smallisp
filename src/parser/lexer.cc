@@ -75,16 +75,16 @@ int is_symbolc(char c)
  *  Returns an int for the length of the symbol.
  *  Symbols are determined via the is_symbolc function.
  */
-int read_symbol(FILE *file, char *buff)
+int read_symbol(std::istream &InStream, char *buff)
 {
-  char nc = fgetc(file);
+  char nc = InStream.get();
   int len = 0;
   while (is_symbolc(nc)) {
     buff[++len] = nc;
-    nc = fgetc(file);
+    nc = InStream.get();
   }
   buff[++len] = '\0';
-  ungetc(nc, file);
+  InStream.unget();
   return len--;
 }
 
@@ -93,8 +93,8 @@ int read_symbol(FILE *file, char *buff)
  *  Length of string is stored in the front of buff.
  *  Returns an int for the length of the string.
  */
-int read_string(FILE *file, char *buff){
-  char nc = fgetc(file);
+int read_string(std::istream &InStream, char *buff){
+  char nc = InStream.get();
   int len = 0;
   while (nc != '"') {
     if (nc == '\n') {
@@ -102,11 +102,11 @@ int read_string(FILE *file, char *buff){
       column = 0;
     }
     if (nc == '\\') {
-      nc = fgetc(file);
+      nc = InStream.get();
       nc = escape_char(nc);
     }
     buff[++len] = nc;
-    nc = fgetc(file);
+    nc = InStream.get();
   }
   buff[++len] = '\0';	// Terminate string 
   buff[0] = len--;	// Store length at front of string
@@ -117,15 +117,15 @@ int read_string(FILE *file, char *buff){
  * Reads in a number from the file and stores it into buff.
  * Returns a long representing the number.
  */
-long read_number(FILE *file, char *buff)
+long read_number(std::istream &InStream, char *buff)
 {
-  char nc = fgetc(file);
+  char nc = InStream.get();
   int len = 0;
   while (isdigit(nc)) {
     buff[++len] = nc;
-    nc = fgetc(file);
+    nc = InStream.get();
   }
-  ungetc(nc, file);
+  InStream.unget();
   return valof_numstr(buff, len);
 }
 
@@ -133,52 +133,54 @@ long read_number(FILE *file, char *buff)
   Takes in a file to do lexical analysis on, 
   and produce a token stream via the TokenStream API.
 */
-TokenStream* lexer(FILE *input_file)
+TokenStream* lexer(std::istream &InStream)
 {
   TokenStream *stream = new_tokenstream();
 
   char c;
   char nc;
 
-  while ((c = fgetc(input_file)) != EOF) {
+  while ((c = InStream.get()) != EOF) {
     Token *tok = static_cast<Token*>(malloc(sizeof(Token)));
     tok->linum = linum;
     if (c == ';') { // Comment
-      tok->type = COMMENT;
       while(c != EOF && c != '\n')
-        c = fgetc(input_file);
+        c = InStream.get();
             
       linum++;
       column = 0;
+      // ignore
+      continue;
     } else if (isspace(c) || c == ',') { // Whitespace
       if (c == '\n') {
         linum++;
         column = 0;
       }
-      tok->type = WHITESPACE;
+      // Ignore
+      continue;
     } else if (isdigit(c) || 
-               ((c == '+' || c == '-') && isdigit(nc = fgetc(input_file)))) {
+               ((c == '+' || c == '-') && isdigit(nc = InStream.get()))) {
       if (c == '+' || c == '-') { // Read over one
-        ungetc(nc, input_file);
+        InStream.unget();
       }
       char* buff = static_cast<char*>(malloc(sizeof(char) * 64));
       tok->type = NUMBER;
       buff[0] = c;
-      tok->val.tok_num = read_number(input_file, buff);
+      tok->val.tok_num = read_number(InStream, buff);
       free(buff);
     } else if (is_symbolc(c)) { // Symbol
       char* buff = static_cast<char*>(malloc(sizeof(char) * 64));
       if (c == '+' || c == '-') { // Read over one
-        ungetc(nc, input_file);
+        InStream.unget();
       }
       buff[0] = c;
       tok->type = SYMBOL_TOK;
-      read_symbol(input_file, buff); 
+      read_symbol(InStream, buff); 
       tok->val.tok_str = buff;
     } else if (c == '"') { // String
       char* buff = static_cast<char*>(malloc(sizeof(char) * 64));
       tok->type = STRING;
-      read_string(input_file, buff);
+      read_string(InStream, buff);
       tok->val.tok_str = buff;
     } else {
       switch (c) { // Delimiters
@@ -199,30 +201,7 @@ TokenStream* lexer(FILE *input_file)
       }
     }
     column++;
-    if (tok->type != WHITESPACE) {
-      push_token(stream, tok);
-    }
+    push_token(stream, tok);
   }
-  fclose(input_file);
   return stream;
-}
-
-int main(int argc, char *argv[])
-{
-  if (argc < 2) {
-    puts("Lexer requires FILE argument");
-    return 1;
-  }
-
-  FILE *input_file = fopen(argv[1], "r");
-
-  TokenStream *stream = lexer(input_file);
-  
-  char *token_str;
-  while (has_token(stream)) {
-    Token *token = take_token(stream);
-    token_str = token_tostr(token);
-    printf("%s", token_str);
-  }
-  return 0;
 }

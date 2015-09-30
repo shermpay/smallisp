@@ -7,32 +7,28 @@
 #include "parser.h"
 #include "list.h"
 
-ParserError parse_tokens(TokenStream *stream, List **prog) 
-{
-  std::stack<Token*> delim_stack;
-  *prog = new_list();
-  while (has_token(stream)) {
-    Token *token = take_token(stream);
-    // switch (token->type) {
-    //   case OPEN_PAREN:
-    //   case OPEN_BRACK:
-    //     delim_stack.push(token)
-    // }
-  }
-  return NO_ERROR;
+ParserError makeError(ParserErrorType Type, int Linum) {
+  return {Type, Linum};
 }
 
-int main(int argc, char *argv[])
-{
-  if (argc < 2) {
-    puts("Parser requires FILE argument");
-    return 1;
+ParserError parseTokens(TokenStream *Stream, List **Prog) {
+  std::stack<Token*> delim_stack;
+  *Prog = new_list();
+  while (has_token(Stream)) {
+    Token *Token = take_token(Stream);
+    switch (Token->type) {
+      case OPEN_PAREN:
+      case OPEN_BRACK:
+        delim_stack.push(Token);
+        break;
+      case CLOSE_PAREN:
+        Token = delim_stack.top();
+        if (Token->type != OPEN_PAREN) {
+          makeError(Parser_Error_No_Match, Token->linum);
+        } 
+        break;
+    }
   }
-
-  FILE *input_file = fopen(argv[1], "r");
-
-  List *prog;
-  TokenStream *stream = lexer(input_file);
-  parse_tokens(stream, &prog);
+  return makeError(Parser_Error_No_Error, 0);
 }
 
