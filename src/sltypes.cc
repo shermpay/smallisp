@@ -37,32 +37,44 @@ SlVal *new_string_val(char *x)
   return val;
 }
 
-Object *new_num(int x)
+Object *newNum(int x)
 {
-  return new_object(new_num_val(x), SL_NUM);
+  return newObject(new_num_val(x), SlNumTy);
 }
 
-Object *new_symbol(char *x)
+Object *newSymbol(char *x)
 {
-  return new_object(new_symbol_val(x), SYMBOL);
+  return newObject(new_symbol_val(x), SymbolTy);
 }
 
-Object *new_char(char x) 
+Object *newChar(char x) 
 {
-  return new_object(new_char_val(x), SL_CHAR);
+  return newObject(new_char_val(x), SlCharTy);
 }
 
-Object *new_bool(int x)
+Object *newBool(int x)
 {
-  return new_object(new_bool_val(x), SL_BOOL);
+  return newObject(new_bool_val(x), SlBoolTy);
 }
 
-Object *new_string(char *x)
+Object *newString(char *x)
 {
-  return new_object(new_string_val(x), SL_STRING);
+  return newObject(new_string_val(x), SlStringTy);
 }
 
-Object *new_object(SlVal *x, SlType type)
+Object *listToObject(struct list_t *Lst) {
+  SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
+  Val->list = Lst;
+  return newObject(Val, ListTy);
+}
+
+Object *newSexp(struct list_t *Lst) {
+  SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
+  Val->list = Lst;
+  return newObject(Val, SexpTy);
+}
+
+Object *newObject(SlVal *x, SlType type)
 {
   Object *res = static_cast<Object*>(malloc(sizeof(Object)));
   res->type = type;
@@ -70,35 +82,35 @@ Object *new_object(SlVal *x, SlType type)
   return res;
 }
 
-void del_object(Object *x)
+void delObject(Object *x)
 {
   free(x->val);
   free(x);
 }
 
-char *obj_tostr(Object *x)
+char *objToStr(Object *x)
 {
   /* TODO: Implement this. */
   int size, len;
   size = 64;
   char *buff = static_cast<char*>(malloc(sizeof(char) * size));
   switch (x->type) {
-    case SL_NUM:
+    case SlNumTy:
       len = snprintf(buff, size, "%ld", x->val->sl_num);
       if (len >= size) {
         buff = (char*)realloc(buff, sizeof(char) * len);
         snprintf(buff, size, "%ld", x->val->sl_num);
       }
       return buff;
-    case SYMBOL:
-      return "SYMBOL";
-    case SL_CHAR:
+    case SymbolTy:
+      return x->val->symbol;
+    case SlCharTy:
       return "CHAR";
-    case SL_BOOL:
+    case SlBoolTy:
       return "BOOL";
-    case SL_STRING:
-      return "STRING";
-    case LIST:
-      return "LIST";
+    case SlStringTy:
+      return x->val->sl_string;
+    case ListTy:
+      return listToStr(x->val->list);
   }
 }

@@ -1,25 +1,18 @@
-CC=clang
-CFLAGS = -std=c99 -Wall -g
-LIBS = -ledit -lm
-OBJS = mpc.o lval.o lenv.o lbuiltin.o
-SRC_DIR = ./src
-BIN_DIR = ./bin
-OBJ_DIR = ./obj
+CC=clang++
+CFLAGS=-std=c++11 -Wall -g
+LIBS=-ledit -lm
+SRC_DIR=./src
+BIN_DIR=./bin
+OBJ_DIR=./obj
 
-all: repl.c $(OBJS)
-	$(CC) $(CFLAGS) $< $(OBJS) $(LIBS) -o repl
+STD_OBJS=$(OBJ_DIR)/list.o $(OBJ_DIR)/sltypes.o 
+PARSER_OBJS=$(OBJ_DIR)/lexer.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/token.o 
 
-mpc.o: mpc.c
-	$(CC) $(CFLAGS) -c $<
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
+	$(CC) $(CFLAGS) $^ -c -o $@
 
-lval.o: lval.c ltypes.h
-	$(CC) $(CFLAGS) -c $<
-
-lenv.o: lenv.c ltypes.h
-	$(CC) $(CFLAGS) -c $<
-
-lbuiltin.o: lbuiltin.c ltypes.h
-	$(CC) $(CFLAGS) -c $<
+main: $(SRC_DIR)/main.cc $(STD_OBJS) $(PARSER_OBJS)
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $(BIN_DIR)/$ 
 
 clean: 
 	rm -r $(OBJ_DIR)/*.o

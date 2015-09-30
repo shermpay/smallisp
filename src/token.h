@@ -1,8 +1,11 @@
-/*
+/* -*- mode: C++ -*-
   Author: Sherman Pay
   Version: 0.1; Thursday, 07. August 2014
   Token and TokenStream definitions here.
  */
+#ifndef _TOKEN_DEF
+#define _TOKEN_DEF
+
 enum token_type { OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
 		  NUMBER, STRING, SYMBOL_TOK,
@@ -56,3 +59,5 @@ Token *take_token(TokenStream*);
 void ret_token(TokenStream*, Token*);
 bool has_token(TokenStream*); 
 char *stream_tostr(TokenStream*);
+
+#endif

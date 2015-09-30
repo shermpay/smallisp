@@ -1,32 +1,46 @@
+/* -*- mode: C++ -*- */
 #ifndef _LIST_DEF
 #define _LIST_DEF
 
 #include "sltypes.h"
 
+typedef struct cons_t {
+  struct object_t *Val;
+  struct cons_t *Next;
+} Cons;
+
+/* Struct representing a Smallisp List (Singly linked-list) */
+typedef struct list_t {
+  Cons *Head;
+} List;
+
 /* Creates a new cons cell with value x */
-Cons *new_cons(Object *x);
+Cons *newCons(Object *x);
 
 /* Destructor for cons cells, deletes itself and returns a pointer to
    the next cons cell */
-Cons *del_cons(Cons *c);
+Cons *delCons(Cons *c);
 
 /* Creates a new list */
-List *new_list();
+List *newList();
 
 /* Destructor for list */
-void del_list(List *sl);
+void delList(List *sl);
 
 /* Adds a new Cons cell at the front of the list */
-void list_cons(List *sl, Cons *c);
+void listCons(List *sl, Cons *c);
 
 /* Returns true if sl is empty */
-bool list_empty(List *sl);
+bool listEmpty(List *sl);
 
 /* Removes and returns the head of the list in a return argument.
  Returns 0 for success and 1 for failure. */
-int list_pop(List *sl, Cons **cons);
+int listPop(List *sl, Cons **cons);
+
+List *listTail(List *sl);
 
 /* Prints list in (a b c) format */
-void print_list(List *sl);
+void printList(List *sl);
+
 
 #endif

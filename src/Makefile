@@ -1,15 +1,24 @@
 CC=clang
 CPP=clang++
-CFLAGS=-g -Wall -std=c++11
+CFLAGS=-std=c++11 -g -Wall
 LIBS=-ledit
 TESTDIR=./tests
 EXDIR=./examples
 
+STD_DIR=std
+STD_OBJS=list.o sltypes.o 
+
 PARSER_DIR=parser
-PARSER_OBJS=$(PARSER_DIR)/lexer.o $(PARSER_DIR)/parser.o $(PARSER_DIR)/token.o $(PARSER_DIR)/list.o $(PARSER_DIR)/sltypes.o 
+PARSER_OBJS=lexer.o parser.o token.o 
 
 repl.o: repl.cc
 	$(CPP) $(CFLAGS) $^ $(LIBS) -c
 
-main: main.cc repl.o $(PARSER_OBJS)
+%.o: %.cc
+	$(CPP) $(CFLAGS) $^ $(LIBS) -c
+
+main: main.cc repl.o $(PARSER_OBJS) $(STD_OBJS)
 	$(CPP) $(CFLAGS) $^ $(LIBS) -o $@
+
+clean:
+	rm main *.o && make -C $(STD_DIR) clean && make -C $(PARSER_DIR) clean
