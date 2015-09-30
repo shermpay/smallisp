@@ -8,7 +8,7 @@ enum token_type { WHITESPACE,
 		  OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,
 		  COMMENT, 
-		  NUMBER, STRING, SYMBOL,
+		  NUMBER, STRING, SYMBOL_TOK,
 		  INVALID };
 
 union token_val {

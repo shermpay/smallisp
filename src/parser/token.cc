@@ -10,7 +10,7 @@
 #include <string.h>
 char *token_tostr(Token *token)
 {
-    char *str = malloc(64);
+    char *str = (char*)malloc(64);
     switch (token->type){
 	case COMMENT:
 	    sprintf(str, "(COMMENT, ln: %d)", token->linum);
@@ -30,7 +30,7 @@ char *token_tostr(Token *token)
 	case CLOSE_BRACK:
 	    sprintf(str, "(CLOSE_BRACK, ln: %d)", token->linum);
 	    break;
-	case SYMBOL:
+	case SYMBOL_TOK:
 	    sprintf(str, "(SYMBOL, %s, ln: %d)", token->val.tok_str, token->linum);
 	    break;
 	case NUMBER:
@@ -47,7 +47,7 @@ char *token_tostr(Token *token)
 
 TokenStream* new_tokenstream(void)
 {
-    TokenStream *stream = malloc(sizeof(TokenStream)); 
+    TokenStream *stream = (TokenStream*)malloc(sizeof(TokenStream)); 
     stream->front = NULL;
     stream->back = NULL;
     return stream;
@@ -71,7 +71,7 @@ void flush_stream(TokenStream *stream)
 
 void push_token(TokenStream *stream, Token *token)
 {
-    StreamNode *node = malloc(sizeof(StreamNode));
+    StreamNode *node = (StreamNode*)malloc(sizeof(StreamNode));
     node->token = token;
     node->prev = stream->back;
     node->next = NULL;
@@ -96,7 +96,7 @@ Token *take_token(TokenStream *stream)
 
 void ret_token(TokenStream *stream, Token *token)
 {
-    StreamNode *node = malloc(sizeof(StreamNode));
+    StreamNode *node = (StreamNode*)malloc(sizeof(StreamNode));
     node->token = token;
     node->next = stream->front;
     node->prev = NULL;
@@ -114,7 +114,7 @@ bool has_token(TokenStream *stream)
 char* stream_tostr(TokenStream *stream)
 {
     int i;
-    char *buff = malloc(sizeof(char*) * 256);
+    char *buff = (char*)malloc(sizeof(char*) * 256);
     buff[0] = '[';
     buff[1] = '\0';
     for (i = 1; has_token(stream); i++) {

@@ -4,52 +4,40 @@
 # Consider pulling this to overall Makefile
 # Flex: smallist.flex
 # Bison: grammar.y
-# AST: list.c, ast.c
+# AST: list.c, ast.cc
 # Execute tests via 'make test_(name)'
 
-CC = clang
-CFLAGS = -g -Wall
-LIBS = -lfl -ledit -lm
-TESTDIR = ./tests
-EXDIR = ./examples
+CC=clang
+CPP=clang++
+CFLAGS=-g -Wall
+LIBS=-lfl -ledit -lm
+TESTDIR=./tests
+EXDIR=./examples
 
-ast.o: ast.c ast.h
-	$(CC) $(CFLAGS) $< -c
+ast.o: ast.cc ast.h
+	$(CPP) $(CFLAGS) $< -c
 
-list.o: list.c list.h
-	$(CC) $(CFLAGS) $< -c
+sltypes.o: sltypes.cc sltypes.h
+	$(CPP) $(CFLAGS) $^ -c
 
-# parser: lex.yy.c grammar.tab.c
-# 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+list.o: list.cc sltypes.o list.h 
+	$(CPP) $(CFLAGS) $^ -c
 
-# lexer: lex.yy.c 
-# 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+token.o: token.cc token.h
+	$(CPP) $(CFLAGS) $^ -c
 
-lex.yy.c: smallisp.flex
-	flex $<
+lexer.o: lexer.cc lexer.h token.o
+	$(CPP) $(CFLAGS) $^ -c
 
-grammar.tab.h: grammar.tab.c
+parser.o: parser.cc lexer.o token.o list.o sltypes.o
+	$(CPP) $(CFLAGS) $^ -c
 
-grammar.tab.c: grammar.y
-	bison -d $<
+parser: parser.o lexer.o token.o list.o sltypes.o
+	$(CPP) $(CFLAGS) $^ -o $@
 
-repl: repl.c lexer.o token.o
-	$(CC) $(CFLAGS) $^ -ledit -o repl
+repl: repl.cc lexer.o token.o
+	$(CPP) $(CFLAGS) $^ -ledit -o $@
 
-token.o: token.c token.h
-	$(CC) $(CFLAGS) $^ -c
-
-test_token: $(TESTDIR)/test_token.c token.o
-	$(CC) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
-
-lexer.o: lexer.c lexer.h token.o
-	$(CC) $(CFLAGS) $^ -c
-
-lexer: lexer.o token.o
-	$(CC) $(CFLAGS) $^ -o $@
-
-parser: parser.c lexer.o token.o
-	$(CC) $(CFLAGS) $^ -o $@
 
 # ===========
 # TESTS
@@ -68,18 +56,22 @@ test_parser: parser
 		echo "\n" ; \
 	done
 
-test_sltypes: $(TESTDIR)/test_sltypes.c sltypes.o
-	$(CC) $(CFLAGS) $^ -o $(TESTDIR)/bin/$@ && valgrind $(TESTDIR)/bin/$@
+test_sltypes: $(TESTDIR)/test_sltypes.cc sltypes.o
+	$(CPP) $(CFLAGS) $^ -o $(TESTDIR)/bin/$@ && valgrind $(TESTDIR)/bin/$@
 
-test_ast: ast_test.c ast.o
-	$(CC) $(CFLAGS) $^ -o $(TESTDIR)/bin/$@ && valgrind $(TESTDIR)/bin/$@
+test_ast: ast_test.cc ast.o
+	$(CPP) $(CFLAGS) $^ -o $(TESTDIR)/bin/$@ && valgrind $(TESTDIR)/bin/$@
 
-test_list: $(TESTDIR)/test_list.c list.o sltypes.o
-	$(CC) $(CFLAGS) $^ -o $(TESTDIR)/bin/$@ && valgrind $(TESTDIR)/bin/$@
+test_list: $(TESTDIR)/test_list.cc list.o sltypes.o
+	$(CPP) $(CFLAGS) $^ -o $(TESTDIR)/bin/$@ && valgrind $(TESTDIR)/bin/$@
+
+test_token: $(TESTDIR)/test_token.cc token.o
+	$(CPP) $(CFLAGS) -I . $^ -o $(TESTDIR)/$@ && valgrind $(TESTDIR)/$@
+
 
 # Remove test binaries
 clean_tests:
 	rm $(TESTDIR)/test_list $(TESTDIR)/test_sltypes
 
 clean:
-	rm parser lexer grammar.tab.h grammar.tab.c lex.yy.c *.o
+	rm parser lexer *.o

@@ -17,14 +17,14 @@
   1. Garbage Collection
   2. Persistent Linked-list
 */
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "list.h"
 
 /* Creates a new cons cell with value x */
 Cons *new_cons(Object *x)
 {
-  Cons *res = malloc(sizeof(Cons));
+  Cons *res = static_cast<Cons*>(malloc(sizeof(Cons)));
   res->val = x;
   res->next = NULL;
   return res;
@@ -46,7 +46,7 @@ Cons *del_cons(Cons *c)
 /* Creates a new list */
 List *new_list()
 {
-  List *res = malloc(sizeof(List));
+  List *res = static_cast<List*>(malloc(sizeof(List)));
   res->head = NULL;
   res->length = 0;
   return res;
