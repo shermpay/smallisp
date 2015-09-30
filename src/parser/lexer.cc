@@ -199,8 +199,30 @@ TokenStream* lexer(FILE *input_file)
       }
     }
     column++;
-    push_token(stream, tok);
+    if (tok->type != WHITESPACE) {
+      push_token(stream, tok);
+    }
   }
   fclose(input_file);
   return stream;
+}
+
+int main(int argc, char *argv[])
+{
+  if (argc < 2) {
+    puts("Lexer requires FILE argument");
+    return 1;
+  }
+
+  FILE *input_file = fopen(argv[1], "r");
+
+  TokenStream *stream = lexer(input_file);
+  
+  char *token_str;
+  while (has_token(stream)) {
+    Token *token = take_token(stream);
+    token_str = token_tostr(token);
+    printf("%s", token_str);
+  }
+  return 0;
 }

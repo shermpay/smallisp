@@ -3,7 +3,6 @@
   Version: 0.1; Thursday, 07. August 2014
   Token and TokenStream definitions here.
  */
-#include <stdbool.h>
 enum token_type { WHITESPACE,
 		  OPEN_PAREN, CLOSE_PAREN,
 		  OPEN_BRACK, CLOSE_BRACK,

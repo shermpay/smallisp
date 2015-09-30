@@ -1,5 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
+
+#include <stack>
 
 #include "lexer.h"
 #include "parser.h"
@@ -7,9 +9,15 @@
 
 ParserError parse_tokens(TokenStream *stream, List **prog) 
 {
+  std::stack<Token*> delim_stack;
   *prog = new_list();
   while (has_token(stream)) {
     Token *token = take_token(stream);
+    // switch (token->type) {
+    //   case OPEN_PAREN:
+    //   case OPEN_BRACK:
+    //     delim_stack.push(token)
+    // }
   }
   return NO_ERROR;
 }

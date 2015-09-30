@@ -4,10 +4,10 @@
   TokenStreams are implemented as a Doubly Linked List with a small interface.
   Memory usage is not optimized for string outputs.
  */
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include "token.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 char *token_tostr(Token *token)
 {
     char *str = (char*)malloc(64);

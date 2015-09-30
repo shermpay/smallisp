@@ -4,6 +4,6 @@
   Lexical Analysis of input file.
   TokenStream is an object defined in token.h
  */
-#include <stdio.h>
+#include <cstdio>
 #include "token.h"
 TokenStream* lexer(FILE *input_file);

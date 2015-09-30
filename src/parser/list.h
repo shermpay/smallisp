@@ -1,7 +1,6 @@
 #ifndef _LIST_DEF
 #define _LIST_DEF
 
-#include <stdbool.h>
 #include "sltypes.h"
 
 /* Creates a new cons cell with value x */

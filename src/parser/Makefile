@@ -14,20 +14,23 @@ LIBS=-lfl -ledit -lm
 TESTDIR=./tests
 EXDIR=./examples
 
-ast.o: ast.cc ast.h
+ast.o: ast.cc 
 	$(CPP) $(CFLAGS) $< -c
 
-sltypes.o: sltypes.cc sltypes.h
+sltypes.o: sltypes.cc 
 	$(CPP) $(CFLAGS) $^ -c
 
-list.o: list.cc sltypes.o list.h 
+list.o: list.cc sltypes.o 
 	$(CPP) $(CFLAGS) $^ -c
 
-token.o: token.cc token.h
+token.o: token.cc 
 	$(CPP) $(CFLAGS) $^ -c
 
-lexer.o: lexer.cc lexer.h token.o
+lexer.o: lexer.cc token.o
 	$(CPP) $(CFLAGS) $^ -c
+
+lexer: lexer.cc token.o
+	$(CPP) $(CFLAGS) $^ -o $@
 
 parser.o: parser.cc lexer.o token.o list.o sltypes.o
 	$(CPP) $(CFLAGS) $^ -c
