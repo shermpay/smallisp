@@ -88,6 +88,13 @@ Token *take_token(TokenStream *stream)
     return result;
 }
 
+Token *peek_token(TokenStream *stream)
+{
+    StreamNode *node = stream->front;
+    Token *result = node->token;
+    return result;
+}
+
 void ret_token(TokenStream *stream, Token *token)
 {
     StreamNode *node = (StreamNode*)malloc(sizeof(StreamNode));

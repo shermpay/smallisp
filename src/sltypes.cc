@@ -111,6 +111,7 @@ char *objToStr(Object *x)
     case SlStringTy:
       return x->val->sl_string;
     case ListTy:
+    case SexpTy:
       return listToStr(x->val->list);
   }
 }

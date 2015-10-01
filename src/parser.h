@@ -2,6 +2,7 @@
 #ifndef _PARSER_DEF
 #define _PARSER_DEF
 #include "list.h"
+#include "token.h"
 
 enum ParserErrorType {
   Parser_Error_No_Error,
@@ -13,8 +14,15 @@ struct ParserError {
   int Linum;
 };
 
+const ParserError ParserNoError = {
+  Parser_Error_No_Error,
+  0,
+};
+
 ParserError makeError(ParserErrorType Type, int Linum);
 
-ParserError parseString(char *Input, List **ProgSexp);
+ParserError parseExpr(TokenStream *Stream, Object **Expr);
+ParserError parseSexp(TokenStream *Stream, List **NewSexp);
+ParserError parseString(char *Input, Object **Expr);
 
 #endif

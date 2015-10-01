@@ -56,6 +56,7 @@ TokenStream* new_tokenstream(void);
 void flush_stream(TokenStream*);
 void push_token(TokenStream*, Token*);
 Token *take_token(TokenStream*);
+Token *peek_token(TokenStream*);
 void ret_token(TokenStream*, Token*);
 bool has_token(TokenStream*); 
 char *stream_tostr(TokenStream*);
