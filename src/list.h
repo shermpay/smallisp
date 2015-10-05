@@ -5,7 +5,7 @@
 #include "sltypes.h"
 
 typedef struct cons_t {
-  struct object_t *Val;
+  Object *Val;
   struct cons_t *Next;
 } Cons;
 
@@ -31,16 +31,16 @@ void delList(List *sl);
 void listCons(List *sl, Cons *c);
 
 /* Returns true if sl is empty */
-bool listEmpty(List *sl);
+bool listEmpty(const List *sl);
 
 /* Removes and returns the head of the list in a return argument.
  Returns 0 for success and 1 for failure. */
-int listPop(List *sl, Cons **cons);
+int listPop(const List *sl, Cons **cons);
 
 List *listTail(List *sl);
 
 /* Prints list in (a b c) format */
-void printList(List *sl);
+void printList(const List *sl);
 
 
 #endif

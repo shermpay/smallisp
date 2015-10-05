@@ -1,117 +1,121 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include "sltypes.h"
 
-SlVal *new_num_val(int x)
+SlVal *newNumVal(int X)
+{
+  SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
+  Val->SlNum = X;
+  return Val;
+}
+
+SlVal *newSymbolVal(const char *X)
+{
+  SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
+  Val->Symbol = new Symbol();
+  Val->Symbol->Name = X;
+  return Val;
+}
+
+SlVal *newCharVal(char X)
+{
+  SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
+  Val->SlChar = X;
+  return Val;
+}
+
+SlVal *newBoolVal(int X)
 {
   SlVal *val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  val->sl_num = x;
+  val->SlBool = X;
   return val;
 }
 
-SlVal *new_symbol_val(char *x)
+SlVal *newStringVal(const char *X)
 {
   SlVal *val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  val->symbol = x;
+  val->SlString = X;
   return val;
 }
 
-SlVal *new_char_val(char x)
+Object *newNum(int X)
 {
-  SlVal *val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  val->sl_char = x;
-  return val;
+  return newObject(newNumVal(X), SlNumTy);
 }
 
-SlVal *new_bool_val(int x)
+Object *newSymbol(const char *X)
 {
-  SlVal *val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  val->sl_bool = x;
-  return val;
+  return newObject(newSymbolVal(X), SymbolTy);
 }
 
-SlVal *new_string_val(char *x)
+Object *newChar(char X) 
 {
-  SlVal *val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  val->sl_string = x;
-  return val;
+  return newObject(newCharVal(X), SlCharTy);
 }
 
-Object *newNum(int x)
+Object *newBool(int X)
 {
-  return newObject(new_num_val(x), SlNumTy);
+  return newObject(newBoolVal(X), SlBoolTy);
 }
 
-Object *newSymbol(char *x)
+Object *newString(const char *X)
 {
-  return newObject(new_symbol_val(x), SymbolTy);
-}
-
-Object *newChar(char x) 
-{
-  return newObject(new_char_val(x), SlCharTy);
-}
-
-Object *newBool(int x)
-{
-  return newObject(new_bool_val(x), SlBoolTy);
-}
-
-Object *newString(char *x)
-{
-  return newObject(new_string_val(x), SlStringTy);
+  return newObject(newStringVal(X), SlStringTy);
 }
 
 Object *listToObject(struct list_t *Lst) {
   SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  Val->list = Lst;
+  Val->List = Lst;
   return newObject(Val, ListTy);
 }
 
 Object *newSexp(struct list_t *Lst) {
   SlVal *Val = static_cast<SlVal*>(malloc(sizeof(SlVal)));
-  Val->list = Lst;
+  Val->List = Lst;
   return newObject(Val, SexpTy);
 }
 
-Object *newObject(SlVal *x, SlType type)
+Object *newObject(SlVal *X, SlType Type)
 {
-  Object *res = static_cast<Object*>(malloc(sizeof(Object)));
-  res->type = type;
-  res->val = x;
-  return res;
+  Object *Res = static_cast<Object*>(malloc(sizeof(Object)));
+  Res->Type = Type;
+  Res->Val = X;
+  return Res;
 }
 
-void delObject(Object *x)
+void delObject(Object *X)
 {
-  free(x->val);
-  free(x);
+  free(X->Val);
+  free(X);
 }
 
-char *objToStr(Object *x)
+char *objToStr(const Object *X)
 {
   /* TODO: Implement this. */
   int size, len;
   size = 64;
   char *buff = static_cast<char*>(malloc(sizeof(char) * size));
-  switch (x->type) {
+  switch (X->Type) {
     case SlNumTy:
-      len = snprintf(buff, size, "%ld", x->val->sl_num);
+      len = snprintf(buff, size, "%ld", X->Val->SlNum);
       if (len >= size) {
         buff = (char*)realloc(buff, sizeof(char) * len);
-        snprintf(buff, size, "%ld", x->val->sl_num);
+        snprintf(buff, size, "%ld", X->Val->SlNum);
       }
       return buff;
     case SymbolTy:
-      return x->val->symbol;
+      memcpy(buff, X->Val->Symbol->Name, sizeof(char) * size);
+      return buff;
     case SlCharTy:
       return "CHAR";
     case SlBoolTy:
       return "BOOL";
     case SlStringTy:
-      return x->val->sl_string;
+      memcpy(buff, X->Val->SlString, sizeof(char) * size);
+      return buff;
     case ListTy:
     case SexpTy:
-      return listToStr(x->val->list);
+      return listToStr(X->Val->List);
   }
 }

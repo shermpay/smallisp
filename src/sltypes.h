@@ -18,32 +18,39 @@ typedef enum sltype_t {SlNumTy, SymbolTy, SlCharTy, SlBoolTy,
 struct cons_t;
 struct list_t;
 
+struct Object;
+
+struct Symbol {
+  const char *Name;
+  Object *Obj;
+};
+
 /* Union representing all primitive Smallisp types */
 typedef union slval_t {
-  long sl_num;		
-  char *symbol;
-  char sl_char;	
+  long SlNum;		
+  Symbol *Symbol;
+  char SlChar;	
   // TODO: Change to bool.
-  int sl_bool;	
-  char *sl_string;
-  struct list_t *list;
+  int SlBool;	
+  const char *SlString;
+  struct list_t *List;
 } SlVal;
 
-typedef struct object_t {
-  SlVal *val;
-  SlType type;
-} Object;
+struct Object {
+  SlVal *Val;
+  SlType Type;
+};
 
 Object *newNum(int x);
-Object *newSymbol(char *x);
+Object *newSymbol(const char *x);
 Object *newChar(char x);
 Object *newBool(int x);
-Object *newString(char *x);
+Object *newString(const char *x);
 Object *newObject(SlVal *x, SlType type);
 Object *listToObject(struct list_t *Lst);
 Object *newSexp(struct list_t *Lst);
-char *objToStr(Object *);
-char *listToStr(struct list_t *Sl);
+char *objToStr(const Object *);
+char *listToStr(const struct list_t *Sl);
 void delObject(Object *x);
 
 #endif

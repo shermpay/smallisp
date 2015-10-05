@@ -1,7 +1,9 @@
+ARCH=X86
 CC=clang
-CPP=clang++
-CFLAGS=-std=c++11 -g -Wall
-LIBS=-ledit
+CXX=clang++
+LLVM_CONFIG=llvm-config
+CXXFLAGS=-std=c++11 `$(LLVM_CONFIG) --cxxflags` -Wall -g 
+LIBS=`$(LLVM_CONFIG) --libs core` `$(LLVM_CONFIG) --ldflags` -ldl -lcurses -ledit -lm -pthread
 TESTDIR=./tests
 EXDIR=./examples
 
@@ -11,14 +13,16 @@ STD_OBJS=list.o sltypes.o
 PARSER_DIR=parser
 PARSER_OBJS=lexer.o parser.o token.o 
 
+CODEGEN_OBJS=llvm_code_gen.o
+
 repl.o: repl.cc
-	$(CPP) $(CFLAGS) $^ $(LIBS) -c
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -c
 
 %.o: %.cc
-	$(CPP) $(CFLAGS) $^ $(LIBS) -c
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -c
 
-main: main.cc repl.o $(PARSER_OBJS) $(STD_OBJS)
-	$(CPP) $(CFLAGS) $^ $(LIBS) -o $@
+main: main.cc repl.o $(PARSER_OBJS) $(STD_OBJS) $(CODEGEN_OBJS)
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@
 
 clean:
 	rm main *.o && make -C $(STD_DIR) clean && make -C $(PARSER_DIR) clean

@@ -72,7 +72,7 @@ void listCons(List *Sl, Cons *C)
 }
 
 /* Returns true if sl is empty */
-bool listEmpty(List *Sl)
+bool listEmpty(const List *Sl)
 {
   return Sl->Head == NULL;
 }
@@ -91,14 +91,14 @@ int listPop(List *Sl, Cons **Cons)
   return 0;
 }
 
-List *listTail(List *Sl) {
+List *listTail(const List *Sl) {
   List *Tail = newList();
   Tail->Head = Sl->Head->Next;
   return Tail;
 }
 
 /* Prints list in (a b c) format */
-void printList(List *Sl)
+void printList(const List *Sl)
 {
   Cons *Cur = Sl->Head;
   char *Str;
@@ -119,7 +119,7 @@ void printList(List *Sl)
 
 
 // TODO: Fix this. (Use strncat)
-char *listToStr(List *Sl) {
+char *listToStr(const List *Sl) {
   char *buff = static_cast<char*>(malloc(sizeof(char) * 64));
   Cons *Cur = Sl->Head;
   char *Str;
