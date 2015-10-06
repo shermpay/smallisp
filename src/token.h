@@ -6,25 +6,33 @@
 #ifndef _TOKEN_DEF
 #define _TOKEN_DEF
 
-enum token_type { OPEN_PAREN, CLOSE_PAREN,
-		  OPEN_BRACK, CLOSE_BRACK,
-		  NUMBER, STRING, SYMBOL_TOK,
-		  INVALID };
+#include <string>
 
-union token_val {
-    long tok_num;
-    char* tok_str;
+enum TokenType {
+  TOK_OpenParen,
+  TOK_CloseParen,
+  TOK_OpenBrack,
+  TOK_CloseBrack,
+  TOK_Number,
+  TOK_String,
+  TOK_Symbol,
+  TOK_Invalid
 };
-    
-typedef struct {
-    int linum;			/* Aid error reporting */
-    enum token_type type;
-    union token_val val;
-} Token;
 
-char *token_tostr(Token*);
+union TokenVal {
+  long TokNum;
+  char *TokStr;
+};
 
-/* 
+struct Token {
+  int Linum; /* Aid error reporting */
+  enum TokenType Type;
+  union TokenVal Val;
+};
+
+char *tokenToStr(Token *);
+
+/*
    Token Stream
    ------------
    Provides a simple API to interact with tokens via a FIFO Stream.
@@ -33,32 +41,33 @@ char *token_tostr(Token*);
    And you can manipulate the tokens via the following functions:
    - take_token(TokenStream*) -> Token* : Take the next token from the stream
    - has_token(TokenStream*) -> bool : Check if the stream has any tokens
-   - ret_token(TokenStream*) -> void : Return the last token you took from the stream
-   ret_token technically allows you to insert anything to the front of the token stream.
-   
-   Finally you construct a stream with new_tokenstream(void), and flush/close the stream,
+   - ret_token(TokenStream*) -> void : Return the last token you took from the
+   stream
+   ret_token technically allows you to insert anything to the front of the token
+   stream.
+
+   Finally you construct a stream with new_tokenstream(void), and flush/close
+   the stream,
    with flush_stream(TokenStream*).
 */
-typedef struct stream_node StreamNode;
-struct stream_node {
-    Token *token;
-    StreamNode *next;
-    StreamNode *prev;
+struct StreamNode {
+  Token *Token;
+  StreamNode *Next;
+  StreamNode *Prev;
 };
 
-typedef struct {
-    StreamNode *front;
-    StreamNode *back;
-} TokenStream;
-
-char *token_tostr(Token*);
-TokenStream* new_tokenstream(void);
-void flush_stream(TokenStream*);
-void push_token(TokenStream*, Token*);
-Token *take_token(TokenStream*);
-Token *peek_token(TokenStream*);
-void ret_token(TokenStream*, Token*);
-bool has_token(TokenStream*); 
-char *stream_tostr(TokenStream*);
+struct TokenStream {
+  StreamNode *Front;
+  StreamNode *Back;
+};
+std::string tokenToStr(const Token *);
+TokenStream *newTokenStream(void);
+void flushStream(TokenStream *);
+void pushToken(TokenStream *, Token *);
+const Token *takeToken(TokenStream *);
+const Token *peekToken(TokenStream *);
+void retToken(TokenStream *, Token *);
+bool hasToken(TokenStream *);
+std::string streamToStr(const TokenStream *);
 
 #endif

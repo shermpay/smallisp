@@ -9,14 +9,13 @@
 #include <cctype>
 #include "lexer.h"
 
-#define MAX_COLUMN 512		/* Maximum Columns accepted on a line */
+#define MAX_COLUMN 512 /* Maximum Columns accepted on a line */
 
-static int linum = 1;		/* Keeping track of line number */
-static int column = 0;		/* Keeping track of column number */
+static int Linum = 1;  /* Keeping track of line number */
+static int Column = 0; /* Keeping track of column number */
 
 /* Get value of digit. Returns -1 if not a digit. */
-int valof_digit(char n)
-{
+int valof_digit(char n) {
   if (n < '0' || n > '9') {
     return -1;
   }
@@ -24,8 +23,7 @@ int valof_digit(char n)
 }
 
 /* Gets the value of a number string */
-long valof_numstr(char *numstr, int len)
-{
+long valof_numstr(char *numstr, int len) {
   long val = 0;
   int mul = 1;
   while (len > 0) {
@@ -47,36 +45,34 @@ long valof_numstr(char *numstr, int len)
 /* Given a character returns the escape sequence of it */
 char escape_char(char c) {
   switch (c) {
-    case 'n':
-      return '\n';
-    case 't':
-      return '\t';
-    case 'r':
-      return '\r';
-    case 'b':
-      return '\b';
-    case 'v':
-      return '\v';
-    default:
-      return c;
+  case 'n':
+    return '\n';
+  case 't':
+    return '\t';
+  case 'r':
+    return '\r';
+  case 'b':
+    return '\b';
+  case 'v':
+    return '\v';
+  default:
+    return c;
   }
 }
 
-/* 
- * Checks if char c is valid symbol char 
+/*
+ * Checks if char c is valid symbol char
  */
-int is_symbolc(char c)
-{
+int is_symbolc(char c) {
   return isalpha(c) || c == '*' || c == '+' || c == '-' || c == '/';
 }
 
-/* 
- *  Reads in an entire symbol from file and stores it into buff. 
+/*
+ *  Reads in an entire symbol from file and stores it into buff.
  *  Returns an int for the length of the symbol.
  *  Symbols are determined via the is_symbolc function.
  */
-int read_symbol(std::istream &InStream, char *buff)
-{
+int read_symbol(std::istream &InStream, char *buff) {
   char nc = InStream.get();
   int len = 0;
   while (is_symbolc(nc)) {
@@ -88,18 +84,18 @@ int read_symbol(std::istream &InStream, char *buff)
   return len--;
 }
 
-/* 
- *  Reads in an entire string from file and stores it into buff. 
+/*
+ *  Reads in an entire string from file and stores it into buff.
  *  Length of string is stored in the front of buff.
  *  Returns an int for the length of the string.
  */
-int read_string(std::istream &InStream, char *buff){
+int read_string(std::istream &InStream, char *buff) {
   char nc = InStream.get();
   int len = 0;
   while (nc != '"') {
     if (nc == '\n') {
-      linum++;
-      column = 0;
+      Linum++;
+      Column = 0;
     }
     if (nc == '\\') {
       nc = InStream.get();
@@ -108,8 +104,8 @@ int read_string(std::istream &InStream, char *buff){
     buff[++len] = nc;
     nc = InStream.get();
   }
-  buff[++len] = '\0';	// Terminate string 
-  buff[0] = len--;	// Store length at front of string
+  buff[++len] = '\0'; // Terminate string
+  buff[0] = len--;    // Store length at front of string
   return len;
 }
 
@@ -117,8 +113,7 @@ int read_string(std::istream &InStream, char *buff){
  * Reads in a number from the file and stores it into buff.
  * Returns a long representing the number.
  */
-long read_number(std::istream &InStream, char *buff)
-{
+long read_number(std::istream &InStream, char *buff) {
   char nc = InStream.get();
   int len = 0;
   while (isdigit(nc)) {
@@ -130,78 +125,77 @@ long read_number(std::istream &InStream, char *buff)
 }
 
 /*
-  Takes in a file to do lexical analysis on, 
+  Takes in a file to do lexical analysis on,
   and produce a token stream via the TokenStream API.
 */
-TokenStream* lexer(std::istream &InStream)
-{
-  TokenStream *stream = new_tokenstream();
+TokenStream *lexer(std::istream &InStream) {
+  TokenStream *Stream = newTokenStream();
 
-  char c;
-  char nc;
+  char Curr;
+  char Next;
 
-  while ((c = InStream.get()) != EOF) {
-    Token *tok = static_cast<Token*>(malloc(sizeof(Token)));
-    tok->linum = linum;
-    if (c == ';') { // Comment
-      while(c != EOF && c != '\n')
-        c = InStream.get();
-            
-      linum++;
-      column = 0;
+  while ((Curr = InStream.get()) != EOF) {
+    Token *Tok = new Token();
+    Tok->Linum = Linum;
+    if (Curr == ';') { // Comment
+      while (Curr != EOF && Curr != '\n')
+        Curr = InStream.get();
+
+      Linum++;
+      Column = 0;
       // ignore
       continue;
-    } else if (isspace(c) || c == ',') { // Whitespace
-      if (c == '\n') {
-        linum++;
-        column = 0;
+    } else if (isspace(Curr) || Curr == ',') { // Whitespace
+      if (Curr == '\n') {
+        Linum++;
+        Column = 0;
       }
       // Ignore
       continue;
-    } else if (isdigit(c) || 
-               ((c == '+' || c == '-') && isdigit(nc = InStream.get()))) {
-      if (c == '+' || c == '-') { // Read over one
+    } else if (isdigit(Curr) || ((Curr == '+' || Curr == '-') &&
+                                 isdigit(Next = InStream.get()))) {
+      if (Curr == '+' || Curr == '-') { // Read over one
         InStream.unget();
       }
-      char* buff = static_cast<char*>(malloc(sizeof(char) * 64));
-      tok->type = NUMBER;
-      buff[0] = c;
-      tok->val.tok_num = read_number(InStream, buff);
-      free(buff);
-    } else if (is_symbolc(c)) { // Symbol
-      char* buff = static_cast<char*>(malloc(sizeof(char) * 64));
-      if (c == '+' || c == '-') { // Read over one
+      char *Buff = static_cast<char *>(malloc(sizeof(char) * 64));
+      Tok->Type = TOK_Number;
+      Buff[0] = Curr;
+      Tok->Val.TokNum = read_number(InStream, Buff);
+      free(Buff);
+    } else if (is_symbolc(Curr)) { // Symbol
+      char *Buff = static_cast<char *>(malloc(sizeof(char) * 64));
+      if (Curr == '+' || Curr == '-') { // Read over one
         InStream.unget();
       }
-      buff[0] = c;
-      tok->type = SYMBOL_TOK;
-      read_symbol(InStream, buff); 
-      tok->val.tok_str = buff;
-    } else if (c == '"') { // String
-      char* buff = static_cast<char*>(malloc(sizeof(char) * 64));
-      tok->type = STRING;
-      read_string(InStream, buff);
-      tok->val.tok_str = buff;
+      Buff[0] = Curr;
+      Tok->Type = TOK_Symbol;
+      read_symbol(InStream, Buff);
+      Tok->Val.TokStr = Buff;
+    } else if (Curr == '"') { // String
+      char *Buff = static_cast<char *>(malloc(sizeof(char) * 64));
+      Tok->Type = TOK_String;
+      read_string(InStream, Buff);
+      Tok->Val.TokStr = Buff;
     } else {
-      switch (c) { // Delimiters
-        case '(':
-          tok->type = OPEN_PAREN;
-          break;
-        case ')':
-          tok->type = CLOSE_PAREN;
-          break;
-        case '[':
-          tok->type = OPEN_BRACK;
-          break;
-        case ']':
-          tok->type = CLOSE_BRACK;
-          break;
-        default:
-          tok->type = INVALID;
+      switch (Curr) { // Delimiters
+      case '(':
+        Tok->Type = TOK_OpenParen;
+        break;
+      case ')':
+        Tok->Type = TOK_CloseParen;
+        break;
+      case '[':
+        Tok->Type = TOK_OpenBrack;
+        break;
+      case ']':
+        Tok->Type = TOK_CloseBrack;
+        break;
+      default:
+        Tok->Type = TOK_Invalid;
       }
     }
-    column++;
-    push_token(stream, tok);
+    Column++;
+    pushToken(Stream, Tok);
   }
-  return stream;
+  return Stream;
 }

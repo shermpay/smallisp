@@ -27,18 +27,18 @@ ParserError parseSexp(TokenStream *Stream, List **NewSexp) {
   std::list<Object *> Atoms;
   Object *Obj;
   ParserError Err;
-  while (has_token(Stream)) {
-    Token *Token = peek_token(Stream);
-    switch (Token->type) {
-    case OPEN_PAREN: {
-      take_token(Stream);
+  while (hasToken(Stream)) {
+    const Token *Token = peekToken(Stream);
+    switch (Token->Type) {
+    case TOK_OpenParen: {
+      takeToken(Stream);
       List *NestedSexp = static_cast<List *>(malloc(sizeof(List *)));
       Err = parseSexp(Stream, &NestedSexp);
       Obj = newSexp(NestedSexp);
       Atoms.push_front(Obj);
     }
-    case CLOSE_PAREN:
-      take_token(Stream);
+    case TOK_CloseParen:
+      takeToken(Stream);
       *NewSexp = newList();
       for (auto &Atom : Atoms) {
         listCons(*NewSexp, newCons(Atom));
@@ -52,23 +52,23 @@ ParserError parseSexp(TokenStream *Stream, List **NewSexp) {
 }
 
 ParserError parseExpr(TokenStream *Stream, Object **Expr) {
-  while (has_token(Stream)) {
-    Token *Token = take_token(Stream);
-    switch (Token->type) {
-    case OPEN_PAREN: {
+  while (hasToken(Stream)) {
+    const Token *Token = takeToken(Stream);
+    switch (Token->Type) {
+    case TOK_OpenParen: {
       List *Sexp = newList();
       ParserError Err = parseSexp(Stream, &Sexp);
       *Expr = newSexp(Sexp);
       return Err;
     }
-    case NUMBER:
-      *Expr = newNum(Token->val.tok_num);
+    case TOK_Number:
+      *Expr = newNum(Token->Val.TokNum);
       return ParserNoError;
-    case STRING:
-      *Expr = newString(Token->val.tok_str);
+    case TOK_String:
+      *Expr = newString(Token->Val.TokStr);
       return ParserNoError;
-    case SYMBOL_TOK:
-      *Expr = newSymbol(Token->val.tok_str);
+    case TOK_Symbol:
+      *Expr = newSymbol(Token->Val.TokStr);
       return ParserNoError;
     }
   }
