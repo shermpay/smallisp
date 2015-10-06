@@ -1,7 +1,7 @@
 /*
   Sherman Pay Jing Hao
   Tuesday, 10. June 2014
-  
+
   Smallisp List
   -------------
   Current Implementation:
@@ -9,7 +9,7 @@
   2. Build up of cons cell
   3. Bare minimal functions
   4. Cons cell of SlObj
-  
+
   Todo:
   1. Use dynamic types
 
@@ -17,15 +17,15 @@
   1. Garbage Collection
   2. Persistent Linked-list
 */
+#include "list.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include "list.h"
 
 /* Creates a new cons cell with value x */
-Cons *newCons(Object *X)
-{
-  Cons *Res = static_cast<Cons*>(malloc(sizeof(Cons)));
+Cons *newCons(Object *X) {
+  Cons *Res = static_cast<Cons *>(malloc(sizeof(Cons)));
   Res->Val = X;
   Res->Next = NULL;
   return Res;
@@ -33,11 +33,10 @@ Cons *newCons(Object *X)
 
 /* Destructor for cons cells, deletes itself and returns a pointer to
    the next cons cell */
-Cons *delCons(Cons *C)
-{
+Cons *delCons(Cons *C) {
   Cons *Next = NULL;
   if (C->Next) {
-     Next = C->Next;
+    Next = C->Next;
   }
   delObject(C->Val);
   free(C);
@@ -45,16 +44,14 @@ Cons *delCons(Cons *C)
 }
 
 /* Creates a new list */
-List *newList()
-{
-  List *Res = static_cast<List*>(malloc(sizeof(List)));
+List *newList() {
+  List *Res = static_cast<List *>(malloc(sizeof(List)));
   Res->Head = NULL;
   return Res;
 }
 
 /* Destructor for list */
-void delList(List *Sl)
-{
+void delList(List *Sl) {
   if (Sl != NULL) {
     Cons *Cur = Sl->Head;
     while (Cur) {
@@ -65,27 +62,22 @@ void delList(List *Sl)
 }
 
 /* Adds a new Cons cell at the front of the list */
-void listCons(List *Sl, Cons *C)
-{
+void listCons(List *Sl, Cons *C) {
   C->Next = Sl->Head;
   Sl->Head = C;
 }
 
 /* Returns true if sl is empty */
-bool listEmpty(const List *Sl)
-{
-  return Sl->Head == NULL;
-}
+bool listEmpty(const List *Sl) { return Sl->Head == NULL; }
 
 /* Removes and returns the head of the list */
-int listPop(List *Sl, Cons **Cons)
-{
+int listPop(List *Sl, Cons **Cons) {
   /* Error if trying to pop empty list */
   if (listEmpty(Sl)) {
     fprintf(stderr, "Attempting to Pop empty list\n");
     return 1;
   }
-    
+
   *Cons = Sl->Head;
   Sl->Head = Sl->Head->Next;
   return 0;
@@ -98,44 +90,35 @@ List *listTail(const List *Sl) {
 }
 
 /* Prints list in (a b c) format */
-void printList(const List *Sl)
-{
+void printList(const List *Sl) {
   Cons *Cur = Sl->Head;
-  char *Str;
+  std::string Str;
   putchar('(');
   if (!listEmpty(Sl)) {
     Str = objToStr(Cur->Val);
-    printf("%s", Str);
-    free(Str);
+    printf("%s", Str.c_str());
     while (Cur->Next != NULL) {
       Cur = Cur->Next;
       Str = objToStr(Cur->Val);
-      printf(" %s", Str);
-      free(Str);
+      printf(" %s", Str.c_str());
     }
   }
   puts(")");
 }
 
-
 // TODO: Fix this. (Use strncat)
-char *listToStr(const List *Sl) {
-  char *buff = static_cast<char*>(malloc(sizeof(char) * 64));
+std::string listToStr(const List *Sl) {
   Cons *Cur = Sl->Head;
-  char *Str;
-  buff[0] = '(';
-  if (!listEmpty(Sl)) {
-    Str = objToStr(Cur->Val);
-    strcat(buff, Str);
-    while (Cur->Next != NULL) {
+  std::string Buff;
+  Buff.push_back('(');
+  if (!listEmpty(Sl) && Cur) {
+    Buff += (objToStr(Cur->Val));
+    while (Cur && Cur->Next) {
       Cur = Cur->Next;
-      Str = objToStr(Cur->Val);
-      strcat(buff, " ");
-      strcat(buff, Str);
+      Buff.push_back(' ');
+      Buff += objToStr(Cur->Val);
     }
   }
-  int len = strlen(buff);
-  buff[len] = ')';
-  buff[len+1] = '\0';
-  return buff;
+  Buff.push_back(')');
+  return Buff;
 }

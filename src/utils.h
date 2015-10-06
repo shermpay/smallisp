@@ -1,2 +1,2 @@
 /* -*- mode: C++ -*- */
-#define MALLOC(TYPE) (static_cast<TYPE>(malloc(sizeof(TYPE))))
+#define MALLOC(TYPE, N) (static_cast<TYPE>(malloc(sizeof(TYPE))))

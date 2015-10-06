@@ -2,12 +2,10 @@
 #ifndef _BUILTINS_DEF
 #define _BUILTINS_DEF
 
-#include "code_gen.h"
-
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 enum SpecialFormType {
@@ -15,12 +13,17 @@ enum SpecialFormType {
   SFT_Def,
 };
 
-class SpecialForm {
+class BuiltinDef {
 public:
-  virtual llvm::Value *genCode(int Nargs, Object** Args) = 0;
-  virtual  ~SpecialForm();
+  int NumArgs;
+
+  BuiltinDef(int NumArgs) { this->NumArgs = NumArgs; }
 };
 
-const char* BuiltinNames[] = {"add"};
+const std::unordered_map<std::string, BuiltinDef *> BuiltinDefs = {
+    {"add", new BuiltinDef(2)},
+    {"sub", new BuiltinDef(2)},
+    {"mul", new BuiltinDef(2)},
+};
 
 #endif

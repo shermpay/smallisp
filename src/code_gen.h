@@ -2,6 +2,8 @@
 #ifndef _CODE_GEN_DEF
 #define _CODE_GEN_DEF
 
+#include "builtins.h"
+#include "list.h"
 #include "sltypes.h"
 
 #include <llvm/ADT/STLExtras.h>
@@ -12,7 +14,6 @@
 
 #include <map>
 #include <queue>
-
 
 enum SemanticErrorType {
   SE_UseBeforeDecl,
@@ -27,73 +28,46 @@ public:
     this->Type = Type;
     this->Obj = Obj;
   }
-  std::string toStr() {
-    const char *Str = objToStr(this->Obj);
-    return std::string(Str);
-  }
+  std::string toStr() { return objToStr(this->Obj); }
 };
 
 // Defines the interface for IR code.
 class IRCode {};
 
-
 /* Code Generator defines an interface.
  */
 class CodeGenerator {
 public:
-  // Returns an error value.
-  // llvm::Value *errorV(const char *Str) {
-  //   return llvm::Error(Str);
-  // }
-
-
-  // llvm::Value *numberGenCode(const Object *Obj) {
-  //   return llvm::ConstantFP::get(llvm::getGlobalContext(), llvm::APInt(Obj->Val->SlNum));
-  // }
-
   virtual llvm::Value *symbolGenCode(const Object *Obj) = 0;
   virtual llvm::Value *genCode(const Object *Obj) = 0;
-  virtual llvm::Value *genBuiltinCode(const char *SymbolName, 
-                                      int Nargs, 
-                                      const Object **Args) = 0;
-  virtual const std::queue<SemanticError*> semanticErrors() = 0;
+  virtual llvm::Value *callGenCode(const Object *Obj) = 0;
+  virtual llvm::Value *builtinGenCode(const std::string &SymbolName,
+                                      const List *Args) = 0;
+  virtual const std::queue<SemanticError *> semanticErrors() = 0;
   virtual ~CodeGenerator() {}
 };
 
 class LLVMCodeGenerator : CodeGenerator {
 public:
-  // Returns an error value.
-  // llvm::Value *errorV(const char *Str) {
-  //   return llvm::Error(Str);
-  // }
-
-
-  // llvm::Value *numberGenCode(const Object *Obj) {
-  //   return llvm::ConstantFP::get(llvm::getGlobalContext(), llvm::APInt(Obj->Val->SlNum));
-  // }
-  LLVMCodeGenerator(const llvm::Module *Module) : Builder(llvm::getGlobalContext()){
+  LLVMCodeGenerator(const llvm::Module *Module)
+      : Builder(llvm::getGlobalContext()) {
     this->Module = Module;
   }
-  
-  virtual ~LLVMCodeGenerator() {
-    delete this->Module;
-  };
+
+  virtual ~LLVMCodeGenerator() { delete this->Module; };
 
   virtual llvm::Value *symbolGenCode(const Object *Obj);
   virtual llvm::Value *genCode(const Object *Obj);
-  virtual llvm::Value *genBuiltinCode(const char *SymbolName, 
-                                      int Nargs, 
-                                      const Object **Args);
-  virtual const std::queue<SemanticError*> semanticErrors();
-
+  virtual llvm::Value *callGenCode(const Object *Obj);
+  virtual llvm::Value *builtinGenCode(const std::string &SymbolName,
+                                      const List *Args);
+  virtual const std::queue<SemanticError *> semanticErrors();
 
 private:
   const llvm::Module *Module;
   llvm::IRBuilder<> Builder;
-  std::map<std::string, llvm::Value*> NamedValues;
-  std::queue<SemanticError*> SemanticErrors;
-  
-
+  std::map<std::string, llvm::Value *> NamedValues;
+  std::queue<SemanticError *> SemanticErrors;
 };
 
 #endif

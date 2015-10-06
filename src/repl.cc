@@ -23,7 +23,7 @@ int StartRepl() {
     char *Input = readline("slisp> ");
     add_history(Input);
     parseString(Input, &Expr);
-    printf("Object: %s\n", objToStr(Expr));
+    printf("Object: %s\n", objToStr(Expr).c_str());
     llvm::Value *Val = CodeGen->genCode(Expr);
     OutStream << "IR: ";
     if (Val) {
@@ -32,7 +32,7 @@ int StartRepl() {
     } else {
       OutStream << "nil\n";
     }
-      OutStream.flush();
+    OutStream.flush();
     free(Input);
   }
   return 0;

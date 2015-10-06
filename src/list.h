@@ -10,9 +10,7 @@ typedef struct cons_t {
 } Cons;
 
 /* Struct representing a Smallisp List (Singly linked-list) */
-typedef struct list_t {
-  Cons *Head;
-} List;
+typedef struct list_t { Cons *Head; } List;
 
 /* Creates a new cons cell with value x */
 Cons *newCons(Object *x);
@@ -37,10 +35,9 @@ bool listEmpty(const List *sl);
  Returns 0 for success and 1 for failure. */
 int listPop(const List *sl, Cons **cons);
 
-List *listTail(List *sl);
+List *listTail(const List *sl);
 
 /* Prints list in (a b c) format */
 void printList(const List *sl);
-
 
 #endif
