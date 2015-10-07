@@ -19,6 +19,7 @@ enum SpecialFormType {
 };
 
 extern const Symbol *DefSymbol;
+extern const Symbol *DefFnSymbol;
 extern const Symbol *IfSymbol;
 
 extern const std::unordered_map<const Symbol *, SlMacro *> SpecialForms;

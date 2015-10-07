@@ -1,10 +1,13 @@
 #include "builtins.h"
 namespace builtins {
 const Symbol *DefSymbol = Symbol::get("def");
+const Symbol *DefFnSymbol = Symbol::get("deffn");
 const Symbol *IfSymbol = Symbol::get("if");
 
 const std::unordered_map<const Symbol *, SlMacro *> SpecialForms = {
-    {DefSymbol, new SlMacro(2)}, {IfSymbol, new SlMacro(2)},
+    {DefSymbol, new SlMacro(2)},
+    {DefFnSymbol, new SlMacro(3)},
+    {IfSymbol, new SlMacro(2)},
 };
 
 const Symbol *AddSymbol = Symbol::get("add");

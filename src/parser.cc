@@ -32,10 +32,11 @@ ParserError parseSexp(TokenStream *Stream, List **NewSexp) {
     switch (Token->Type) {
     case TOK_OpenParen: {
       takeToken(Stream);
-      List *NestedSexp = static_cast<List *>(malloc(sizeof(List *)));
+      List *NestedSexp = newList();
       Err = parseSexp(Stream, &NestedSexp);
       Obj = newSexp(NestedSexp);
       Atoms.push_front(Obj);
+      break;
     }
     case TOK_CloseParen:
       takeToken(Stream);

@@ -2,10 +2,12 @@
 #ifndef _LIST_DEF
 #define _LIST_DEF
 
+#include <cstdlib>
+
 struct Object;
 
 typedef struct cons_t {
-  Object *Val;
+  Object *Obj;
   struct cons_t *Next;
 } Cons;
 
@@ -36,6 +38,8 @@ bool listEmpty(const List *sl);
 int listPop(const List *sl, Cons **cons);
 
 List *listTail(const List *sl);
+
+size_t listCount(const List *sl);
 
 /* Prints list in (a b c) format */
 void printList(const List *sl);

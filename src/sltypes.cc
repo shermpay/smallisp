@@ -106,5 +106,9 @@ std::string objToStr(const Object *X) {
   case ListTy:
   case SexpTy:
     return listToStr(X->Val->List);
+  case SlFunctionTy:
+    return std::string("<FUNCTION>");
+  case SlMacroTy:
+    return std::string("<MACRO>");
   }
 }

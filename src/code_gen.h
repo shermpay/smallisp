@@ -45,16 +45,19 @@ public:
                                       const List *Args) = 0;
   virtual llvm::Value *specialFormGenCode(const Symbol &SFSymbol,
                                           const List *Args) = 0;
-  virtual llvm::Value *funcCallGenCode(const Symbol &FuncSymbol,
-                                       const List *Args) = 0;
+  virtual llvm::Value *fnCallGenCode(const Symbol &FuncSymbol,
+                                     const List *Args) = 0;
+  virtual llvm::Function *defFnGenCode(const List *Args) = 0;
   virtual const std::queue<SemanticError *> semanticErrors() = 0;
   virtual ~CodeGenerator() {}
 };
 
 class LLVMCodeGenerator : CodeGenerator {
 public:
-  LLVMCodeGenerator(const llvm::Module *Module)
-      : Builder(llvm::getGlobalContext()) {
+  llvm::IRBuilder<> Builder;
+  std::map<std::string, llvm::Value *> NamedValues;
+
+  LLVMCodeGenerator(llvm::Module *Module) : Builder(llvm::getGlobalContext()) {
     this->Module = Module;
   }
 
@@ -67,16 +70,13 @@ public:
                                       const List *Args);
   virtual llvm::Value *specialFormGenCode(const Symbol &SFSymbol,
                                           const List *Args);
-  virtual llvm::Value *funcCallGenCode(const Symbol &FuncSymbol,
-                                       const List *Args);
+  virtual llvm::Value *fnCallGenCode(const Symbol &FuncSymbol,
+                                     const List *Args);
+  virtual llvm::Function *defFnGenCode(const List *Args);
   virtual const std::queue<SemanticError *> semanticErrors();
 
-  llvm::IRBuilder<> builder() const { return this->Builder; }
-
 private:
-  const llvm::Module *Module;
-  llvm::IRBuilder<> Builder;
-  std::map<std::string, llvm::Value *> NamedValues;
+  llvm::Module *Module;
   std::queue<SemanticError *> SemanticErrors;
 };
 

@@ -27,7 +27,7 @@
 /* Creates a new cons cell with value x */
 Cons *newCons(Object *X) {
   Cons *Res = static_cast<Cons *>(malloc(sizeof(Cons)));
-  Res->Val = X;
+  Res->Obj = X;
   Res->Next = NULL;
   return Res;
 }
@@ -39,7 +39,7 @@ Cons *delCons(Cons *C) {
   if (C->Next) {
     Next = C->Next;
   }
-  delObject(C->Val);
+  delObject(C->Obj);
   free(C);
   return Next;
 }
@@ -90,17 +90,27 @@ List *listTail(const List *Sl) {
   return Tail;
 }
 
+size_t listCount(const List *Sl) {
+  size_t Count = 0;
+  Cons *Curr = Sl->Head;
+  while (Curr) {
+    Curr = Curr->Next;
+    Count++;
+  }
+  return Count;
+}
+
 /* Prints list in (a b c) format */
 void printList(const List *Sl) {
   Cons *Cur = Sl->Head;
   std::string Str;
   putchar('(');
   if (!listEmpty(Sl)) {
-    Str = objToStr(Cur->Val);
+    Str = objToStr(Cur->Obj);
     printf("%s", Str.c_str());
     while (Cur->Next != NULL) {
       Cur = Cur->Next;
-      Str = objToStr(Cur->Val);
+      Str = objToStr(Cur->Obj);
       printf(" %s", Str.c_str());
     }
   }
@@ -113,11 +123,11 @@ std::string listToStr(const List *Sl) {
   std::string Buff;
   Buff.push_back('(');
   if (!listEmpty(Sl) && Cur) {
-    Buff += (objToStr(Cur->Val));
+    Buff += (objToStr(Cur->Obj));
     while (Cur && Cur->Next) {
       Cur = Cur->Next;
       Buff.push_back(' ');
-      Buff += objToStr(Cur->Val);
+      Buff += objToStr(Cur->Obj);
     }
   }
   Buff.push_back(')');

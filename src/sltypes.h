@@ -27,6 +27,13 @@ typedef enum sltype_t {
   SlMacroTy,
 } SlType;
 
+static std::string SlTypeNames[] = {
+    "Num",  "Symbol", "Char",     "Bool",  "String",
+    "List", "Sexp",   "Function", "Macro",
+};
+
+static std::string sltypeToStr(const SlType Type) { return SlTypeNames[Type]; };
+
 struct Object;
 
 class SlFunction {
