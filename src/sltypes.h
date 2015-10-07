@@ -22,18 +22,29 @@ typedef enum sltype_t {
   SlBoolTy,
   SlStringTy,
   ListTy,
-  SexpTy
+  SexpTy,
+  SlFunctionTy,
+  SlMacroTy,
 } SlType;
 
 struct Object;
 
 class SlFunction {
 public:
-  SlFunction(const int &NumArgs) : NumArgs(NumArgs) {}
-  int numArgs() { return this->NumArgs; };
+  SlFunction(const size_t &NumArgs) : NumArgs(NumArgs) {}
+  size_t numArgs() { return this->NumArgs; };
 
 private:
-  const int NumArgs;
+  const size_t NumArgs;
+};
+
+class SlMacro {
+public:
+  SlMacro(const size_t NumArgs) : NumArgs(NumArgs) {}
+  size_t numArgs() { return this->NumArgs; }
+
+private:
+  const size_t NumArgs;
 };
 
 /* Union representing all primitive Smallisp types */
@@ -46,6 +57,7 @@ typedef union slval_t {
   const char *SlString;
   struct list_t *List;
   SlFunction *SlFunction;
+  SlMacro *SlMacro;
 } SlVal;
 
 struct Object {

@@ -18,6 +18,11 @@ enum SpecialFormType {
   SFT_Def,
 };
 
+extern const Symbol *DefSymbol;
+extern const Symbol *IfSymbol;
+
+extern const std::unordered_map<const Symbol *, SlMacro *> SpecialForms;
+
 extern const Symbol *AddSymbol;
 extern const Symbol *SubSymbol;
 extern const Symbol *MulSymbol;

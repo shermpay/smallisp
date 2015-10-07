@@ -43,6 +43,10 @@ public:
   virtual llvm::Value *callGenCode(const Object *Obj) = 0;
   virtual llvm::Value *builtinGenCode(const Symbol &FuncSymbol,
                                       const List *Args) = 0;
+  virtual llvm::Value *specialFormGenCode(const Symbol &SFSymbol,
+                                          const List *Args) = 0;
+  virtual llvm::Value *funcCallGenCode(const Symbol &FuncSymbol,
+                                       const List *Args) = 0;
   virtual const std::queue<SemanticError *> semanticErrors() = 0;
   virtual ~CodeGenerator() {}
 };
@@ -61,6 +65,10 @@ public:
   virtual llvm::Value *callGenCode(const Object *Obj);
   virtual llvm::Value *builtinGenCode(const Symbol &FuncSymbol,
                                       const List *Args);
+  virtual llvm::Value *specialFormGenCode(const Symbol &SFSymbol,
+                                          const List *Args);
+  virtual llvm::Value *funcCallGenCode(const Symbol &FuncSymbol,
+                                       const List *Args);
   virtual const std::queue<SemanticError *> semanticErrors();
 
   llvm::IRBuilder<> builder() const { return this->Builder; }

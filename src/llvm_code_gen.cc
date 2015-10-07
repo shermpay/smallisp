@@ -33,12 +33,15 @@ llvm::Value *LLVMCodeGenerator::callGenCode(const Object *Obj) {
   List *Lst = Obj->Val->List;
   assert(Lst->Head->Val->Type == SymbolTy &&
          "Call should have a Symbol as Head");
-  const Symbol *FuncSymbolPtr(Lst->Head->Val->Val->Symbol);
+  const Symbol *SymbolPtr(Lst->Head->Val->Val->Symbol);
 
-  if (builtins::Defs.find(FuncSymbolPtr) != builtins::Defs.end()) {
-    return builtinGenCode(*FuncSymbolPtr, listTail(Lst));
+  if (builtins::Defs.find(SymbolPtr) != builtins::Defs.end()) {
+    return builtinGenCode(*SymbolPtr, listTail(Lst));
+  } else if (builtins::SpecialForms.find(SymbolPtr) !=
+             builtins::SpecialForms.end()) {
+    return specialFormGenCode(*SymbolPtr, listTail(Lst));
   } else {
-    return nullptr;
+    return funcCallGenCode(*SymbolPtr, listTail(Lst));
   };
 }
 
@@ -59,9 +62,29 @@ llvm::Value *LLVMCodeGenerator::builtinGenCode(const Symbol &FuncSymbol,
   else if (FuncSymbol.name() == "sub")
     return this->builder().CreateNSWSub(Values[0], Values[1], "subtmp");
   else if (FuncSymbol.name() == "mul")
-    return this->builder().CreateNSWMul(Values[0], Values[1], "subtmp");
+    return this->builder().CreateNSWMul(Values[0], Values[1], "multmp");
   else
     return nullptr;
+}
+
+llvm::Value *LLVMCodeGenerator::specialFormGenCode(const Symbol &SFSymbol,
+                                                   const List *Args) {
+  return nullptr;
+}
+
+llvm::Value *LLVMCodeGenerator::funcCallGenCode(const Symbol &FuncSymbol,
+                                                const List *Args) {
+  llvm::Function *Func = this->Module->getFunction(FuncSymbol.name());
+  if (!Func)
+    return nullptr;
+  std::vector<llvm::Value *> ArgsV;
+  for (Cons *Curr = Args->Head; Curr; Curr = Curr->Next) {
+    ArgsV.push_back(genCode(Curr->Val));
+    if (ArgsV.size() > FuncSymbol.object()->Val->SlFunction->numArgs())
+      return nullptr;
+  }
+
+  return this->builder().CreateCall(Func, ArgsV, "calltmp");
 }
 
 llvm::Value *LLVMCodeGenerator::genCode(const Object *Obj) {
