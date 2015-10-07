@@ -19,7 +19,7 @@ llvm::Value *numberGenCode(const Object *Obj) {
 
 llvm::Value *LLVMCodeGenerator::symbolGenCode(const Object *Obj) {
   assert(Obj->Type == SymbolTy && "symbolGenCode only accepts Symbols");
-  std::string name = std::string(Obj->Val->Symbol->Name);
+  std::string name = std::string(Obj->Val->Symbol->name());
   llvm::Value *Val = this->NamedValues[name];
   if (!Val) {
     this->SemanticErrors.push(new SemanticError(SE_UseBeforeDecl, Obj));
@@ -33,15 +33,16 @@ llvm::Value *LLVMCodeGenerator::callGenCode(const Object *Obj) {
   List *Lst = Obj->Val->List;
   assert(Lst->Head->Val->Type == SymbolTy &&
          "Call should have a Symbol as Head");
-  const std::string FuncName(Lst->Head->Val->Val->Symbol->Name);
-  if (BuiltinDefs.find(FuncName) != BuiltinDefs.end()) {
-    return builtinGenCode(FuncName, listTail(Lst));
+  const Symbol *FuncSymbolPtr(Lst->Head->Val->Val->Symbol);
+
+  if (builtins::Defs.find(FuncSymbolPtr) != builtins::Defs.end()) {
+    return builtinGenCode(*FuncSymbolPtr, listTail(Lst));
   } else {
     return nullptr;
   };
 }
 
-llvm::Value *LLVMCodeGenerator::builtinGenCode(const std::string &SymbolName,
+llvm::Value *LLVMCodeGenerator::builtinGenCode(const Symbol &FuncSymbol,
                                                const List *Args) {
   std::vector<llvm::Value *> Values;
   for (Cons *Curr = Args->Head; Curr; Curr = Curr->Next) {
@@ -53,12 +54,12 @@ llvm::Value *LLVMCodeGenerator::builtinGenCode(const std::string &SymbolName,
   }
   if (!Values[0] || !Values[1])
     return nullptr;
-  if (SymbolName == "add")
-    return this->Builder.CreateNSWAdd(Values[0], Values[1], "addtmp");
-  else if (SymbolName == "sub")
-    return this->Builder.CreateNSWSub(Values[0], Values[1], "subtmp");
-  else if (SymbolName == "mul")
-    return this->Builder.CreateNSWMul(Values[0], Values[1], "subtmp");
+  if (FuncSymbol.name() == "add")
+    return this->builder().CreateNSWAdd(Values[0], Values[1], "addtmp");
+  else if (FuncSymbol.name() == "sub")
+    return this->builder().CreateNSWSub(Values[0], Values[1], "subtmp");
+  else if (FuncSymbol.name() == "mul")
+    return this->builder().CreateNSWMul(Values[0], Values[1], "subtmp");
   else
     return nullptr;
 }

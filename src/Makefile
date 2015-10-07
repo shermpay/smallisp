@@ -8,7 +8,7 @@ TESTDIR=./tests
 EXDIR=./examples
 
 STD_DIR=std
-STD_OBJS=list.o sltypes.o 
+STD_OBJS=list.o symbol.o sltypes.o builtins.o
 
 PARSER_DIR=parser
 PARSER_OBJS=lexer.o parser.o token.o 

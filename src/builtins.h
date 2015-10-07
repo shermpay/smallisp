@@ -2,28 +2,28 @@
 #ifndef _BUILTINS_DEF
 #define _BUILTINS_DEF
 
+#include "sltypes.h"
+
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
+
+namespace builtins {
 
 enum SpecialFormType {
   SFT_If,
   SFT_Def,
 };
 
-class BuiltinDef {
-public:
-  int NumArgs;
+extern const Symbol *AddSymbol;
+extern const Symbol *SubSymbol;
+extern const Symbol *MulSymbol;
 
-  BuiltinDef(int NumArgs) { this->NumArgs = NumArgs; }
-};
+extern const std::unordered_map<const Symbol *, SlFunction *> Defs;
 
-const std::unordered_map<std::string, BuiltinDef *> BuiltinDefs = {
-    {"add", new BuiltinDef(2)},
-    {"sub", new BuiltinDef(2)},
-    {"mul", new BuiltinDef(2)},
-};
+} // namespace Builtins
 
 #endif

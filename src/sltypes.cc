@@ -11,8 +11,7 @@ SlVal *newNumVal(int X) {
 
 SlVal *newSymbolVal(const char *X) {
   SlVal *Val = static_cast<SlVal *>(malloc(sizeof(SlVal)));
-  Val->Symbol = new Symbol();
-  Val->Symbol->Name = X;
+  Val->Symbol = Symbol::get(std::string(X));
   return Val;
 }
 
@@ -86,11 +85,11 @@ std::string objToStr(const Object *X) {
     }
     return std::string(Buff);
   case SymbolTy:
-    Len = strlen(X->Val->Symbol->Name);
+    Len = X->Val->Symbol->name().size();
     if (Len >= Size) {
       Buff = (char *)realloc(Buff, sizeof(char) * Len);
     }
-    memcpy(Buff, X->Val->Symbol->Name, sizeof(char) * Len);
+    memcpy(Buff, X->Val->Symbol->name().c_str(), sizeof(char) * Len);
     return std::string(Buff);
   // return buff;
   case SlCharTy:
@@ -98,7 +97,7 @@ std::string objToStr(const Object *X) {
   case SlBoolTy:
     return std::string("BOOL");
   case SlStringTy:
-    Len = strlen(X->Val->Symbol->Name);
+    Len = X->Val->Symbol->name().size();
     if (Len >= Size) {
       Buff = (char *)realloc(Buff, sizeof(char) * Len);
     }

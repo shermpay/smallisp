@@ -2,7 +2,7 @@
 #ifndef _LIST_DEF
 #define _LIST_DEF
 
-#include "sltypes.h"
+struct Object;
 
 typedef struct cons_t {
   Object *Val;

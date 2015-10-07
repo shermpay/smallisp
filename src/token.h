@@ -16,6 +16,8 @@ enum TokenType {
   TOK_Number,
   TOK_String,
   TOK_Symbol,
+  TOK_Quote,
+  TOK_EOF,
   TOK_Invalid
 };
 

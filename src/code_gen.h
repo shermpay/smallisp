@@ -41,7 +41,7 @@ public:
   virtual llvm::Value *symbolGenCode(const Object *Obj) = 0;
   virtual llvm::Value *genCode(const Object *Obj) = 0;
   virtual llvm::Value *callGenCode(const Object *Obj) = 0;
-  virtual llvm::Value *builtinGenCode(const std::string &SymbolName,
+  virtual llvm::Value *builtinGenCode(const Symbol &FuncSymbol,
                                       const List *Args) = 0;
   virtual const std::queue<SemanticError *> semanticErrors() = 0;
   virtual ~CodeGenerator() {}
@@ -59,9 +59,11 @@ public:
   virtual llvm::Value *symbolGenCode(const Object *Obj);
   virtual llvm::Value *genCode(const Object *Obj);
   virtual llvm::Value *callGenCode(const Object *Obj);
-  virtual llvm::Value *builtinGenCode(const std::string &SymbolName,
+  virtual llvm::Value *builtinGenCode(const Symbol &FuncSymbol,
                                       const List *Args);
   virtual const std::queue<SemanticError *> semanticErrors();
+
+  llvm::IRBuilder<> builder() const { return this->Builder; }
 
 private:
   const llvm::Module *Module;

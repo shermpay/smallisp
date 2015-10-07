@@ -7,6 +7,8 @@
 #ifndef _SLTYPES_DEF
 #define _SLTYPES_DEF
 
+#include "symbol.h"
+#include "list.h"
 #include <string>
 
 #define MAX_STR_LEN 512
@@ -23,18 +25,16 @@ typedef enum sltype_t {
   SexpTy
 } SlType;
 
-/* Struct representing a single Cons cell */
-struct cons_t;
-struct list_t;
-
 struct Object;
 
-struct Symbol {
-  const char *Name;
-  Object *Obj;
-};
+class SlFunction {
+public:
+  SlFunction(const int &NumArgs) : NumArgs(NumArgs) {}
+  int numArgs() { return this->NumArgs; };
 
-struct SlFunction {};
+private:
+  const int NumArgs;
+};
 
 /* Union representing all primitive Smallisp types */
 typedef union slval_t {

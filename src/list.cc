@@ -18,6 +18,7 @@
   2. Persistent Linked-list
 */
 #include "list.h"
+#include "sltypes.h"
 
 #include <cstdlib>
 #include <cstdio>
