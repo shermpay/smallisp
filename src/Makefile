@@ -3,7 +3,7 @@ CC=clang
 CXX=clang++
 LLVM_CONFIG=llvm-config
 CXXFLAGS=-std=c++11 `$(LLVM_CONFIG) --cxxflags` -Wall -g 
-LIBS=`$(LLVM_CONFIG) --libs core` `$(LLVM_CONFIG) --ldflags` -ldl -lcurses -ledit -lm -pthread
+LIBS=`$(LLVM_CONFIG) --libs core engine interpreter` `$(LLVM_CONFIG) --ldflags` -ldl -lcurses -ledit -lm -pthread -lffi
 TESTDIR=./tests
 EXDIR=./examples
 

@@ -54,14 +54,16 @@ public:
 
 class LLVMCodeGenerator : CodeGenerator {
 public:
+  llvm::Module *Module;
   llvm::IRBuilder<> Builder;
   std::map<std::string, llvm::Value *> NamedValues;
 
-  LLVMCodeGenerator(llvm::Module *Module) : Builder(llvm::getGlobalContext()) {
-    this->Module = Module;
+  LLVMCodeGenerator(llvm::Module *TheModule)
+      : Builder(llvm::getGlobalContext()) {
+    this->Module = TheModule;
   }
 
-  virtual ~LLVMCodeGenerator() { delete this->Module; };
+  virtual ~LLVMCodeGenerator(void){};
 
   virtual llvm::Value *symbolGenCode(const Object *Obj);
   virtual llvm::Value *genCode(const Object *Obj);
@@ -76,7 +78,6 @@ public:
   virtual const std::queue<SemanticError *> semanticErrors();
 
 private:
-  llvm::Module *Module;
   std::queue<SemanticError *> SemanticErrors;
 };
 
