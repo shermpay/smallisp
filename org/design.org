@@ -1,0 +1,115 @@
+#+TITLE: Design
+
+* Info
+This document is meant to describe the design of the Smallisp Language and an
+implementation of the language. To keep the document short, the document uses
+terminology common to lisps, and makes no effort to explain that.
+
+* Overview
+Smallisp is a programming language designed mainly for learning purposes. It is
+meant to be a lisp, and provide a minimal set of features. However, it is also
+meant to have a complete and rich runtime.
+
+* Language Design
+** Syntax
+   Lisp based syntax. Everything is an expression.
+   - S-Expression: ( /expr/* )
+     The first expression in an expression either evaluates to a function, a
+     macro or a special-form.
+   - Quoted List: '( /expr/* )
+     Quoted lists create a list without evaluating the contents
+
+** Evaluation
+   Evaluation rule follow most lisps.
+   
+** Special Forms
+   - def: Bind a symbol to a value
+   - fn: Create a function. => (fn (a b) /body/)
+   - if: If conditional expression. => (if /pred/ /then/ /else/)
+
+** Primitive Types
+   - int: fix-width signed 64-bit integer.
+   - symbol: lisp symbol.
+     Holds an object or nil.
+   - list: standard lisp list. Supports fast cons and an immutable interface.
+   - function: standard function that knows how many args it should take and a
+     reference to it's definition.
+   - macro: same as a function but transformed during 'macro expansion'. A
+     special form is a kind of macro.
+
+* Implementation Design
+** Components
+   Smallisp 
+*** Data Types
+All Smallisp Datatypes are wrapped in an sl::Object struct.
+
+#+BEGIN_SRC C++
+namespace sl {
+
+struct Object {
+  Type Type;
+  union {
+    Int Int;
+
+    Symbol *Symbol;
+    List *List;
+  };
+}
+
+}
+#+END_SRC
+
+We do not want to have another layer of indirection for ints, to keep the
+language fast and simple. 
+
+So the definitions of sl::Int, sl::Symbol, and sl::List is as follows.
+#+BEGIN_SRC C++
+namespace sl {
+
+typedef Int long;
+
+class Symbol {
+public:
+  std::string Name;
+  Object *Object;
+  // Use this for constructing symbols.
+  static Symbol get(const std::string &Name) {};
+}
+
+struct Cons {
+  Object &Object;
+  Cons &Next;
+}
+
+class List {
+public:
+  Cons &Head;
+}
+
+}
+#+END_SRC
+
+We would like our runtime to interact with primitive in "primitive
+form". Meaning that we have minimal wrapping.
+
+*** Reader
+Instead of having a lexer and parser. I would like to implement a
+LispReader. The reader would parse the input and produce Sl_List objects,
+keeping the language 'list' and the implementation 'list' consistent would keep
+the language smaller and also provide efficient implementations. The minor
+setback would be that we have to keep the list object as simple as possible to
+minimize the overhead of list objects.
+*** Interpreter
+**** AST Interpreter
+     To provide a starter and baseline for the runtime, I would like to
+     implement an AST walking interpeter. This would mean a slow but nonetheless
+     working interpreter.
+****  LLVM JIT Compiler
+      Fitting  on a the LLVM JIT compiler would allow us to benchmark our
+      bytecode interpreter implementation and JIT implementation. It would also
+      serve as another execution engine.
+**** Bytecode compiler and Bytecode Intpreter
+     Next would be to implement a bytecode representation and a bytecode
+     compiler and interpreter.
+**** JIT Compiler
+     Finally is a JIT compiler from bytecode to machine code.
