@@ -1,20 +1,36 @@
-ARCH=x86
-CC=clang++
-LLVM_CONFIG=llvm-config
-CXXFLAGS=-std=c++11 `$(LLVM_CONFIG) --cxxflags` -Wall -g 
-LIBS=`$(LLVM_CONFIG) --ldflags --libs $(ARCH) support` -ledit -lm
-SRC_DIR=./src
-BIN_DIR=./bin
-OBJ_DIR=./obj
+export ARCH := x86
+export CXX :=clang++
+export SRC_EXT := cc
+export HDR_EXT := h
 
-STD_OBJS=$(OBJ_DIR)/list.o $(OBJ_DIR)/sltypes.o 
-PARSER_OBJS=$(OBJ_DIR)/lexer.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/token.o 
+SRC_DIR := ./src
+INCL_DIR := ./include
+TEST_DIR := ./test
+BUILD_DIR := ./build
+BIN_DIR := $(BUILD_DIR)/bin
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
-	$(CXX) $(CXXFLAGS) $^ -c -o $@
+LLVM_CONFIG ?= llvm-config
 
-main: $(SRC_DIR)/main.cc $(STD_OBJS) $(PARSER_OBJS)
-	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $(BIN_DIR)/$ 
+export LIBS := `$(LLVM_CONFIG) --ldflags --libs $(ARCH)`
+LIBS += `$(LLVM_CONFIG) --system-libs`
+
+export CXX_INCLUDE_FLAGS := -I$(INCL_DIR)
+export CXX_SAFETY_FLAGS := -Wall
+export CXX_DEBUG_FLAGS := -g
+export CXXFLAGS := -std=c++11 `$(LLVM_CONFIG) --cxxflags` $(CXX_INCLUDE_FLAGS) \
+	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS)
+
+export SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))
+
+export OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
+
+main: $(SRC_DIR)/main.cc $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BUILD_DIR)/$@
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc
+	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@ -c
+
+.PHONY: clean
 
 clean: 
-	rm -r $(OBJ_DIR)/*.o
+	rm -r $(BUILD_DIR)/*
