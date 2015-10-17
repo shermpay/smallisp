@@ -4,18 +4,18 @@
 namespace {
 
 TEST(ObjectAllocation, IntAllocation) {
-  sl::Object *Integer = sl::objects::newInt(5);
-  EXPECT_EQ(5, Integer->Val->Int);
+  sl::Int *integer = new sl::Int(5);
+  EXPECT_EQ(5, integer->value());
 }
 
 TEST(ObjectAllocation, SymbolAllocation) {
-  sl::Object *SymFoo = sl::objects::newSymbol("Foo");
-  EXPECT_EQ("Foo", SymFoo->Val->Symbol->Name);
-  sl::Object *SymBar = sl::objects::newSymbol("Bar");
-  EXPECT_EQ("Bar", SymBar->Val->Symbol->Name);
-  sl::Object *SymFooPtr = sl::objects::newSymbol("Foo");
-  EXPECT_EQ("Foo", SymFooPtr->Val->Symbol->Name);
-  EXPECT_EQ(SymFoo->Val->Symbol, SymFooPtr->Val->Symbol);
+  sl::Symbol *sym_foo = sl::Symbol::Get("Foo");
+  EXPECT_EQ("Foo", sym_foo->name());
+  sl::Symbol *sym_bar = sl::Symbol::Get("Bar");
+  EXPECT_EQ("Bar", sym_bar->name());
+  sl::Symbol *sym_foo_ptr = sl::Symbol::Get("Foo");
+  EXPECT_EQ("Foo", sym_foo_ptr->name());
+  EXPECT_EQ(sym_foo, sym_foo_ptr);
 }
 }
 

@@ -41,19 +41,14 @@ meant to have a complete and rich runtime.
 ** Components
    Smallisp 
 *** Data Types
-All Smallisp Datatypes are wrapped in an sl::Object struct.
+All Smallisp Datatypes implement the an sl::Object ABC.
 
 #+BEGIN_SRC C++
 namespace sl {
 
-struct Object {
-  Type Type;
-  union {
-    Int Int;
-
-    Symbol *Symbol;
-    List *List;
-  };
+class Object {
+  virtual Type type() = 0;
+  virtual ~Object() = 0;
 }
 
 }
@@ -66,9 +61,15 @@ So the definitions of sl::Int, sl::Symbol, and sl::List is as follows.
 #+BEGIN_SRC C++
 namespace sl {
 
-typedef Int long;
+class Int : Object {
+public:
+  long Value
+  Int(const long &X);
+  static const Int Zero = Int(0);
+  static const Int One = Int(1);
+}
 
-class Symbol {
+class Symbol : Object {
 public:
   std::string Name;
   Object *Object;
@@ -77,13 +78,13 @@ public:
 }
 
 struct Cons {
-  Object &Object;
-  Cons &Next;
+  Object *Object;
+  Cons *Next;
 }
 
-class List {
+class List : Object {
 public:
-  Cons &Head;
+  Cons *Head;
 }
 
 }
