@@ -1,19 +1,20 @@
-#include "Objects.h"
+#include "objects.h"
 #include <gtest/gtest.h>
+#include <iostream>
 
-namespace {
+namespace sl {
 
 TEST(ObjectAllocation, IntAllocation) {
-  sl::Int *integer = new sl::Int(5);
+  Int *integer = Int::Get(5);
   EXPECT_EQ(5, integer->value());
 }
 
 TEST(ObjectAllocation, SymbolAllocation) {
-  sl::Symbol *sym_foo = sl::Symbol::Get("Foo");
+  Symbol *sym_foo = Symbol::Get("Foo");
   EXPECT_EQ("Foo", sym_foo->name());
-  sl::Symbol *sym_bar = sl::Symbol::Get("Bar");
+  Symbol *sym_bar = Symbol::Get("Bar");
   EXPECT_EQ("Bar", sym_bar->name());
-  sl::Symbol *sym_foo_ptr = sl::Symbol::Get("Foo");
+  Symbol *sym_foo_ptr = Symbol::Get("Foo");
   EXPECT_EQ("Foo", sym_foo_ptr->name());
   EXPECT_EQ(sym_foo, sym_foo_ptr);
 }
