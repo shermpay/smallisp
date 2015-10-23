@@ -26,7 +26,7 @@ public:
 
   // Implement Object
   virtual Type GetType() const override { return sl::Type::kCons; };
-  virtual bool IsEqual(const Object *o) const override;
+  virtual bool IsEqual(const Object &o) const override;
   virtual const std::string Str(void) const override {
     return "(" + car_->Str() + " . " + cdr_->Str() + ")";
   };
@@ -100,7 +100,7 @@ public:
 
   // Implement object
   virtual Type GetType(void) const override { return sl::Type::kList; };
-  virtual bool IsEqual(const Object *o) const override;
+  virtual bool IsEqual(const Object &o) const override;
   virtual const std::string Str(void) const override;
 
   inline const ConsC *head() const { return this->head_; };

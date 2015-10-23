@@ -17,14 +17,12 @@
 namespace sl {
 
 // ---------------- ConsC ----------------
-bool ConsC::IsEqual(const Object *o) const {
-  if (o->GetType() != sl::Type::kCons)
-    return false;
-  return (*this) == *dynamic_cast<const ConsC *>(o);
-}
+bool ConsC::IsEqual(const Object &o) const {
+  return (*this) == dynamic_cast<const ConsC &>(o);
+};
 
 bool operator==(const ConsC &lhs, const ConsC &rhs) {
-  return lhs.car()->IsEqual(rhs.car()) && lhs.cdr()->IsEqual((rhs.cdr()));
+  return lhs.car()->IsEqual(*(rhs.car())) && lhs.cdr()->IsEqual(*(rhs.cdr()));
 }
 
 bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
@@ -39,10 +37,10 @@ List::~List(void){
     // delete rest;
 };
 
-bool List::IsEqual(const Object *o) const {
-  if (o->GetType() != sl::Type::kList)
+bool List::IsEqual(const Object &o) const {
+  if (o.GetType() != sl::Type::kList)
     return false;
-  return (*this) == *dynamic_cast<const List *>(o);
+  return (*this) == dynamic_cast<const List &>(o);
 }
 
 const std::string List::Str(void) const {
@@ -83,7 +81,7 @@ size_t List::Count(void) const {
 // ---------------- List Operators ----------------
 bool operator==(const List &lhs, const List &rhs) {
   if (&lhs != List::kNil && &rhs != List::kNil) {
-    return lhs.head()->IsEqual(rhs.head());
+    return lhs.head()->IsEqual(*(rhs.head()));
   } else if (&lhs == List::kNil && &rhs == List::kNil) {
     return true;
   } else {

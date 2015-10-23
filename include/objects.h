@@ -28,7 +28,7 @@ public:
   // Return the type of the object for introspection.
   virtual Type GetType() const = 0;
   // Value equality between 2 smallisp objects.
-  virtual bool IsEqual(const Object *) const = 0;
+  virtual bool IsEqual(const Object &) const = 0;
   // Str should return a human readable std::string object
   virtual const std::string Str(void) const = 0;
 };
@@ -37,15 +37,12 @@ public:
 class Int : public Object {
 public:
   static std::unordered_map<long, Int *> pool_;
-  // Constant for the sl::Int representing '0'
-  static const Int *kZero;
-  // Constant for the sl::Int representing '1'
-  static const Int *kOne;
   virtual ~Int(){};
 
   // Object functions
   virtual Type GetType() const override { return sl::Type::kInt; };
-  virtual bool IsEqual(const Object *) const override;
+  // We do address equality because Ints are pooled.
+  virtual bool IsEqual(const Object &o) const override { return this == &o; };
   virtual const std::string Str(void) const override {
     return std::to_string(this->value_);
   };
@@ -59,9 +56,7 @@ private:
   Int(const long &x) : value_(x){};
 };
 
-inline bool operator==(const Int &lhs, const Int &rhs) {
-  return lhs.value() == rhs.value();
-};
+inline bool operator==(const Int &lhs, const Int &rhs) { return &lhs == &rhs; };
 
 inline bool operator!=(const Int &lhs, const Int &rhs) {
   return !(lhs == rhs);
@@ -80,7 +75,8 @@ public:
 
   // Implement Object
   virtual Type GetType() const override { return sl::Type::kSymbol; };
-  virtual bool IsEqual(const Object *o) const override;
+  // We do address equality because Symbols are pooled.
+  virtual bool IsEqual(const Object &o) const override { return this == &o; };
   virtual const std::string Str(void) const override { return name_; };
 
   inline const std::string name() const { return this->name_; };
@@ -98,7 +94,7 @@ private:
 };
 
 inline bool operator==(const Symbol &lhs, const Symbol &rhs) {
-  return lhs.name() == rhs.name();
+  return &lhs == &rhs;
 }
 
 inline bool operator!=(const Symbol &lhs, const Symbol &rhs) {

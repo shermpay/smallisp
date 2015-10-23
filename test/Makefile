@@ -4,6 +4,8 @@ TEST_LIBS :=  -lgtest
 
 BIN := ./bin
 
+all: list_test objects_test
+
 list_test: list_test.cc ../build/list.o ../build/objects.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
 	@echo "=============== STARTING TESTS ================="

@@ -16,11 +16,6 @@ std::ostream &operator<<(std::ostream &os, const Type &type) {
 
 // -------- Definitions for Int -----------
 std::unordered_map<long, Int *> Int::pool_;
-const Int *Int::kZero = Int::Get(0);
-const Int *Int::kOne = Int::Get(1);
-
-// We do address equality because Ints are pooled.
-bool Int::IsEqual(const Object *o) const { return this == o; }
 
 Int *Int::Get(const long &x) {
   Int *result;
@@ -36,9 +31,6 @@ Int *Int::Get(const long &x) {
 
 // -------- Definition for Symbol ----------
 std::unordered_map<std::string, Symbol *> Symbol::pool_;
-
-// We do address equality because Symbols are pooled.
-bool Symbol::IsEqual(const Object *o) const { return this == o; }
 
 Symbol *Symbol::Get(const std::string &name) {
   Symbol *sym;
