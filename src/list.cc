@@ -4,132 +4,104 @@
 
   Smallisp List
   -------------
-  Current Implementation:
-  1. Singly Linked-list
-  2. Build up of cons cell
-  3. Bare minimal functions
-  4. Cons cell of SlObj
-
-  Todo:
-  1. Use dynamic types
-
-  Future:
-  1. Garbage Collection
-  2. Persistent Linked-list
 */
 #include "list.h"
-#include "sltypes.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
-/* Creates a new cons cell with value x */
-Cons *newCons(Object *X) {
-  Cons *Res = static_cast<Cons *>(malloc(sizeof(Cons)));
-  Res->Obj = X;
-  Res->Next = NULL;
-  return Res;
+#include <vector>
+#include <sstream>
+#include <iostream>
+
+namespace sl {
+
+// ---------------- ConsC ----------------
+bool ConsC::IsEqual(const Object *o) const {
+  if (o->GetType() != sl::Type::kCons)
+    return false;
+  return (*this) == *dynamic_cast<const ConsC *>(o);
 }
 
-/* Destructor for cons cells, deletes itself and returns a pointer to
-   the next cons cell */
-Cons *delCons(Cons *C) {
-  Cons *Next = NULL;
-  if (C->Next) {
-    Next = C->Next;
+bool operator==(const ConsC &lhs, const ConsC &rhs) {
+  return lhs.car()->IsEqual(rhs.car()) && lhs.cdr()->IsEqual((rhs.cdr()));
+}
+
+bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
+
+// ---------------- Lists ----------------
+
+// nil/empty list
+const List *List::kNil = new List(nullptr);
+
+List::~List(void){
+    // const List *rest = this->Rest();
+    // delete rest;
+};
+
+bool List::IsEqual(const Object *o) const {
+  if (o->GetType() != sl::Type::kList)
+    return false;
+  return (*this) == *dynamic_cast<const List *>(o);
+}
+
+const std::string List::Str(void) const {
+  std::stringstream sstream;
+  sstream.put('(');
+  for (ListIterator iter = this->begin(); iter != this->end(); iter++) {
+    const Object &o = *iter;
+    sstream << o.Str();
+    sstream.put(' ');
   }
-  delObject(C->Obj);
-  free(C);
-  return Next;
+  std::string str = sstream.str();
+  str[str.length() - 1] = ')';
+  return str;
 }
 
-/* Creates a new list */
-List *newList() {
-  List *Res = static_cast<List *>(malloc(sizeof(List)));
-  Res->Head = NULL;
-  return Res;
+const Object *List::First() const {
+  if (this == kNil) {
+    return kNil;
+  }
+  return this->head_->car();
 }
 
-/* Destructor for list */
-void delList(List *Sl) {
-  if (Sl != NULL) {
-    Cons *Cur = Sl->Head;
-    while (Cur) {
-      Cur = delCons(Cur);
-    }
-    free(Sl);
+const List *List::Rest(void) const {
+  assert(this->head()->cdr()->GetType() == sl::Type::kList);
+  return (dynamic_cast<const List *>(this->head()->cdr()));
+}
+
+size_t List::Count(void) const {
+  size_t count = 0;
+  const ConsC *curr = this->head();
+  while (curr) {
+    count++;
+    curr = (dynamic_cast<const List *>(curr->cdr()))->head();
+  }
+  return count;
+}
+
+// ---------------- List Operators ----------------
+bool operator==(const List &lhs, const List &rhs) {
+  if (&lhs != List::kNil && &rhs != List::kNil) {
+    return lhs.head()->IsEqual(rhs.head());
+  } else if (&lhs == List::kNil && &rhs == List::kNil) {
+    return true;
+  } else {
+    return false;
   }
 }
 
-/* Adds a new Cons cell at the front of the list */
-void listCons(List *Sl, Cons *C) {
-  C->Next = Sl->Head;
-  Sl->Head = C;
+bool operator!=(const List &lhs, const List &rhs) { return !(lhs == rhs); }
+
+// Cons function
+const ConsC *Cons(const Object *o1, const Object *o2) {
+  const ConsC *cell = new ConsC(o1, o2);
+  return cell;
 }
 
-/* Returns true if sl is empty */
-bool listEmpty(const List *Sl) { return Sl->Head == NULL; }
-
-/* Removes and returns the head of the list */
-int listPop(List *Sl, Cons **Cons) {
-  /* Error if trying to pop empty list */
-  if (listEmpty(Sl)) {
-    fprintf(stderr, "Attempting to Pop empty list\n");
-    return 1;
-  }
-
-  *Cons = Sl->Head;
-  Sl->Head = Sl->Head->Next;
-  return 0;
+const List *Cons(const Object *o1, const List *o2) {
+  const ConsC *cell = new ConsC(o1, o2);
+  return new List(cell);
 }
 
-List *listTail(const List *Sl) {
-  List *Tail = newList();
-  Tail->Head = Sl->Head->Next;
-  return Tail;
-}
-
-size_t listCount(const List *Sl) {
-  size_t Count = 0;
-  Cons *Curr = Sl->Head;
-  while (Curr) {
-    Curr = Curr->Next;
-    Count++;
-  }
-  return Count;
-}
-
-/* Prints list in (a b c) format */
-void printList(const List *Sl) {
-  Cons *Cur = Sl->Head;
-  std::string Str;
-  putchar('(');
-  if (!listEmpty(Sl)) {
-    Str = objToStr(Cur->Obj);
-    printf("%s", Str.c_str());
-    while (Cur->Next != NULL) {
-      Cur = Cur->Next;
-      Str = objToStr(Cur->Obj);
-      printf(" %s", Str.c_str());
-    }
-  }
-  puts(")");
-}
-
-// TODO: Fix this. (Use strncat)
-std::string listToStr(const List *Sl) {
-  Cons *Cur = Sl->Head;
-  std::string Buff;
-  Buff.push_back('(');
-  if (!listEmpty(Sl) && Cur) {
-    Buff += (objToStr(Cur->Obj));
-    while (Cur && Cur->Next) {
-      Cur = Cur->Next;
-      Buff.push_back(' ');
-      Buff += objToStr(Cur->Obj);
-    }
-  }
-  Buff.push_back(')');
-  return Buff;
-}
+} // namespace sl

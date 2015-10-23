@@ -18,6 +18,18 @@ TEST(ObjectAllocation, SymbolAllocation) {
   EXPECT_EQ("Foo", sym_foo_ptr->name());
   EXPECT_EQ(sym_foo, sym_foo_ptr);
 }
+
+TEST(ObjectEquality, IntEquality) {
+  Int *integer = Int::Get(5);
+  EXPECT_EQ(Int::Get(5), integer);
+  EXPECT_NE(Int::Get(6), integer);
+};
+
+TEST(ObjectEquality, SymbolEquality) {
+  Symbol *sym_foo = Symbol::Get("foo");
+  EXPECT_EQ(Symbol::Get("foo"), sym_foo);
+  EXPECT_NE(Symbol::Get("bar"), sym_foo);
+}
 }
 
 int main(int argc, char **argv) {

@@ -1,54 +1,137 @@
-/* -*- mode: C++ -*- */
+//===- smallisp/list.h - Smallisp cons/list definition --*- mode: C++ -*-=== //
 #ifndef _LIST_DEF
 #define _LIST_DEF
 
-#include "Objects.h"
+#include <cstddef>
 #include <cstdlib>
+#include <cassert>
+
+#include <iterator>
+#include <vector>
+#include <iostream>
+
+#include "objects.h"
 
 namespace sl {
 
-struct Cons {
-  Object *Obj;
-  Cons *Next;
-};
+// The smallisp cons function
+// Construct a cons cell containing object o1 and object o2
+// If object o2 is a list, wrap the cons cell into a list
 
-/* Creates a new cons cell with value x */
-Cons *newCons(Object *x);
-
-/* Destructor for cons cells, deletes itself and returns a pointer to
-   the next cons cell */
-Cons *delCons(Cons *c);
-
-// The standard Lisp consing function.
-Cons *cons(Object *o1, Object *o2);
-
-class List : Object {
+// The definition of a Cons Cell in Smallisp
+class ConsC : public Object {
 public:
-  Cons *Head;
-  /* Creates a new list */
-  List();
+  ConsC(const Object *o1, const Object *o2) : car_(o1), cdr_(o2){};
+  ~ConsC() noexcept {};
 
-  /* Destructor for list */
-  ~List();
+  // Implement Object
+  virtual Type GetType() const override { return sl::Type::kCons; };
+  virtual bool IsEqual(const Object *o) const override;
+  virtual const std::string Str(void) const override {
+    return "(" + car_->Str() + " . " + cdr_->Str() + ")";
+  };
 
-  /* Returns true if sl is empty */
-  bool empty();
+  inline const Object *car() const { return this->car_; };
+  inline const Object *cdr() const { return this->cdr_; };
 
-  /* Push a new Object to the front of the list */
-  void push(Object *obj);
-
-  /* Removes and returns the head of the list in a return argument.
-     Returns 0 for success and 1 for failure. */
-  int pop(Cons **cons);
-
-  List *tail();
-
-  size_t count();
-
-  /* Prints list in (a b c) format */
-  void print();
+private:
+  const Object *car_;
+  const Object *cdr_;
 };
 
+bool operator==(const ConsC &lhs, const ConsC &rhs);
+bool operator!=(const ConsC &lhs, const ConsC &rhs);
+
+// The definition of a List in Smallisp
+// nil == '() in smallisp.
+// A list is a wrapper around a chain of cons where each cons cell
+// has an Object in its car pointer and a list in its cdr pointer.
+class List : public Object {
+public:
+  class ListIterator {
+  public:
+    // typedefs for iterator
+    typedef ptrdiff_t difference_type;
+    typedef size_t size_type;
+    typedef Object value_type;
+    typedef Object *pointer;
+    typedef Object &reference;
+
+    ListIterator(const List &list) : curr_(list.head()){};
+    inline const ConsC *curr() const { return this->curr_; };
+    const Object &operator*() { return *(this->curr()->car()); };
+    ListIterator &operator++() {
+      assert(curr_->cdr()->GetType() == sl::Type::kCons);
+      curr_ = dynamic_cast<const ConsC *>(curr_->cdr());
+      return *this;
+    }
+
+    ListIterator operator++(int) {
+      ListIterator ret = *this;
+      this->operator++();
+      return ret;
+    }
+
+    inline bool operator==(const ListIterator &rhs) {
+      return this->curr() == rhs.curr();
+    }
+
+    inline bool operator!=(const ListIterator &rhs) { return !(*this == rhs); }
+
+  private:
+    const ConsC *curr_;
+  };
+
+  typedef ListIterator iterator;
+
+  // The constant nil.
+  static const List *kNil;
+
+  // Constructor for wrapping a cons cell into a list type.
+  List(const ConsC *cell) : head_(cell) {
+    assert(cell->cdr()->GetType() != sl::Type::kCons);
+  };
+
+  // Copy constructor
+  List(const List &lst) : head_(lst.head()){};
+
+  // Destructor for list
+  ~List(void);
+
+  // Implement object
+  virtual Type GetType(void) const override { return sl::Type::kList; };
+  virtual bool IsEqual(const Object *o) const override;
+  virtual const std::string Str(void) const override;
+
+  inline const ConsC *head() const { return this->head_; };
+  const Object *First() const;
+
+  // Returns the rest of the list
+  const List *Rest(void) const;
+
+  // Counts the number of elements in the list.
+  size_t Count(void) const;
+
+  // Prints list in (a b c) format
+  // void Print(void);
+
+  // Iterator implementation
+  iterator begin(void) { return iterator(*this); }
+  iterator end(void) { return iterator(*kNil); }
+
+  // const_iterator implementation
+  iterator begin(void) const { return iterator(*this); }
+  iterator end(void) const { return iterator(*kNil); }
+
+private:
+  const ConsC *head_;
+  List();
+};
+bool operator==(const List &lhs, const List &rhs);
+bool operator!=(const List &lhs, const List &rhs);
+
+const ConsC *Cons(const Object *o1, const Object *o2);
+const List *Cons(const Object *o1, const List *o2);
 } // namespace sl
 
 #endif

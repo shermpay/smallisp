@@ -27,8 +27,8 @@ export OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
 main: $(SRC_DIR)/main.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BUILD_DIR)/$@
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc
-	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@ -c
+%.o: $(SRC_DIR)/%.cc
+	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BUILD_DIR)/$@ -c
 
 .PHONY: clean
 

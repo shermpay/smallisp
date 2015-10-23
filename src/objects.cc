@@ -1,13 +1,26 @@
 #include "objects.h"
 
 namespace sl {
+// Definitions for types
+static const std::map<const Type, const std::string &> kTypeNameMap = {
+    {Type::kInt, "Int"},
+    {Type::kSymbol, "Symbol"},
+    {Type::kCons, "Cons"},
+    {Type::kList, "List"},
+};
+
+std::ostream &operator<<(std::ostream &os, const Type &type) {
+  os << kTypeNameMap.at(type);
+  return os;
+}
 
 // -------- Definitions for Int -----------
 std::unordered_map<long, Int *> Int::pool_;
 const Int *Int::kZero = Int::Get(0);
 const Int *Int::kOne = Int::Get(1);
 
-Type Int::GetType() const { return sl::Type::kInt; }
+// We do address equality because Ints are pooled.
+bool Int::IsEqual(const Object *o) const { return this == o; }
 
 Int *Int::Get(const long &x) {
   Int *result;
@@ -23,7 +36,9 @@ Int *Int::Get(const long &x) {
 
 // -------- Definition for Symbol ----------
 std::unordered_map<std::string, Symbol *> Symbol::pool_;
-Type Symbol::GetType() const { return sl::Type::kSymbol; }
+
+// We do address equality because Symbols are pooled.
+bool Symbol::IsEqual(const Object *o) const { return this == o; }
 
 Symbol *Symbol::Get(const std::string &name) {
   Symbol *sym;
@@ -37,4 +52,4 @@ Symbol *Symbol::Get(const std::string &name) {
   return sym;
 }
 
-}  // namespace sl
+} // namespace sl
