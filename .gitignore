@@ -6,6 +6,8 @@ bin/*
 obj/*
 .*
 
+test/bin/
+
 # Remove when done
 src/parser/parser
 lexer

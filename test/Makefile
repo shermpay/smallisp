@@ -3,15 +3,21 @@ CXXFLAGS := -std=c++11 -I../include
 TEST_LIBS :=  -lgtest
 
 BIN := ./bin
+BUILD := ../build
 
 all: list_test objects_test
 
-list_test: list_test.cc ../build/list.o ../build/objects.o
+reader_test: reader_test.cc $(BUILD)/objects.o $(BUILD)/list.o  $(BUILD)/reader.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
 	@echo "=============== STARTING TESTS ================="
 	$(BIN)/$@
 
-objects_test: objects_test.cc ../build/objects.o
+list_test: list_test.cc $(BUILD)/list.o $(BUILD)/objects.o
+	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
+	@echo "=============== STARTING TESTS ================="
+	$(BIN)/$@
+
+objects_test: objects_test.cc $(BUILD)/objects.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
 	@echo "=============== STARTING TESTS ================="
 	$(BIN)/$@

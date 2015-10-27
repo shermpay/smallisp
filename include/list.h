@@ -85,7 +85,7 @@ public:
   typedef ListIterator iterator;
 
   // The constant nil.
-  static const List *kNil;
+  static const List *kEmpty;
 
   // Constructor for wrapping a cons cell into a list type.
   List(const ConsC *cell) : head_(cell) {
@@ -117,16 +117,19 @@ public:
 
   // Iterator implementation
   iterator begin(void) { return iterator(*this); }
-  iterator end(void) { return iterator(*kNil); }
+  iterator end(void) { return iterator(*kEmpty); }
 
   // const_iterator implementation
   iterator begin(void) const { return iterator(*this); }
-  iterator end(void) const { return iterator(*kNil); }
+  iterator end(void) const { return iterator(*kEmpty); }
 
 private:
   const ConsC *head_;
   List();
 };
+
+extern const List *kNil;
+
 bool operator==(const List &lhs, const List &rhs);
 bool operator!=(const List &lhs, const List &rhs);
 

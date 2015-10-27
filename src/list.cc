@@ -30,7 +30,8 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 // ---------------- Lists ----------------
 
 // nil/empty list
-const List *List::kNil = new List(nullptr);
+const List *kNil = new List(nullptr);
+const List *List::kEmpty = kNil;
 
 List::~List(void){
     // const List *rest = this->Rest();
@@ -80,9 +81,9 @@ size_t List::Count(void) const {
 
 // ---------------- List Operators ----------------
 bool operator==(const List &lhs, const List &rhs) {
-  if (&lhs != List::kNil && &rhs != List::kNil) {
+  if (&lhs != kNil && &rhs != kNil) {
     return lhs.head()->IsEqual(*(rhs.head()));
-  } else if (&lhs == List::kNil && &rhs == List::kNil) {
+  } else if (&lhs == kNil && &rhs == kNil) {
     return true;
   } else {
     return false;
