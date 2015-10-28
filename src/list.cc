@@ -13,6 +13,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <iterator>
 
 namespace sl {
 
@@ -33,28 +34,56 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 const List *kNil = new List(nullptr);
 const List *List::kEmpty = kNil;
 
+const List *InitHelper(std::initializer_list<const Object> il) {
+  const List *curr = kNil;
+  for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
+    const Object &o = (*ptr);
+    curr = Cons(&o, curr);
+  }
+  return curr;
+}
+
+const List *InitHelperPtr(std::initializer_list<const Object *> il) {
+  const List *curr = kNil;
+  for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
+    const Object *o = (*ptr);
+    curr = Cons(o, curr);
+  }
+  return curr;
+}
+
+List::List(std::initializer_list<const Object> il)
+    : head_(InitHelper(il)->head()) {}
+
+List::List(std::initializer_list<const Object *> il)
+    : head_(InitHelperPtr(il)->head()) {}
+
 List::~List(void){
     // const List *rest = this->Rest();
     // delete rest;
 };
 
 bool List::IsEqual(const Object &o) const {
-  if (o.GetType() != sl::Type::kList)
-    return false;
+  if (o.GetType() != sl::Type::kList) return false;
   return (*this) == dynamic_cast<const List &>(o);
 }
 
 const std::string List::Str(void) const {
   std::stringstream sstream;
   sstream.put('(');
-  for (ListIterator iter = this->begin(); iter != this->end(); iter++) {
+  ListIterator iter = this->begin();
+  if (iter != this->end()) {
     const Object &o = *iter;
     sstream << o.Str();
-    sstream.put(' ');
+    ++iter;
   }
-  std::string str = sstream.str();
-  str[str.length() - 1] = ')';
-  return str;
+  for (; iter != this->end(); ++iter) {
+    sstream.put(' ');
+    const Object &o = *iter;
+    sstream << o.Str();
+  }
+  sstream.put(')');
+  return sstream.str();
 }
 
 const Object *List::First() const {
@@ -103,4 +132,4 @@ const List *Cons(const Object *o1, const List *o2) {
   return new List(cell);
 }
 
-} // namespace sl
+}  // namespace sl

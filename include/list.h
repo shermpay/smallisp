@@ -20,7 +20,7 @@ namespace sl {
 
 // The definition of a Cons Cell in Smallisp
 class ConsC : public Object {
-public:
+ public:
   ConsC(const Object *o1, const Object *o2) : car_(o1), cdr_(o2){};
   ~ConsC() noexcept {};
 
@@ -34,22 +34,24 @@ public:
   inline const Object *car() const { return this->car_; };
   inline const Object *cdr() const { return this->cdr_; };
 
-private:
+ private:
   const Object *car_;
   const Object *cdr_;
 };
 
 bool operator==(const ConsC &lhs, const ConsC &rhs);
 bool operator!=(const ConsC &lhs, const ConsC &rhs);
+// TODO: Remove when bug in gtest is fixed
+inline void PrintTo(const ConsC &o, std::ostream *os) { *os << o.Str(); };
 
 // The definition of a List in Smallisp
 // nil == '() in smallisp.
 // A list is a wrapper around a chain of cons where each cons cell
 // has an Object in its car pointer and a list in its cdr pointer.
 class List : public Object {
-public:
+ public:
   class ListIterator {
-  public:
+   public:
     // typedefs for iterator
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
@@ -78,7 +80,7 @@ public:
 
     inline bool operator!=(const ListIterator &rhs) { return !(*this == rhs); }
 
-  private:
+   private:
     const ConsC *curr_;
   };
 
@@ -91,6 +93,15 @@ public:
   List(const ConsC *cell) : head_(cell) {
     assert(cell->cdr()->GetType() != sl::Type::kCons);
   };
+
+  // Move constructor
+  List(List &&lst) noexcept : head_(std::move(lst.head())){};
+
+  // Constructor for creating lists of objects.
+  List(std::initializer_list<const Object> il);
+
+  // Constructor for creating lists of objects.
+  List(std::initializer_list<const Object *> il);
 
   // Copy constructor
   List(const List &lst) : head_(lst.head()){};
@@ -123,7 +134,7 @@ public:
   iterator begin(void) const { return iterator(*this); }
   iterator end(void) const { return iterator(*kEmpty); }
 
-private:
+ private:
   const ConsC *head_;
   List();
 };
@@ -133,8 +144,11 @@ extern const List *kNil;
 bool operator==(const List &lhs, const List &rhs);
 bool operator!=(const List &lhs, const List &rhs);
 
+// TODO: Remove when bug in gtest is fixed
+inline void PrintTo(const List &o, std::ostream *os) { *os << o.Str(); };
+
 const ConsC *Cons(const Object *o1, const Object *o2);
 const List *Cons(const Object *o1, const List *o2);
-} // namespace sl
+}  // namespace sl
 
 #endif

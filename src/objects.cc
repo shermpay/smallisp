@@ -14,6 +14,9 @@ std::ostream &operator<<(std::ostream &os, const Type &type) {
   return os;
 }
 
+// void PrintTo(const Object &o, std::ostream *os) { *os << ""; }
+// void PrintTo(const Int &o, std::ostream *os) { *os << ""; }
+
 // -------- Definitions for Int -----------
 std::unordered_map<long, Int *> Int::pool_;
 
@@ -44,4 +47,4 @@ Symbol *Symbol::Get(const std::string &name) {
   return sym;
 }
 
-} // namespace sl
+}  // namespace sl

@@ -28,6 +28,15 @@ TEST(List, AllocAndDelloc) {
   Object *o1 = Int::Get(5);
   const ConsC *head = new ConsC(o1, kNil);
   List *list = new List(head);
+  EXPECT_NE(nullptr, list);
+  // Try initializer list
+  // Requires Equality to be correct
+  const List init_list({Int::Get(5)});
+  EXPECT_EQ(*list, init_list);
+  const List init_list_long({Int::Get(5), Int::Get(6), Int::Get(7)});
+  const List *expected =
+      Cons(Int::Get(5), Cons(Int::Get(6), Cons(Int::Get(7), kNil)));
+  EXPECT_EQ(*expected, init_list_long);
 }
 
 TEST(List, First) {
@@ -43,6 +52,14 @@ TEST(List, Str) {
   const ConsC *head = new ConsC(o1, kNil);
   List *list = new List(head);
   EXPECT_EQ("(5)", list->Str());
+  EXPECT_EQ("()", kNil->Str());
+}
+
+TEST(List, PrintToString) {
+  Object *o1 = Int::Get(5);
+  const ConsC *head = new ConsC(o1, kNil);
+  List *list = new List(head);
+  EXPECT_EQ("(5)", ::testing::PrintToString(*list));
 }
 
 TEST(List, Equality) {
@@ -81,7 +98,7 @@ TEST(List, Count) {
   EXPECT_EQ(2, new_list->Count());
 }
 
-} // namespace sl
+}  // namespace sl
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

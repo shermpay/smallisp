@@ -23,7 +23,7 @@ std::ostream &operator<<(std::ostream &os, const Type &type);
 // Object is an Abstract Base Class.
 // It defines the interface to all Smallisp Objects.
 class Object {
-public:
+ public:
   virtual ~Object(){};
   // Return the type of the object for introspection.
   virtual Type GetType() const = 0;
@@ -33,9 +33,17 @@ public:
   virtual const std::string Str(void) const = 0;
 };
 
+// For debugging
+// There is bug in gtest which requires duplication of PrintTo code
+// ::testing::PrintToString will always NOT use the base class PrintTo,
+// instead it uses the default PrintTo, which prints bytes
+// Bug Location:
+// https://code.google.com/p/googletest/issues/detail?id=443
+inline void PrintTo(const Object &o, std::ostream *os) { *os << o.Str(); };
+
 // Int representation
 class Int : public Object {
-public:
+ public:
   static std::unordered_map<long, Int *> pool_;
   virtual ~Int(){};
 
@@ -50,7 +58,7 @@ public:
   inline long value() const { return this->value_; };
   static Int *Get(const long &x);
 
-private:
+ private:
   const long value_;
   Int() = delete;
   Int(const long &x) : value_(x){};
@@ -62,11 +70,18 @@ inline bool operator!=(const Int &lhs, const Int &rhs) {
   return !(lhs == rhs);
 };
 
+// TODO: Remove when bug in gtest is fixed
+inline void PrintTo(const Int &o, std::ostream *os) { *os << o.Str(); };
+
+// inline std::ostream &operator<<(std::ostream &os, const Int &o) {
+//   return os << o.Str();
+// };
+
 // Smallisp Symbol Objects
 // Construction of Symbol objects is done via the Symbol::get(std::string)
 // static function.
 class Symbol : public Object {
-public:
+ public:
   static std::unordered_map<std::string, Symbol *> pool_;
   virtual ~Symbol() {
     std::cout << "~Symbol" << std::endl;
@@ -84,11 +99,11 @@ public:
   // Use this for constructing symbols.
   static Symbol *Get(const std::string &name);
 
-private:
+ private:
   const std::string name_;
   const Object *obj_;
 
-private:
+ private:
   Symbol() = delete;
   Symbol(const std::string &name) : name_(name) {}
 };
@@ -101,6 +116,9 @@ inline bool operator!=(const Symbol &lhs, const Symbol &rhs) {
   return !(lhs == rhs);
 }
 
-} // namespace sl
+// TODO: Remove when bug in gtest is fixed
+inline void PrintTo(const Symbol &o, std::ostream *os) { *os << o.Str(); };
+
+}  // namespace sl
 
 #endif

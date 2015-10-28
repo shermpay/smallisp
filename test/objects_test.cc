@@ -1,6 +1,7 @@
 #include "objects.h"
 #include <gtest/gtest.h>
 #include <iostream>
+#include <sstream>
 
 namespace sl {
 
@@ -29,6 +30,18 @@ TEST(ObjectEquality, SymbolEquality) {
   Symbol *sym_foo = Symbol::Get("foo");
   EXPECT_EQ(Symbol::Get("foo"), sym_foo);
   EXPECT_NE(Symbol::Get("bar"), sym_foo);
+  EXPECT_EQ(*Symbol::Get("foo"), *sym_foo);
+  EXPECT_NE(*Symbol::Get("bar"), *sym_foo);
+}
+
+TEST(ObjectTestPrinter, IntTestPrinter) {
+  Int *integer = Int::Get(5);
+  EXPECT_EQ("5", ::testing::PrintToString(*integer));
+}
+
+TEST(ObjectTestPrinter, SymbolTestPrinter) {
+  const Symbol *foo = Symbol::Get("foo");
+  EXPECT_EQ("foo", ::testing::PrintToString(*foo));
 }
 }
 
