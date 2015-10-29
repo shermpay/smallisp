@@ -29,6 +29,7 @@ class Object {
   virtual Type GetType() const = 0;
   // Value equality between 2 smallisp objects.
   virtual bool IsEqual(const Object &) const = 0;
+  virtual bool IsEqual(const Object *) const = 0;
   // Str should return a human readable std::string object
   virtual const std::string Str(void) const = 0;
 };
@@ -50,7 +51,10 @@ class Int : public Object {
   // Object functions
   virtual Type GetType() const override { return sl::Type::kInt; };
   // We do address equality because Ints are pooled.
-  virtual bool IsEqual(const Object &o) const override { return this == &o; };
+  virtual bool IsEqual(const Object &o) const override {
+    return this->IsEqual(&o);
+  };
+  virtual bool IsEqual(const Object *o) const override { return this == o; };
   virtual const std::string Str(void) const override {
     return std::to_string(this->value_);
   };
@@ -91,7 +95,10 @@ class Symbol : public Object {
   // Implement Object
   virtual Type GetType() const override { return sl::Type::kSymbol; };
   // We do address equality because Symbols are pooled.
-  virtual bool IsEqual(const Object &o) const override { return this == &o; };
+  virtual bool IsEqual(const Object &o) const override {
+    return this->IsEqual(&o);
+  };
+  virtual bool IsEqual(const Object *o) const override { return this == o; };
   virtual const std::string Str(void) const override { return name_; };
 
   inline const std::string name() const { return this->name_; };

@@ -22,6 +22,10 @@ bool ConsC::IsEqual(const Object &o) const {
   return (*this) == dynamic_cast<const ConsC &>(o);
 };
 
+bool ConsC::IsEqual(const Object *o) const {
+  return (*this) == *dynamic_cast<const ConsC *>(o);
+};
+
 bool operator==(const ConsC &lhs, const ConsC &rhs) {
   return lhs.car()->IsEqual(*(rhs.car())) && lhs.cdr()->IsEqual(*(rhs.cdr()));
 }
@@ -67,6 +71,8 @@ bool List::IsEqual(const Object &o) const {
   if (o.GetType() != sl::Type::kList) return false;
   return (*this) == dynamic_cast<const List &>(o);
 }
+
+bool List::IsEqual(const Object *o) const { return this->IsEqual(*o); }
 
 const std::string List::Str(void) const {
   std::stringstream sstream;
