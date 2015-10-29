@@ -63,14 +63,15 @@ class List : public Object {
     inline const ConsC *curr() const { return this->curr_; };
     const Object &operator*() { return *(this->curr()->car()); };
     ListIterator &operator++() {
-      assert(curr_->cdr()->GetType() == sl::Type::kCons);
-      curr_ = dynamic_cast<const ConsC *>(curr_->cdr());
+      assert(curr_->cdr()->GetType() == sl::Type::kList);
+      curr_ = dynamic_cast<const ConsC *>(
+          dynamic_cast<const List *>(curr_->cdr())->head());
       return *this;
     }
 
     ListIterator operator++(int) {
-      ListIterator ret = *this;
       this->operator++();
+      ListIterator ret = *this;
       return ret;
     }
 

@@ -77,10 +77,11 @@ const std::string List::Str(void) const {
     sstream << o.Str();
     ++iter;
   }
-  for (; iter != this->end(); ++iter) {
+  while (iter != this->end()) {
     sstream.put(' ');
     const Object &o = *iter;
     sstream << o.Str();
+    ++iter;
   }
   sstream.put(')');
   return sstream.str();

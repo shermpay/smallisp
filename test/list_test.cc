@@ -29,6 +29,7 @@ TEST(List, AllocAndDelloc) {
   const ConsC *head = new ConsC(o1, kNil);
   List *list = new List(head);
   EXPECT_NE(nullptr, list);
+
   // Try initializer list
   // Requires Equality to be correct
   const List init_list({Int::Get(5)});
@@ -37,6 +38,18 @@ TEST(List, AllocAndDelloc) {
   const List *expected =
       Cons(Int::Get(5), Cons(Int::Get(6), Cons(Int::Get(7), kNil)));
   EXPECT_EQ(*expected, init_list_long);
+
+  // Move Lists
+  const List init_list_2(List({Int::Get(5)}));
+  const List expected_2 = List{Int::Get(5)};
+  ASSERT_EQ(expected_2, init_list_2);
+  ASSERT_EQ(Int::Get(5), init_list_2.First());
+
+  // Nested Lists
+  const List init_list_3({new List({Int::Get(5)})});
+  const List *tmp = new List({Int::Get(5)});
+  const List expected_3({tmp});
+  ASSERT_EQ(expected_3, init_list_3);
 }
 
 TEST(List, First) {
@@ -53,6 +66,8 @@ TEST(List, Str) {
   List *list = new List(head);
   EXPECT_EQ("(5)", list->Str());
   EXPECT_EQ("()", kNil->Str());
+  List list_2(new ConsC(Int::Get(1), list));
+  EXPECT_EQ("(1 5)", list_2.Str());
 }
 
 TEST(List, PrintToString) {
@@ -60,6 +75,8 @@ TEST(List, PrintToString) {
   const ConsC *head = new ConsC(o1, kNil);
   List *list = new List(head);
   EXPECT_EQ("(5)", ::testing::PrintToString(*list));
+  List list_2({Int::Get(1), Int::Get(2)});
+  EXPECT_EQ("(1 2)", ::testing::PrintToString(list_2));
 }
 
 TEST(List, Equality) {
