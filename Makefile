@@ -17,7 +17,7 @@ LIBS += `$(LLVM_CONFIG) --system-libs`
 export CXX_INCLUDE_FLAGS := -I$(INCL_DIR)
 export CXX_SAFETY_FLAGS := -Wall
 export CXX_DEBUG_FLAGS := -g
-export CXXFLAGS := -std=c++11 `$(LLVM_CONFIG) --cxxflags` $(CXX_INCLUDE_FLAGS) \
+export CXXFLAGS := -std=c++14 `$(LLVM_CONFIG) --cxxflags` $(CXX_INCLUDE_FLAGS) \
 	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS)
 
 export SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))

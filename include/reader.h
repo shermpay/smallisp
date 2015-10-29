@@ -10,7 +10,7 @@ namespace sl {
 namespace reader {
 
 class Error {
-public:
+ public:
   Error(long linum, int colnum, const std::string &msg) : msg_(msg) {
     this->linum_ = linum;
     this->colnum_ = colnum;
@@ -29,23 +29,26 @@ public:
 
   const std::string Str(void) const;
 
-private:
+ private:
   long linum_;
   int colnum_;
   std::string msg_;
 };
 
-} // namespace reader
+}  // namespace reader
 
 // Reader is a complete smallisp reader that reads smallisp expressions
 // and produces smallisp objects.
 // TODO: Consider implementing Reader using a stream interface(use operator>>).
 class Reader {
-public:
+ public:
   static const long kStartLinum;
   static const int kStartColnum;
   Reader(std::istream &input_stream)
-      : linum_(kStartLinum), colnum_(kStartColnum), stream_(input_stream) {}
+      : linum_(kStartLinum),
+        colnum_(kStartColnum),
+        stream_(input_stream),
+        error_(nullptr) {}
 
   // Getters
   inline long linum(void) const { return linum_; }
@@ -70,16 +73,21 @@ public:
   // Get the next character in the stream
   // Update the state of the reader accordingly
   char GetChar(void);
+  // Read the next token seperated by whitespace
+  std::string Next(void);
+
   // Output a string representation of the current state of the reader
   const std::string Str(void) const;
   // Reading
   void ReadWhitespace(void);
   const Int *ReadInt(void);
+  const Int *ReadInt(const std::string &);
   const Symbol *ReadSymbol(void);
-  const Object *ReadSexp(void);
+  const Symbol *ReadSymbol(const std::string &);
+  const List *ReadSexp(void);
   const Object *ReadExpr(void);
 
-private:
+ private:
   long linum_;
   int colnum_;
   std::istream &stream_;
@@ -88,7 +96,7 @@ private:
 };
 
 // Read is the standard interface to reading smallisp expressions
-const Object *Read(std::istream *input_stream);
+const Object *Read(std::istream &input_stream);
 
 // Read with stdin as the input_stream
 const Object *Read(void);

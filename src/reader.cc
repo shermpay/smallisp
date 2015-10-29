@@ -20,15 +20,13 @@
 namespace sl {
 
 const std::string reader::Error::Str(void) const {
-  auto line = std::to_string(linum());
-  auto col = std::to_string(colnum());
-  std::string str;
-  str.append(line);
-  str.push_back(':');
-  str.append(col);
-  str.append(" - ");
-  str.append(msg_);
-  return str;
+  std::stringstream sstream;
+  sstream << linum();
+  sstream.put(':');
+  sstream << colnum();
+  sstream << " - ";
+  sstream << msg_;
+  return sstream.str();
 }
 
 enum Delim : char { kLParen = '(', kRParen = ')' };
@@ -62,10 +60,22 @@ char Reader::GetChar(void) {
   return c;
 }
 
+std::string Reader::Next(void) {
+  std::string token;
+  char c;
+  ReadWhitespace();
+  while (!isspace(c = PeekChar()) && c != Delim::kLParen &&
+         c != Delim::kRParen && c != EOF) {
+    GetChar();
+    token.push_back(c);
+  }
+  return token;
+}
+
 const std::string Reader::Str(void) const {
   std::stringstream sstream;
   sstream << "Line: " << linum() << ", Col: " << colnum() << std::endl;
-  sstream << "Error: " << (error() ? error()->Str() : "None") << std::endl;
+  if (error_ != nullptr) sstream << "Error: " << error()->Str() << std::endl;
   sstream << '\t' << curr_line() << std::endl;
   sstream << '\t';
   for (int i = 0; i < colnum() - 1; ++i) {
@@ -80,8 +90,6 @@ void Reader::ReadWhitespace(void) {
     GetChar();
   }
 }
-
-// TODO: Optimize this to one pass. This requires two passes.
 const Int *Reader::ReadInt(void) {
   std::string int_str;
   char c = PeekChar();
@@ -96,6 +104,11 @@ const Int *Reader::ReadInt(void) {
     GetChar();
     int_str.push_back(c);
   }
+  return ReadInt(int_str);
+}
+
+// TODO: Optimize this to one pass. This requires two passes.
+const Int *Reader::ReadInt(const std::string &int_str) {
   size_t ptr;
   int base = 10;
   long value = std::stol(int_str, &ptr, base);
@@ -134,22 +147,58 @@ const Symbol *Reader::ReadSymbol(void) {
   }
 }
 
-const Object *Reader::ReadSexp(void) {
-  ReadWhitespace();
-  const Symbol *symbol = ReadSymbol();
-  ReadWhitespace();
-  return new List(new ConsC(symbol, kNil));
+const Symbol *Reader::ReadSymbol(const std::string &symbol_name) {
+  for (const char &c : symbol_name) {
+    if (!IsSymbolChar(c)) {
+      Failed(reader::Error(
+          linum(), colnum(),
+          "Symbol must contain only alphanumeric characters or '-'"));
+      return nullptr;
+    }
+  }
+  return Symbol::Get(symbol_name);
 }
+
+static const List *ReadSexpHelper(Reader *reader) {
+  const Object *obj = reader->ReadExpr();
+  reader->ReadWhitespace();
+  if (reader->PeekChar() == Delim::kRParen) {
+    reader->GetChar();
+    return Cons(obj, kNil);
+  } else
+    return Cons(obj, ReadSexpHelper(reader));
+}
+
+const List *Reader::ReadSexp(void) {
+  GetChar();
+  ReadWhitespace();
+  return ReadSexpHelper(this);
+}
+
 const Object *Reader::ReadExpr(void) {
   char c = PeekChar();
   switch (c) {
-    case Delim::kLParen:
-      ReadSexp();
-      break;
-    case Delim::kRParen:
+    case EOF:
+      return nullptr;
+    case Delim::kLParen: {
+      return ReadSexp();
+    }
+    case Delim::kRParen: {
       std::string error_msg{""};
       Failed(reader::Error(linum(), colnum(), error_msg));
       break;
+    }
+    default: {
+      std::string token = Next();
+      char start = token[0];
+      if (isalpha(start) || (start == '-' && token.size() == 1) ||
+          (start == '-' && isalpha(token[1]))) {
+        return ReadSymbol(token);
+      } else if (isdigit(start) ||
+                 (start == '-' && token.size() > 1 && isdigit(token[1]))) {
+        return ReadInt(token);
+      }
+    }
   }
 }
 

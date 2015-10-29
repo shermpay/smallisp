@@ -7,12 +7,23 @@
 
 namespace sl {
 
+namespace {
+
 TEST(Reader, ReadWhitespace) {
   std::istringstream sstream("       \n   \t ");
   Reader reader(sstream);
   reader.ReadWhitespace();
   EXPECT_EQ(Reader::kStartLinum + 1, reader.linum());
   EXPECT_EQ(Reader::kStartColnum + 5, reader.colnum());
+
+  std::istringstream sstream_2("\n\n   1  ");
+  Reader reader_2(sstream_2);
+  reader_2.ReadWhitespace();
+  EXPECT_EQ(Reader::kStartLinum + 2, reader_2.linum());
+  EXPECT_EQ(Reader::kStartColnum + 3, reader_2.colnum());
+  reader_2.ReadWhitespace();
+  EXPECT_EQ(Reader::kStartLinum + 2, reader_2.linum());
+  EXPECT_EQ(Reader::kStartColnum + 3, reader_2.colnum());
 }
 
 TEST(Reader, ReadInt) {
@@ -46,6 +57,27 @@ TEST(Reader, ReadSymbol) {
   reader.ReadWhitespace();
   const Symbol *baz = reader.ReadSymbol();
   ASSERT_EQ(*Symbol::Get("-baz"), *baz);
+}
+
+TEST(Reader, ReadSexp) {
+  std::stringstream sstream("(foo)");
+  Reader reader(sstream);
+  const List *sexp = reader.ReadSexp();
+  ASSERT_EQ(List({Symbol::Get("foo")}), *sexp);
+
+  std::stringstream sstream_2("(foo 1 2)");
+  Reader reader_2(sstream_2);
+  sexp = reader_2.ReadSexp();
+  ASSERT_EQ(List({Symbol::Get("foo"), Int::Get(1), Int::Get(2)}), *sexp);
+
+  std::stringstream sstream_3("(foo (bar 1 2) 3)");
+  Reader reader_3(sstream_3);
+  sexp = reader_3.ReadSexp();
+  ASSERT_EQ(List({Symbol::Get("foo"),
+                  new List({Symbol::Get("bar"), Int::Get(1), Int::Get(2)}),
+                  Int::Get(3)}),
+            *sexp);
+}
 }
 }
 
