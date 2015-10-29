@@ -86,6 +86,7 @@ class Reader {
   const Symbol *ReadSymbol(const std::string &);
   const List *ReadSexp(void);
   const Object *ReadExpr(void);
+  const std::vector<const Object *> ReadExprList(void);
 
  private:
   long linum_;

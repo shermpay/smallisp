@@ -202,6 +202,17 @@ const Object *Reader::ReadExpr(void) {
   }
 }
 
+const std::vector<const Object *> Reader::ReadExprList(void) {
+  std::vector<const Object *> vec;
+  ReadWhitespace();
+  while (PeekChar() != EOF) {
+    const Object *obj = ReadExpr();
+    vec.push_back(obj);
+    ReadWhitespace();
+  }
+  return vec;
+}
+
 const Object *Read(std::istream &input_stream) {
   Reader reader(input_stream);
   return reader.ReadExpr();

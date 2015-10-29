@@ -78,8 +78,30 @@ TEST(Reader, ReadSexp) {
                   Int::Get(3)}),
             *sexp);
 }
+
+TEST(Reader, ReadExpr) {
+  std::stringstream sstream("(foo)1");
+  Reader reader(sstream);
+  const Object *sexp = reader.ReadExpr();
+  ASSERT_EQ(Type::kList, sexp->GetType());
+  ASSERT_TRUE(sexp->IsEqual(List({Symbol::Get("foo")})));
+
+  const Object *num = reader.ReadExpr();
+  ASSERT_EQ(Type::kInt, num->GetType());
+  ASSERT_TRUE(num->IsEqual(Int::Get(1)));
 }
+
+TEST(Reader, ReadExprList) {
+  std::stringstream sstream("(foo) 1 2");
+  Reader reader(sstream);
+  const std::vector<const Object *> exprs = reader.ReadExprList();
+  ASSERT_TRUE(exprs[0]->IsEqual(List({Symbol::Get("foo")})));
+  ASSERT_TRUE(exprs[1]->IsEqual(Int::Get(1)));
+  ASSERT_TRUE(exprs[2]->IsEqual(Int::Get(2)));
 }
+
+}  // anonymous
+}  // sl
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
