@@ -66,11 +66,13 @@ class List : public Object {
     ListIterator &operator++();
     ListIterator operator++(int);
 
-    inline bool operator==(const ListIterator &rhs) {
+    inline bool operator==(const ListIterator &rhs) const {
       return this->curr() == rhs.curr();
     }
 
-    inline bool operator!=(const ListIterator &rhs) { return !(*this == rhs); }
+    inline bool operator!=(const ListIterator &rhs) const {
+      return !(*this == rhs);
+    }
 
    private:
     const ConsC *curr_;
@@ -107,14 +109,14 @@ class List : public Object {
   virtual bool IsEqual(const Object *o) const override;
   virtual const std::string Str(void) const override;
 
-  inline const ConsC *head() const { return this->head_; };
-  const Object *First() const;
+  virtual inline const ConsC *head() const { return this->head_; };
+  virtual const Object *First() const;
 
   // Returns the rest of the list
-  const List *Rest(void) const;
+  virtual const List *Rest(void) const;
 
   // Counts the number of elements in the list.
-  size_t Count(void) const;
+  virtual size_t Count(void) const;
 
   // Prints list in (a b c) format
   // void Print(void);
@@ -138,6 +140,10 @@ class List : public Object {
 struct Nil : public List {
  public:
   static const Nil *Get(void);
+  virtual const ConsC *head(void) const {
+    // fprintf(stderr, "Cannot dereference nil\n");
+    return nullptr;
+  };
 
  private:
   static Nil *instance;
@@ -149,6 +155,7 @@ struct Nil : public List {
 extern const List *kNil;
 
 bool operator==(const List &lhs, const List &rhs);
+
 bool operator!=(const List &lhs, const List &rhs);
 
 // TODO: Remove when bug in gtest is fixed
@@ -156,6 +163,7 @@ inline void PrintTo(const List &o, std::ostream *os) { *os << o.Str(); };
 
 const ConsC *Cons(const Object *o1, const Object *o2);
 const List *Cons(const Object *o1, const List *o2);
+bool IsNil(const Object *o);
 }  // namespace sl
 
 #endif

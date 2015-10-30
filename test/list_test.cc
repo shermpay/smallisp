@@ -24,6 +24,17 @@ TEST(ConsC, Equality) {
   EXPECT_NE(pair_1, pair_2);
 }
 
+TEST(Nil, Equality) {
+  ASSERT_EQ(kNil, kNil);
+  ASSERT_NE(*kNil, *Cons(Int::Get(1), kNil));
+  ASSERT_EQ(nullptr, kNil->head());
+}
+
+TEST(Nil, IsNil) {
+  ASSERT_TRUE(IsNil(kNil));
+  ASSERT_FALSE(IsNil(Cons(Int::Get(1), kNil)));
+}
+
 TEST(List, AllocAndDelloc) {
   Object *o1 = Int::Get(5);
   const ConsC *head = new ConsC(o1, kNil);
@@ -58,6 +69,17 @@ TEST(List, First) {
   List *list = new List(head);
   ASSERT_EQ(o1, list->First());
   ASSERT_EQ(1, list->Count());
+}
+
+TEST(ListIterator, BeginAndEnd) {
+  const List list({Int::Get(0), Int::Get(1), Int::Get(2)});
+  List::ListIterator iter_begin = list.begin();
+  List::ListIterator iter_end = list.end();
+  ASSERT_EQ(List::ListIterator(*kNil), iter_end);
+  ASSERT_NE(List::ListIterator(*kNil), iter_begin);
+  for (int i = 0; i < 3; ++i, ++iter_begin) {
+    ASSERT_TRUE(Int::Get(i)->IsEqual(*iter_begin));
+  }
 }
 
 TEST(List, Str) {
@@ -113,8 +135,6 @@ TEST(List, Count) {
   const List *new_list = Cons(Int::Get(6), list);
   EXPECT_EQ(2, new_list->Count());
 }
-
-TEST(Nil, Equality) { ASSERT_EQ(kNil, kNil); }
 
 }  // namespace sl
 

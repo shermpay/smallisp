@@ -97,7 +97,7 @@ const Int *Reader::ReadInt(void) {
     GetChar();
     int_str.push_back(c);
   } else {
-    Failed(reader::Error(linum(), colnum(), ""));
+    Failed(reader::Error(linum(), colnum(), "Unable to read int " + int_str));
     return nullptr;
   }
   while (isdigit(c = PeekChar())) {
@@ -113,7 +113,7 @@ const Int *Reader::ReadInt(const std::string &int_str) {
   int base = 10;
   long value = std::stol(int_str, &ptr, base);
   if (ptr < int_str.size()) {
-    Failed(reader::Error(linum(), colnum(), ""));
+    Failed(reader::Error(linum(), colnum(), "Unable to read int " + int_str));
     return nullptr;
   } else {
     return Int::Get(value);
@@ -165,14 +165,21 @@ static const List *ReadSexpHelper(Reader *reader) {
   if (reader->PeekChar() == Delim::kRParen) {
     reader->GetChar();
     return Cons(obj, kNil);
-  } else
-    return Cons(obj, ReadSexpHelper(reader));
+  } else if (reader->PeekChar() == EOF) {
+    return nullptr;
+  } else {
+    const List *rest = ReadSexpHelper(reader);
+    return (rest ? Cons(obj, rest) : nullptr);
+  }
 }
 
 const List *Reader::ReadSexp(void) {
   GetChar();
   ReadWhitespace();
-  return ReadSexpHelper(this);
+  const List *list = ReadSexpHelper(this);
+  if (!list)
+    Failed(reader::Error(linum(), colnum(), "Unable to read S-Expression."));
+  return list;
 }
 
 const Object *Reader::ReadExpr(void) {
@@ -184,9 +191,8 @@ const Object *Reader::ReadExpr(void) {
       return ReadSexp();
     }
     case Delim::kRParen: {
-      std::string error_msg{""};
-      Failed(reader::Error(linum(), colnum(), error_msg));
-      break;
+      Failed(reader::Error(linum(), colnum(), "Unmatched ')'"));
+      return nullptr;
     }
     default: {
       std::string token = Next();
@@ -197,9 +203,19 @@ const Object *Reader::ReadExpr(void) {
       } else if (isdigit(start) ||
                  (start == '-' && token.size() > 1 && isdigit(token[1]))) {
         return ReadInt(token);
+      } else {
+        // Get rid of whitespace?
+        ReadWhitespace();
+        return ReadExpr();
       }
     }
   }
+  std::string unknown_char("Unknown character: ");
+  unknown_char.push_back('\'');
+  unknown_char.push_back(c);
+  unknown_char.push_back('\'');
+  Failed(reader::Error(linum(), colnum(), unknown_char));
+  return nullptr;
 }
 
 const std::vector<const Object *> Reader::ReadExprList(void) {

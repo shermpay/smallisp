@@ -159,4 +159,7 @@ const List *Cons(const Object *o1, const List *o2) {
   return new List(cell);
 }
 
+// ---------------- Nil Definitions ----------------
+bool IsNil(const Object *o) { return o == kNil; }
+
 }  // namespace sl

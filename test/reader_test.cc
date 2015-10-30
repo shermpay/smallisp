@@ -77,6 +77,11 @@ TEST(Reader, ReadSexp) {
                   new List({Symbol::Get("bar"), Int::Get(1), Int::Get(2)}),
                   Int::Get(3)}),
             *sexp);
+
+  std::stringstream sstream_4("(foo (bar 1 2)");
+  Reader reader_4(sstream_4);
+  sexp = reader_4.ReadSexp();
+  ASSERT_EQ(nullptr, sexp);
 }
 
 TEST(Reader, ReadExpr) {
