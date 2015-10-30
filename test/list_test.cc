@@ -80,7 +80,6 @@ TEST(List, PrintToString) {
 }
 
 TEST(List, Equality) {
-  ASSERT_EQ(kNil, kNil);
   Object *o1 = Int::Get(5);
   const ConsC *head_1 = new ConsC(o1, kNil);
   List *list_1 = new List(head_1);
@@ -114,6 +113,8 @@ TEST(List, Count) {
   const List *new_list = Cons(Int::Get(6), list);
   EXPECT_EQ(2, new_list->Count());
 }
+
+TEST(Nil, Equality) { ASSERT_EQ(kNil, kNil); }
 
 }  // namespace sl
 

@@ -34,8 +34,28 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 
 // ---------------- Lists ----------------
 
+// ListIterator
+List::ListIterator &List::ListIterator::operator++() {
+  assert(curr_->cdr()->GetType() == sl::Type::kList);
+  curr_ = dynamic_cast<const ConsC *>(
+      dynamic_cast<const List *>(curr_->cdr())->head());
+  return *this;
+}
+
+List::ListIterator List::ListIterator::operator++(int) {
+  this->operator++();
+  ListIterator ret = *this;
+  return ret;
+}
+
 // nil/empty list
-const List *kNil = new List(nullptr);
+Nil *Nil::instance = nullptr;
+const Nil *Nil::Get(void) {
+  if (!Nil::instance) Nil::instance = new Nil;
+  return instance;
+}
+
+const List *kNil = Nil::Get();
 const List *List::kEmpty = kNil;
 
 const List *InitHelper(std::initializer_list<const Object> il) {

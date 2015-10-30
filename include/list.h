@@ -63,18 +63,8 @@ class List : public Object {
     ListIterator(const List &list) : curr_(list.head()){};
     inline const ConsC *curr() const { return this->curr_; };
     const Object &operator*() { return *(this->curr()->car()); };
-    ListIterator &operator++() {
-      assert(curr_->cdr()->GetType() == sl::Type::kList);
-      curr_ = dynamic_cast<const ConsC *>(
-          dynamic_cast<const List *>(curr_->cdr())->head());
-      return *this;
-    }
-
-    ListIterator operator++(int) {
-      this->operator++();
-      ListIterator ret = *this;
-      return ret;
-    }
+    ListIterator &operator++();
+    ListIterator operator++(int);
 
     inline bool operator==(const ListIterator &rhs) {
       return this->curr() == rhs.curr();
@@ -137,9 +127,23 @@ class List : public Object {
   iterator begin(void) const { return iterator(*this); }
   iterator end(void) const { return iterator(*kEmpty); }
 
+ protected:
+  List(){};
+
  private:
   const ConsC *head_;
-  List();
+};
+
+// Special Singleton object Nil
+struct Nil : public List {
+ public:
+  static const Nil *Get(void);
+
+ private:
+  static Nil *instance;
+  Nil(){};
+  Nil(Nil const &) = delete;
+  Nil &operator=(Nil const &) = delete;
 };
 
 extern const List *kNil;

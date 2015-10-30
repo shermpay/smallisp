@@ -5,7 +5,7 @@ TEST_LIBS :=  -lgtest
 BIN := ./bin
 BUILD := ../build
 
-all: list_test objects_test
+all: objects_test list_test reader_test
 
 reader_test: reader_test.cc $(BUILD)/objects.o $(BUILD)/list.o  $(BUILD)/reader.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
