@@ -1,5 +1,9 @@
 #include "objects.h"
 
+#include <cassert>
+
+#include <map>
+
 namespace sl {
 // Definitions for types
 static const std::map<const Type, const std::string &> kTypeNameMap = {
@@ -18,14 +22,17 @@ std::ostream &operator<<(std::ostream &os, const Type &type) {
 // void PrintTo(const Int &o, std::ostream *os) { *os << ""; }
 
 // -------- Definitions for Int -----------
-std::unordered_map<long, Int *> Int::pool_;
+static std::unordered_map<long, Int *> &IntPool(void) {
+  static std::unordered_map<long, Int *> pool;
+  return pool;
+};
 
 Int *Int::Get(const long &x) {
   Int *result;
-  auto found = Int::pool_.find(x);
-  if (found == Int::pool_.end()) {
+  auto found = IntPool().find(x);
+  if (found == IntPool().end()) {
     result = new Int(x);
-    Int::pool_.insert({x, result});
+    IntPool().insert({x, result});
   } else {
     result = found->second;
   }
@@ -33,14 +40,19 @@ Int *Int::Get(const long &x) {
 }
 
 // -------- Definition for Symbol ----------
-std::unordered_map<std::string, Symbol *> Symbol::pool_;
+static std::unordered_map<std::string, Symbol *> &SymbolPool(void) {
+  static std::unordered_map<std::string, Symbol *> pool;
+  return pool;
+};
 
 Symbol *Symbol::Get(const std::string &name) {
   Symbol *sym;
-  auto found = Symbol::pool_.find(name);
-  if (found == Symbol::pool_.end()) {
+  assert(SymbolPool().bucket_count() > 0 &&
+         "SymbolPool not initialized, bucket_count < 0");
+  auto found = SymbolPool().find(name);
+  if (found == SymbolPool().end()) {
     sym = new Symbol(name);
-    Symbol::pool_.insert({name, sym});
+    SymbolPool().insert({name, sym});
   } else {
     sym = found->second;
   }
