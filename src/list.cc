@@ -19,11 +19,11 @@ namespace sl {
 
 // ---------------- ConsC ----------------
 bool ConsC::IsEqual(const Object &o) const {
-  return (*this) == dynamic_cast<const ConsC &>(o);
+  return (*this) == static_cast<const ConsC &>(o);
 };
 
 bool ConsC::IsEqual(const Object *o) const {
-  return (*this) == *dynamic_cast<const ConsC *>(o);
+  return (*this) == *static_cast<const ConsC *>(o);
 };
 
 bool operator==(const ConsC &lhs, const ConsC &rhs) {
@@ -38,7 +38,7 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 List::ListIterator &List::ListIterator::operator++() {
   assert(curr_->cdr()->GetType() == sl::Type::kList);
   curr_ = dynamic_cast<const ConsC *>(
-      dynamic_cast<const List *>(curr_->cdr())->head());
+      static_cast<const List *>(curr_->cdr())->head());
   return *this;
 }
 
@@ -89,10 +89,20 @@ List::~List(void){
 
 bool List::IsEqual(const Object &o) const {
   if (o.GetType() != sl::Type::kList) return false;
-  return (*this) == dynamic_cast<const List &>(o);
+  return (*this) == static_cast<const List &>(o);
 }
 
 bool List::IsEqual(const Object *o) const { return this->IsEqual(*o); }
+
+std::size_t List::Hashcode(void) const {
+  std::size_t multiplier = 1;
+  std::size_t result = 0;
+  for (const auto &cur : *this) {
+    result += cur.Hashcode() * multiplier;
+    multiplier += 1;
+  }
+  return result;
+}
 
 const std::string List::Str(void) const {
   std::stringstream sstream;
@@ -122,7 +132,7 @@ const Object *List::First() const {
 
 const List *List::Rest(void) const {
   assert(this->head()->cdr()->GetType() == sl::Type::kList);
-  return (dynamic_cast<const List *>(this->head()->cdr()));
+  return (static_cast<const List *>(this->head()->cdr()));
 }
 
 size_t List::Count(void) const {
@@ -130,7 +140,7 @@ size_t List::Count(void) const {
   const ConsC *curr = this->head();
   while (curr) {
     count++;
-    curr = (dynamic_cast<const List *>(curr->cdr()))->head();
+    curr = (static_cast<const List *>(curr->cdr()))->head();
   }
   return count;
 }

@@ -28,6 +28,9 @@ class ConsC : public Object {
   virtual Type GetType() const override { return sl::Type::kCons; };
   virtual bool IsEqual(const Object &o) const override;
   virtual bool IsEqual(const Object *o) const override;
+  virtual std::size_t Hashcode(void) const override {
+    return car()->Hashcode() * 13 + cdr()->Hashcode();
+  };
   virtual const std::string Str(void) const override {
     return "(" + car_->Str() + " . " + cdr_->Str() + ")";
   };
@@ -107,6 +110,7 @@ class List : public Object {
   virtual Type GetType(void) const override { return sl::Type::kList; };
   virtual bool IsEqual(const Object &o) const override;
   virtual bool IsEqual(const Object *o) const override;
+  virtual std::size_t Hashcode(void) const override;
   virtual const std::string Str(void) const override;
 
   virtual inline const ConsC *head() const { return this->head_; };
