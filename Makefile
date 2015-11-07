@@ -19,8 +19,9 @@ BIN_DIR := $(BUILD_DIR)/bin
 export CXX_INCLUDE_FLAGS := -I$(INCL_DIR)
 export CXX_SAFETY_FLAGS := -Wall
 export CXX_DEBUG_FLAGS := -g
+export CXX_INST_FLAGS := --coverage
 export CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
-	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS)
+	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS) $(CXX_INST_FLAGS)
 
 export SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))
 

@@ -18,3 +18,11 @@ lexer
 
 # .gch for faster header files compilation
 *.h.gch
+
+# .gcno .gcda for code coverage
+*.gcno
+*.gcda
+
+# coverage output
+test/cov
+test/html
