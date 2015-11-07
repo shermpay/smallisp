@@ -37,19 +37,28 @@ class Object {
   // Str should return a human readable std::string object
   virtual const std::string Str(void) const = 0;
 };
+
 template <class T>
-class ObjectHashFn;
+class HashFn;
 
 template <>
-class ObjectHashFn<Object> {
+class HashFn<Object> {
  public:
   std::size_t operator()(const Object &obj) const { return obj.Hashcode(); }
 };
 
 template <>
-class ObjectHashFn<Object *> {
+class HashFn<Object *> {
  public:
-  std::size_t operator()(const Object *obj) const { return obj->Hashcode(); }
+  std::size_t operator()(const Object &obj) const { return obj.Hashcode(); }
+};
+
+inline bool operator==(const Object &lhs, const Object &rhs) {
+  return &lhs == &rhs;
+};
+
+inline bool operator!=(const Object &lhs, const Object &rhs) {
+  return !(lhs == rhs);
 };
 
 // For debugging
@@ -78,28 +87,32 @@ class Int : public Object {
   };
 
   inline long value() const { return this->value_; };
-  static Int *Get(const long &x);
+  static Int &Get(const long &x);
 
   // operators
-  inline Int *operator+(const Int *oi) {
-    return Int::Get(this->value() + oi->value());
+  inline Int &operator+(const Int &oi) {
+    return Int::Get(this->value() + oi.value());
   };
 
-  inline Int *operator-(const Int *oi) {
-    return Int::Get(this->value() - oi->value());
+  inline Int &operator-(const Int &oi) {
+    return Int::Get(this->value() - oi.value());
   };
 
-  inline Int *operator*(const Int *oi) {
-    return Int::Get(this->value() * oi->value());
+  inline Int &operator*(const Int &oi) {
+    return Int::Get(this->value() * oi.value());
   };
 
-  inline Int *operator/(const Int *oi) {
-    return Int::Get(this->value() / oi->value());
+  inline Int &operator/(const Int &oi) {
+    return Int::Get(this->value() / oi.value());
   };
 
  private:
   const long value_;
   Int() = delete;
+  Int(const Int &) = delete;               // Copy ctor
+  Int(const Int &&x) = delete;             // Move ctor
+  Int &operator=(const Int &) = delete;    // Copy assignment
+  Int &operator=(const Int &&x) = delete;  // Move assignment
   Int(const long &x) : value_(x){};
 };
 
@@ -122,7 +135,7 @@ inline void PrintTo(const Int &o, std::ostream *os) { *os << o.Str(); };
 class Symbol : public Object {
  public:
   // static std::unordered_map<std::string, Symbol *> pool_;
-  virtual ~Symbol() { std::cout << "~Symbol" << std::endl; };
+  virtual ~Symbol(){};
 
   // Implement Object
   virtual Type GetType() const override { return sl::Type::kSymbol; };
@@ -139,7 +152,7 @@ class Symbol : public Object {
 
   inline const std::string name() const { return this->name_; };
   // Use this for constructing symbols.
-  static Symbol *Get(const std::string &name);
+  static Symbol &Get(const std::string &name);
 
  private:
   const std::string name_;
@@ -147,6 +160,12 @@ class Symbol : public Object {
  private:
   Symbol() = delete;
   Symbol(const std::string &name) : name_(name) {}
+};
+
+template <>
+class HashFn<Symbol> {
+ public:
+  std::size_t operator()(const Symbol &obj) const { return obj.Hashcode(); }
 };
 
 inline bool operator==(const Symbol &lhs, const Symbol &rhs) {

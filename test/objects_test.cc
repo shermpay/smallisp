@@ -8,72 +8,96 @@
 namespace sl {
 
 TEST(ObjectAllocation, IntAllocation) {
-  Int *integer = Int::Get(5);
-  EXPECT_EQ(5, integer->value());
+  Int &integer = Int::Get(5);
+  EXPECT_EQ(5, integer.value());
 }
 
 TEST(ObjectAllocation, SymbolAllocation) {
-  Symbol *sym_foo = Symbol::Get("Foo");
-  EXPECT_EQ("Foo", sym_foo->name());
-  Symbol *sym_bar = Symbol::Get("Bar");
-  EXPECT_EQ("Bar", sym_bar->name());
-  Symbol *sym_foo_ptr = Symbol::Get("Foo");
-  EXPECT_EQ("Foo", sym_foo_ptr->name());
+  Symbol &sym_foo = Symbol::Get("Foo");
+  EXPECT_EQ("Foo", sym_foo.name());
+  Symbol &sym_bar = Symbol::Get("Bar");
+  EXPECT_EQ("Bar", sym_bar.name());
+  Symbol &sym_foo_ptr = Symbol::Get("Foo");
+  EXPECT_EQ("Foo", sym_foo_ptr.name());
   EXPECT_EQ(sym_foo, sym_foo_ptr);
 }
 
 TEST(ObjectEquality, IntEquality) {
-  Int *integer = Int::Get(5);
+  Int &integer = Int::Get(5);
   EXPECT_EQ(Int::Get(5), integer);
   EXPECT_NE(Int::Get(6), integer);
+  EXPECT_EQ(Int::Get(7), Int::Get(7));
 };
 
 TEST(ObjectEquality, SymbolEquality) {
-  Symbol *sym_foo = Symbol::Get("foo");
+  Symbol &sym_foo = Symbol::Get("foo");
   EXPECT_EQ(Symbol::Get("foo"), sym_foo);
   EXPECT_NE(Symbol::Get("bar"), sym_foo);
-  EXPECT_EQ(*Symbol::Get("foo"), *sym_foo);
-  EXPECT_NE(*Symbol::Get("bar"), *sym_foo);
 }
 
 TEST(ObjectTestPrinter, IntTestPrinter) {
-  Int *integer = Int::Get(5);
-  EXPECT_EQ("5", ::testing::PrintToString(*integer));
+  Int &integer = Int::Get(5);
+  EXPECT_EQ("5", ::testing::PrintToString(integer));
 }
 
 TEST(ObjectTestPrinter, SymbolTestPrinter) {
-  const Symbol *foo = Symbol::Get("foo");
-  EXPECT_EQ("foo", ::testing::PrintToString(*foo));
+  const Symbol &foo = Symbol::Get("foo");
+  EXPECT_EQ("foo", ::testing::PrintToString(foo));
 }
 
 TEST(Hashing, IntHashcode) {
-  EXPECT_NE(Int::Get(0)->Hashcode(), Int::Get(1)->Hashcode());
-  EXPECT_EQ(Int::Get(0)->Hashcode(), Int::Get(0)->Hashcode());
+  EXPECT_NE(Int::Get(0).Hashcode(), Int::Get(1).Hashcode());
+  EXPECT_EQ(Int::Get(0).Hashcode(), Int::Get(0).Hashcode());
 }
 
 TEST(Hashing, SymbolHashcode) {
-  EXPECT_NE(Symbol::Get("a")->Hashcode(), Symbol::Get("A")->Hashcode());
-  EXPECT_EQ(Symbol::Get("a")->Hashcode(), Symbol::Get("a")->Hashcode());
+  EXPECT_NE(Symbol::Get("a").Hashcode(), Symbol::Get("A").Hashcode());
+  EXPECT_EQ(Symbol::Get("a").Hashcode(), Symbol::Get("a").Hashcode());
 }
 
 TEST(Hashing, ObjectHashFn) {
-  ObjectHashFn<Object *> hash_fn;
+  HashFn<Object> hash_fn;
   EXPECT_EQ(hash_fn(Symbol::Get("a")), hash_fn(Symbol::Get("a")));
 }
 
 TEST(Hashing, ObjectInHashSet) {
-  std::unordered_set<const Object *> obj_set;
+  std::unordered_set<std::reference_wrapper<Object>, HashFn<Object>> obj_set;
   obj_set.insert(Int::Get(1));
   obj_set.insert(Symbol::Get("foo"));
   EXPECT_EQ(2, obj_set.size());
-  std::unordered_set<const Symbol *> sym_set;
+  std::unordered_set<std::reference_wrapper<Symbol>, HashFn<Object>> sym_set;
   sym_set.insert(Symbol::Get("foo"));
   sym_set.insert(Symbol::Get("bar"));
   EXPECT_EQ(2, sym_set.size());
-  std::unordered_map<const Symbol *, int> sym_map{{Symbol::Get("bar"), 1}};
+  std::unordered_map<Symbol, int, HashFn<Object>> sym_map{
+      {Symbol::Get("bar"), 1}};
   sym_map.insert({Symbol::Get("foo"), 1});
   sym_map.insert({Symbol::Get("bar"), 1});
-  EXPECT_EQ(2, sym_map.size());
+  EXPECT_EQ(3, sym_map.size());
+}
+
+TEST(Int, Operators) {
+  // +
+  EXPECT_EQ(Int::Get(1), Int::Get(0) + Int::Get(1));
+  EXPECT_EQ(Int::Get(0), Int::Get(-1) + Int::Get(1));
+
+  // -
+  EXPECT_EQ(Int::Get(0), Int::Get(1) - Int::Get(1));
+  EXPECT_EQ(Int::Get(-1), Int::Get(0) - Int::Get(1));
+
+  // *
+  EXPECT_EQ(Int::Get(4), Int::Get(2) * Int::Get(2));
+  EXPECT_EQ(Int::Get(0), Int::Get(0) * Int::Get(12));
+  EXPECT_EQ(Int::Get(0), Int::Get(12) * Int::Get(0));
+  EXPECT_EQ(Int::Get(-4), Int::Get(-2) * Int::Get(2));
+  EXPECT_EQ(Int::Get(4), Int::Get(-2) * Int::Get(-2));
+
+  // /
+  EXPECT_EQ(Int::Get(2), Int::Get(2) / Int::Get(1));
+  EXPECT_EQ(Int::Get(2), Int::Get(4) / Int::Get(2));
+  EXPECT_EQ(Int::Get(0), Int::Get(0) / Int::Get(2));
+  // TODO: Divide by zero
+  // TODO: Fractions
 }
 }
 
