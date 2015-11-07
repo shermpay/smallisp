@@ -20,10 +20,24 @@ HTMLDIR := ./html
 
 all: objects_test list_test reader_test
 
+reader_cov: $(BIN)/reader_test
+	$(COV) $(COVFLAGS) $<.gcda
+	$(LCOV) $(LCOVFLAGS) -o $(COVDIR)/$@
+	$(GENHTML) $(GENHTMLFLAGS) $(COVDIR)/$@ -o $(HTMLDIR)/$@
+
+$(BIN)/reader_test: reader_test
+
 reader_test: reader_test.cc $(BUILD)/objects.o $(BUILD)/list.o  $(BUILD)/reader.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
 	@echo "=============== STARTING TESTS ================="
 	$(BIN)/$@
+
+list_cov: $(BIN)/list_test
+	$(COV) $(COVFLAGS) $<.gcda
+	$(LCOV) $(LCOVFLAGS) -o $(COVDIR)/$@
+	$(GENHTML) $(GENHTMLFLAGS) $(COVDIR)/$@ -o $(HTMLDIR)/$@
+
+$(BIN)/list_test: list_test
 
 list_test: list_test.cc $(BUILD)/list.o $(BUILD)/objects.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@

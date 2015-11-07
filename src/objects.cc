@@ -27,7 +27,7 @@ static std::unordered_map<long, Int &> &IntPool(void) {
   return pool;
 };
 
-Int &Int::Get(const long &x) {
+Int *Int::Get(const long &x) {
   Int *result;
   auto found = IntPool().find(x);
   if (found == IntPool().end()) {
@@ -36,8 +36,10 @@ Int &Int::Get(const long &x) {
   } else {
     result = &(found->second);
   }
-  return *result;
+  return result;
 }
+
+Int &Int::Val(const long &x) { return *Int::Get(x); };
 
 // -------- Definition for Symbol ----------
 static std::unordered_map<std::string, Symbol &> &SymbolPool(void) {
@@ -45,7 +47,7 @@ static std::unordered_map<std::string, Symbol &> &SymbolPool(void) {
   return pool;
 };
 
-Symbol &Symbol::Get(const std::string &name) {
+Symbol *Symbol::Get(const std::string &name) {
   Symbol *sym;
   assert(SymbolPool().bucket_count() > 0 &&
          "SymbolPool not initialized, bucket_count < 0");
@@ -56,7 +58,9 @@ Symbol &Symbol::Get(const std::string &name) {
   } else {
     sym = &(found->second);
   }
-  return *sym;
+  return sym;
 }
+
+Symbol &Symbol::Val(const std::string &name) { return *Symbol::Get(name); }
 
 }  // namespace sl

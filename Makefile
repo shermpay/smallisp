@@ -30,6 +30,8 @@ export OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
 main: main.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
+allobjs: $(OBJS)
+
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@ -c
 

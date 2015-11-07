@@ -87,23 +87,24 @@ class Int : public Object {
   };
 
   inline long value() const { return this->value_; };
-  static Int &Get(const long &x);
+  static Int *Get(const long &x);
+  static Int &Val(const long &x);
 
   // operators
   inline Int &operator+(const Int &oi) {
-    return Int::Get(this->value() + oi.value());
+    return Int::Val(this->value() + oi.value());
   };
 
   inline Int &operator-(const Int &oi) {
-    return Int::Get(this->value() - oi.value());
+    return Int::Val(this->value() - oi.value());
   };
 
   inline Int &operator*(const Int &oi) {
-    return Int::Get(this->value() * oi.value());
+    return Int::Val(this->value() * oi.value());
   };
 
   inline Int &operator/(const Int &oi) {
-    return Int::Get(this->value() / oi.value());
+    return Int::Val(this->value() / oi.value());
   };
 
  private:
@@ -152,7 +153,8 @@ class Symbol : public Object {
 
   inline const std::string name() const { return this->name_; };
   // Use this for constructing symbols.
-  static Symbol &Get(const std::string &name);
+  static Symbol *Get(const std::string &name);
+  static Symbol &Val(const std::string &name);
 
  private:
   const std::string name_;
