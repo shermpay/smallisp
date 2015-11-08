@@ -4,6 +4,7 @@
 
 #include <editline/readline.h>
 
+#include "treewalk_interp.h"
 #include "reader.h"
 
 namespace sl {
@@ -15,13 +16,19 @@ static const std::string kPrompt = "sl> ";
 int Start() {
   puts("Smallisp REPL v0.9");
   puts("Press Ctrl-D to exit");
-  while (true) {
+  interp::Treewalker interp;
+  for (;;) {
     std::cout << kPrompt;
     Reader reader(std::cin);
-    const Object *obj = reader.ReadExpr();
-    if (!obj) {
+    const Object *expr = reader.ReadExpr();
+    if (!expr) {
+      if (!reader.error()) return 0;
       std::cout << reader.error() << std::endl;
-      return 0;
+      continue;
+    }
+    const Object *obj = interp.Eval(*expr);
+    if (!obj) {
+      continue;
     }
     std::cout << obj->Str() << std::endl;
   }

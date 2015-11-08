@@ -6,7 +6,7 @@
 
 namespace sl {
 // Definitions for types
-static const std::map<const Type, const std::string &> kTypeNameMap = {
+static const std::map<const Type, const std::string> kTypeNameMap = {
     {Type::kInt, "Int"},
     {Type::kSymbol, "Symbol"},
     {Type::kCons, "Cons"},
@@ -14,7 +14,13 @@ static const std::map<const Type, const std::string &> kTypeNameMap = {
 };
 
 std::ostream &operator<<(std::ostream &os, const Type &type) {
-  os << kTypeNameMap.at(type);
+  const auto &name_map = kTypeNameMap;
+  const auto iter = name_map.find(type);
+  if (iter != name_map.end())
+    os << iter->second;
+  else
+    os << "Error: could not find name for type";
+
   return os;
 }
 

@@ -31,6 +31,7 @@ reader_test: reader_test.cc $(BUILD)/objects.o $(BUILD)/list.o  $(BUILD)/reader.
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
 	@echo "=============== STARTING TESTS ================="
 	$(BIN)/$@
+	mv *.gcda *.gcno $(PROFDIR)
 
 list_cov: $(BIN)/list_test
 	$(COV) $(COVFLAGS) $<.gcda
@@ -43,6 +44,7 @@ list_test: list_test.cc $(BUILD)/list.o $(BUILD)/objects.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(BIN)/$@
 	@echo "=============== STARTING TESTS ================="
 	$(BIN)/$@
+	mv *.gcda *.gcno $(PROFDIR)
 
 objects_cov: $(BIN)/objects_test
 	$(COV) $(COVFLAGS) $<.gcda
@@ -64,6 +66,9 @@ meta_test: meta_test.cc
 	$(BIN)/$@
 
 .PHONY: clean
+.PHONY: clean_cov
 
+clean_cov:
+	rm -rf $(COVDIR)/* $(PROFDIR)/* $(HTMLDIR)/* $(BUILD)/*.gcda $(BUILD)/*.gcno
 clean:
-	rm ./bin/* $(COVDIR)/* $(PROFDIR)/*
+	rm -rf ./bin/* $(COVDIR)/* $(PROFDIR)/* $(HTMLDIR)/*

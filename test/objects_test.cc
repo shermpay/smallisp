@@ -7,6 +7,14 @@
 
 namespace sl {
 
+TEST(Type, TypeNameMap) {
+  std::stringstream ss;
+  ss << Type::kInt;
+  std::string str;
+  ss >> str;
+  EXPECT_EQ("Int", str);
+}
+
 TEST(ObjectAllocation, IntAllocation) {
   Int &integer = Int::Val(5);
   EXPECT_EQ(5, integer.value());

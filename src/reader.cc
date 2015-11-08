@@ -13,7 +13,7 @@
   Prog = Expr*
   Expr = Sexp | Symbol | Int
   Sexp = '(' Symbol Expr* ')'
-  Symbol = '[a-zA-Z\-]+'
+  Symbol = '[a-zA-Z\+\-\*\/!]+'
   Int = '[0-9]+'
 */
 
@@ -120,24 +120,25 @@ const Int *Reader::ReadInt(const std::string &int_str) {
   }
 }
 
-inline static bool IsSymbolChar(char c) { return isalnum(c) || c == '-'; }
+// SymbolStart = '[a-zA-Z\+\-\*\/!]'
+// Symbol = '([0-9]|SymbolStart)*'
+inline static bool IsSymbolStartChar(char c) {
+  return isalpha(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '!';
+}
+
+inline static bool IsSymbolChar(char c) {
+  return IsSymbolStartChar(c) || isdigit(c);
+}
 
 const Symbol *Reader::ReadSymbol(void) {
   std::string symbol_name;
   char c = PeekChar();
-  if (isalpha(c) || c == '-') {
+  if (IsSymbolStartChar(c)) {
     GetChar();
     symbol_name.push_back(c);
     while (IsSymbolChar(c = PeekChar())) {
-      if (isalnum(c) || c == '-') {
-        GetChar();
-        symbol_name.push_back(c);
-      } else {
-        Failed(reader::Error(
-            linum(), colnum(),
-            "Symbol must contain only alphanumeric characters or '-'"));
-        break;
-      }
+      GetChar();
+      symbol_name.push_back(c);
     }
     return Symbol::Get(symbol_name);
   } else {
