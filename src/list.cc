@@ -39,6 +39,7 @@ List::ListIterator &List::ListIterator::operator++() {
   assert(curr_->cdr()->GetType() == sl::Type::kList);
   curr_ = dynamic_cast<const ConsC *>(
       static_cast<const List *>(curr_->cdr())->head());
+  ++curr_count_;
   return *this;
 }
 
@@ -58,15 +59,6 @@ const Nil *Nil::Get(void) {
 const List *kNil = Nil::Get();
 const List *List::kEmpty = kNil;
 
-const List *InitHelper(std::initializer_list<const Object> il) {
-  const List *curr = kNil;
-  for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
-    const Object &o = (*ptr);
-    curr = Cons(&o, curr);
-  }
-  return curr;
-}
-
 const List *InitHelperPtr(std::initializer_list<const Object *> il) {
   const List *curr = kNil;
   for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
@@ -75,9 +67,6 @@ const List *InitHelperPtr(std::initializer_list<const Object *> il) {
   }
   return curr;
 }
-
-List::List(std::initializer_list<const Object> il)
-    : head_(InitHelper(il)->head()) {}
 
 List::List(std::initializer_list<const Object *> il)
     : head_(InitHelperPtr(il)->head()) {}

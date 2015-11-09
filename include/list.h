@@ -63,8 +63,9 @@ class List : public Object {
     typedef Object *pointer;
     typedef Object &reference;
 
-    ListIterator(const List &list) : curr_(list.head()){};
+    ListIterator(const List &list) : curr_(list.head()), curr_count_(0){};
     inline const ConsC *curr() const { return this->curr_; };
+    inline size_t curr_count(void) const { return this->curr_count_; };
     const Object &operator*() { return *(this->curr()->car()); };
     ListIterator &operator++();
     ListIterator operator++(int);
@@ -79,6 +80,7 @@ class List : public Object {
 
    private:
     const ConsC *curr_;
+    size_t curr_count_;
   };
 
   typedef ListIterator iterator;
@@ -93,9 +95,6 @@ class List : public Object {
 
   // Move constructor
   List(List &&lst) noexcept : head_(std::move(lst.head())){};
-
-  // Constructor for creating lists of objects.
-  List(std::initializer_list<const Object> il);
 
   // Constructor for creating lists of objects.
   List(std::initializer_list<const Object *> il);
