@@ -39,6 +39,10 @@ class Error {
 
 // Reader is a complete smallisp reader that reads smallisp expressions
 // and produces smallisp objects.
+// The reader provides various read functions to read smallisp syntax.
+// The functions usually return pointers to smallisp objects.
+// However, they return nullptrs if they encounter an EOF.
+// TODO: Consider returning a 'void' value.
 // TODO: Consider implementing Reader using a stream interface(use operator>>).
 class Reader {
  public:
@@ -67,7 +71,8 @@ class Reader {
   inline void clear_curr_line(void) { curr_line_.clear(); }
 
   // Declare that the reader has failed and stores the error
-  void *Failed(const reader::Error &err);
+  // Returns a sl::Error object
+  const Error *Failed(const reader::Error &err);
   // Return the next character in the stream
   char PeekChar(void);
   // Get the next character in the stream
@@ -80,11 +85,11 @@ class Reader {
   const std::string Str(void) const;
   // Reading
   void ReadWhitespace(void);
-  const Int *ReadInt(void);
-  const Int *ReadInt(const std::string &);
-  const Symbol *ReadSymbol(void);
-  const Symbol *ReadSymbol(const std::string &);
-  const List *ReadSexp(void);
+  const Object *ReadInt(void);
+  const Object *ReadInt(const std::string &);
+  const Object *ReadSymbol(void);
+  const Object *ReadSymbol(const std::string &);
+  const Object *ReadSexp(void);
   const Object *ReadExpr(void);
   const std::vector<const Object *> ReadExprList(void);
 

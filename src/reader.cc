@@ -34,10 +34,9 @@ enum Delim : char { kLParen = '(', kRParen = ')' };
 const long Reader::kStartLinum = 1;
 const int Reader::kStartColnum = 1;
 
-void *Reader::Failed(const reader::Error &err) {
+const Error *Reader::Failed(const reader::Error &err) {
   this->error_ = &err;
-  fprintf(stderr, "ReaderError: %s\n", Str().c_str());
-  return nullptr;
+  return new Error(err.msg());
 }
 
 char Reader::PeekChar(void) { return stream().peek(); }
@@ -90,15 +89,15 @@ void Reader::ReadWhitespace(void) {
     GetChar();
   }
 }
-const Int *Reader::ReadInt(void) {
+const Object *Reader::ReadInt(void) {
   std::string int_str;
   char c = PeekChar();
   if (isdigit(c) || c == '-') {
     GetChar();
     int_str.push_back(c);
   } else {
-    Failed(reader::Error(linum(), colnum(), "Unable to read int " + int_str));
-    return nullptr;
+    return Failed(
+        reader::Error(linum(), colnum(), "Unable to read int " + int_str));
   }
   while (isdigit(c = PeekChar())) {
     GetChar();
@@ -108,13 +107,13 @@ const Int *Reader::ReadInt(void) {
 }
 
 // TODO: Optimize this to one pass. This requires two passes.
-const Int *Reader::ReadInt(const std::string &int_str) {
+const Object *Reader::ReadInt(const std::string &int_str) {
   size_t ptr;
   int base = 10;
   long value = std::stol(int_str, &ptr, base);
   if (ptr < int_str.size()) {
-    Failed(reader::Error(linum(), colnum(), "Unable to read int " + int_str));
-    return nullptr;
+    return Failed(
+        reader::Error(linum(), colnum(), "Unable to read int " + int_str));
   } else {
     return Int::Get(value);
   }
@@ -130,7 +129,7 @@ inline static bool IsSymbolChar(char c) {
   return IsSymbolStartChar(c) || isdigit(c);
 }
 
-const Symbol *Reader::ReadSymbol(void) {
+const Object *Reader::ReadSymbol(void) {
   std::string symbol_name;
   char c = PeekChar();
   if (IsSymbolStartChar(c)) {
@@ -142,19 +141,17 @@ const Symbol *Reader::ReadSymbol(void) {
     }
     return Symbol::Get(symbol_name);
   } else {
-    Failed(reader::Error(linum(), colnum(),
-                         "Symbol must start with alphabet character or '-'"));
-    return nullptr;
+    return Failed(reader::Error(
+        linum(), colnum(), "Symbol must start with alphabet character or '-'"));
   }
 }
 
-const Symbol *Reader::ReadSymbol(const std::string &symbol_name) {
+const Object *Reader::ReadSymbol(const std::string &symbol_name) {
   for (const char &c : symbol_name) {
     if (!IsSymbolChar(c)) {
-      Failed(reader::Error(
+      return Failed(reader::Error(
           linum(), colnum(),
           "Symbol must contain only alphanumeric characters or '-'"));
-      return nullptr;
     }
   }
   return Symbol::Get(symbol_name);
@@ -174,12 +171,13 @@ static const List *ReadSexpHelper(Reader *reader) {
   }
 }
 
-const List *Reader::ReadSexp(void) {
+const Object *Reader::ReadSexp(void) {
   GetChar();
   ReadWhitespace();
   const List *list = ReadSexpHelper(this);
   if (!list)
-    Failed(reader::Error(linum(), colnum(), "Unable to read S-Expression."));
+    return Failed(
+        reader::Error(linum(), colnum(), "Unable to read S-Expression."));
   return list;
 }
 
@@ -187,13 +185,12 @@ const Object *Reader::ReadExpr(void) {
   char c = PeekChar();
   switch (c) {
     case EOF:
-      return nullptr;
+      return nullptr;  // This must be handled in all cases
     case Delim::kLParen: {
       return ReadSexp();
     }
     case Delim::kRParen: {
-      Failed(reader::Error(linum(), colnum(), "Unmatched ')'"));
-      return nullptr;
+      return Failed(reader::Error(linum(), colnum(), "Unmatched ')'"));
     }
     default: {
       std::string token = Next();
@@ -215,8 +212,7 @@ const Object *Reader::ReadExpr(void) {
   unknown_char.push_back('\'');
   unknown_char.push_back(c);
   unknown_char.push_back('\'');
-  Failed(reader::Error(linum(), colnum(), unknown_char));
-  return nullptr;
+  return Failed(reader::Error(linum(), colnum(), unknown_char));
 }
 
 const std::vector<const Object *> Reader::ReadExprList(void) {
