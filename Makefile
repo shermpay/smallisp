@@ -1,4 +1,5 @@
 ARCH := x86
+SHELL := /bin/bash
 CXX :=clang++
 SRC_EXT := cc
 HDR_EXT := h
@@ -64,6 +65,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc
 # --------------------------
 # Building and Running tests
 # --------------------------
+cov: $(TEST_BINS)
+	$(COV) $(COVFLAGS) $(TEST_BIN_DIR)/$*.gcda
+	$(LCOV) $(LCOVFLAGS) -o $(COVDIR)/$@
+	$(GENHTML) $(GENHTMLFLAGS) $(COVDIR)/$@ -o $(HTMLDIR)/$@
+
+.PHONY: tests
+tests: $(TEST_BINS)
+	for test in $(TEST_BIN_DIR)/*; do \
+		./$$test; \
+	done
+
 treewalk_interp_test: $(TEST_DIR)/treewalk_interp_test.cc $(BUILD_DIR)/objects.o $(BUILD_DIR)/list.o $(BUILD_DIR)/reader.o $(BUILD_DIR)/treewalk_interp.o $(BUILD_DIR)/specialforms.o $(BUILD_DIR)/builtins.o
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $(TEST_BIN_DIR)/$@
 	@echo "=============== STARTING TESTS ================="
