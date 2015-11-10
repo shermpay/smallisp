@@ -116,6 +116,14 @@ TEST(List, Equality) {
   List *list_3 = new List(head_3);
   EXPECT_FALSE(list_1->IsEqual(*list_3));
   ASSERT_NE(*list_1, *list_3);
+
+  // Equality with init lists
+  ASSERT_EQ(List{Int::Get(1)}, List{Int::Get(1)});
+
+  // Regression for bug:
+  // Objects might be tested not equal because of static dispatch of operator==
+  Object *obj = new List({Int::Get(1)});
+  ASSERT_EQ(List{Int::Get(1)}, *obj);
 }
 
 TEST(List, Rest) {

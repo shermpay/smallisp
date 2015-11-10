@@ -3,6 +3,7 @@
 #ifndef _OBJECTS_DEF
 #define _OBJECTS_DEF
 
+#include <cassert>
 #include <string>
 #include <unordered_map>
 #include <functional>
@@ -18,6 +19,7 @@ enum class Type {
   kCons,
   kList,
   kFunction,
+  kError,
 };
 
 std::ostream &operator<<(std::ostream &os, const Type &type);
@@ -54,7 +56,7 @@ class HashFn<Object *> {
 };
 
 inline bool operator==(const Object &lhs, const Object &rhs) {
-  return &lhs == &rhs;
+  return lhs.IsEqual(rhs);
 };
 
 inline bool operator!=(const Object &lhs, const Object &rhs) {
@@ -163,7 +165,6 @@ class Symbol : public Object {
   Symbol() = delete;
   Symbol(const std::string &name) : name_(name) {}
 };
-
 template <>
 class HashFn<Symbol> {
  public:
@@ -180,6 +181,31 @@ inline bool operator!=(const Symbol &lhs, const Symbol &rhs) {
 
 // TODO: Remove when bug in gtest is fixed
 inline void PrintTo(const Symbol &o, std::ostream *os) { *os << o.Str(); };
+
+// Error class
+class Error : public Object {
+ public:
+  Error(const std::string &msg) : msg_(msg){};
+  // Return the type of the object for introspection.
+  sl::Type GetType() const override { return sl::Type::kError; };
+  // Value equality between 2 smallisp objects.
+  bool IsEqual(const Object &o) const override {
+    return o.GetType() == Type::kError;
+  };
+  bool IsEqual(const Object *o) const override { return IsEqual(*o); };
+  // Hash code of this object
+  std::size_t Hashcode(void) const override {
+    assert(false && "Hashcode not implemented for Errors.");
+    return 0;
+  };
+  // Str returns the error message
+  const std::string Str(void) const override { return msg_; };
+  bool operator==(const Error &rhs) { return this->IsEqual(rhs); }
+  bool operator!=(const Error &rhs) { return !((*this) == rhs); }
+
+ private:
+  const std::string msg_;
+};
 
 }  // namespace sl
 
