@@ -4,11 +4,23 @@
 #define _OBJECTS_DEF
 
 #include <cassert>
+
 #include <string>
 #include <unordered_map>
 #include <functional>
 
 #include <iostream>
+
+// Use the following code for stacktraces
+// #include <execinfo.h>
+// #define SIZE 8
+//     void *backtrace_buf[SIZE];
+//     int nptrs = backtrace(backtrace_buf, SIZE);
+//     printf("backtrace returned %d addresses.\n", nptrs);
+//     char **trace_strings = backtrace_symbols(backtrace_buf, nptrs);
+//     if (trace_strings) {
+//       for (int i = 0; i < nptrs; ++i) printf("%s\n", trace_strings[i]);
+//     }
 
 namespace sl {
 
@@ -19,6 +31,7 @@ enum class Type {
   kCons,
   kList,
   kFunction,
+  kVoid,
   kError,
 };
 
@@ -182,6 +195,36 @@ inline bool operator!=(const Symbol &lhs, const Symbol &rhs) {
 // TODO: Remove when bug in gtest is fixed
 inline void PrintTo(const Symbol &o, std::ostream *os) { *os << o.Str(); };
 
+struct Void : public Object {
+  // Return the type of the object for introspection.
+  virtual Type GetType() const override { return Type::kVoid; };
+  // Value equality between 2 smallisp objects.
+  bool IsEqual(const Object &) const override {
+    assert(false && "IsEqual: void object");
+    return false;
+  };
+  bool IsEqual(const Object *o) const override { return this->IsEqual(*o); };
+  // Hash code of this object
+  std::size_t Hashcode(void) const override {
+    assert(false && "Hashcode: void object");
+    return 0;
+  };
+  // Str should return a human readable std::string object
+  const std::string Str(void) const override { return "void"; };
+  static const Void *Get(void);
+
+ private:
+  static Void *instance;
+  Void(){};
+};
+inline void PrintTo(const Void &o, std::ostream *os) { *os << "void"; };
+
+extern const Void *kVoid;
+
+inline bool IsVoid(const Object &obj) { return &obj == kVoid; };
+
+inline bool IsVoid(const Object *obj) { return obj == kVoid; };
+
 // Error class
 class Error : public Object {
  public:
@@ -206,6 +249,7 @@ class Error : public Object {
  private:
   const std::string msg_;
 };
+inline void PrintTo(const Error &o, std::ostream *os) { *os << o.Str(); };
 
 }  // namespace sl
 

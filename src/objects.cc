@@ -69,4 +69,10 @@ Symbol *Symbol::Get(const std::string &name) {
 
 Symbol &Symbol::Val(const std::string &name) { return *Symbol::Get(name); }
 
+Void *Void::instance = nullptr;
+const Void *Void::Get(void) {
+  if (!Void::instance) Void::instance = new Void();
+  return Void::instance;
+}
+const Void *kVoid = Void::Get();
 }  // namespace sl

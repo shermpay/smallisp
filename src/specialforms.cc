@@ -7,9 +7,11 @@ namespace sl {
 namespace specialforms {
 
 using SFTable = std::unordered_map<const Symbol *, SFKind>;
+const Symbol &kDefine = Symbol::Val("define");
+const Symbol &kUnsafeSet = Symbol::Val("set!");
 
 static SFTable kSFTable = {
-    {Symbol::Get("set!"), SFKind::kUnsafeSet},
+    {&kDefine, SFKind::kDefine}, {&kUnsafeSet, SFKind::kUnsafeSet},
 };
 
 bool IsSpecialForm(const Symbol &sym) {

@@ -19,35 +19,41 @@ namespace sl {
 
 namespace interp {
 
-struct Error {
-  const std::string msg;
-};
-
 class Treewalker {
  public:
-  Treewalker(void)
-      : globals_(builtins::environment), frame_(nullptr), error_(nullptr){};
+  Treewalker(void) : globals_(builtins::environment), frame_(nullptr){};
   // The environment is returned directly and can be manipulated directly.
   Environment &globals(void) { return globals_; };
+  // A pointer to current frame and nullptr if there is not frame.
   Frame *frame(void) const { return frame_; }
+  // Set the frame of the interpreter to the frame passed in.
   void set_frame(Frame *f) { frame_ = f; };
-  const Error error(void) const { return *error_; };
+  // Eval the object passed in.
   const Object *Eval(const Object &);
+  // Handle a special form given the form and the kind of form.
+  const Object *HandleSpecialForm(const List &sf, specialforms::SFKind sf_kind);
+  // The define special form
+  const Object *Define(const List &sf);
+  // The set! special form
+  // set! is defined to change the bindings of variables of the smallest scope.
+  // It requires the symbol to have an existing definition.
+  const Object *UnsafeSet(const List &sf);
+
+  // Lookup a variable in all scopes.
   const Object *Lookup(const Symbol &);
-  void Bind(const Symbol &sym, const Object &obj);
-  void Failed(const std::string &msg) { error_ = new struct Error({msg}); };
-  void HandleErrors(void);
-  const Object *SpecialFormHandler(const List &sf,
-                                   specialforms::SFKind sf_kind);
-  void UnsafeSet(const List &sf);
+  // Lookup a symbol in the current scope.
+  const Object *LocalLookup(const Symbol &sym);
+  // Bind symbol to object in current frame. If no frame, bind to global
+  // Every scope/frame can only have a single binding
+  // This is the most primitive binding operation.
+  const Object *Bind(const Symbol &sym, const Object &obj);
+  // Create a definition and bind the symbol to the object.
+  const Object *MakeDef(const Symbol &sym, const Object &obj);
 
  private:
   Environment globals_;  // Global bindings symbol table
   Frame *frame_;         // Current stack frame
-
-  Error *error_;  // Error
 };
-
 }  // namespace interp
 
 }  // namespace sl

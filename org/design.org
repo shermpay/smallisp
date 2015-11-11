@@ -1,3 +1,7 @@
+# Local Variables
+# fill-column: 80
+# eval: (auto-fill-mode)
+# End:
 #+TITLE: Design
 
 * Info
@@ -24,19 +28,27 @@ meant to have a complete and rich runtime.
    
 ** Special Forms
    - def: Bind a symbol to a value
-   - fn: Create a function. => (fn (a b) /body/)
+   - lambda: Create a function. => (fn (a b) /body/)
    - if: If conditional expression. => (if /pred/ /then/ /else/)
-
+   - set!: Changes the binding of a defined symbol
 ** Primitive Types
-   - int: fix-width signed 64-bit integer.
-   - symbol: lisp symbol.
+   - Int: fix-width signed 64-bit integer.
+   - Symbol: lisp symbol.
      Holds an object or nil.
-   - list: standard lisp list. Supports fast cons and an immutable interface.
-   - function: standard function that knows how many args it should take and a
+   - List: standard lisp list. Supports fast cons and an immutable interface.
+   - Function: standard function that knows how many args it should take and a
      reference to it's definition.
-   - macro: same as a function but transformed during 'macro expansion'. A
+   - Macro: same as a function but transformed during 'macro expansion'. A
      special form is a kind of macro.
-
+     
+** Binding Rules
+   *def* creates a definition and binds it to a value in the /current scope/.
+   Multiple definitions cannot exists in the same scope, but they cannot exists
+   in nested scopes (eg. one can create a definition in a funciton that shadows
+   an outer scopes definition in a function).
+   *set!* changes the binding of a variable found in the smallest scope that
+   encloses to a new value.
+   
 * Implementation Design
 ** Components
    Smallisp 
@@ -47,8 +59,10 @@ All Smallisp Datatypes implement the an sl::Object ABC.
 namespace sl {
 
 class Object {
-  virtual Type type() = 0;
+  virtual Type GetType() = 0;
   virtual ~Object() = 0;
+  virtual bool IsEqual(const Object *) const;
+  virtual bool IsEqual(const Object &) const;
 }
 
 }
@@ -114,3 +128,22 @@ minimize the overhead of list objects.
      compiler and interpreter.
 **** JIT Compiler
      Finally is a JIT compiler from bytecode to machine code.
+*** Userspace vs Interpreter space
+    Because this is a dynamic lisp, it is expected to have large amounts of
+    overlap between userspace and interpreter space objects. However a few key
+    things to note:
+        - Do not leak nullptr/NULL into userspace
+        - Clear distinction between interpreter coding errors and user errors
+    For now, errors are a special kind of object that holds a error
+    message. Functions that are exposed to userspace should signal errors with
+    these error objects. This is a temporary solution before a design for
+    userspace errors is concrete.
+    All functions that will be called in userspace will have a return type of
+    ~const Object *~ and parameter types of ~const Object *~, *NOT* specific types.
+    Therefore, some level of type checking has to be done for builtin functions.
+*** Using references vs pointers
+    _Prefer reference over pointers_
+    Ideally we have functions that take and return references in all cases.
+    But that has proven to be a nuisance, because there are times we want to
+    return nullptrs. But using references reduces chances of nullptr
+    dereferences and provides nice value syntax on top of pointer semantics.
