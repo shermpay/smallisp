@@ -68,6 +68,10 @@ TEST_BINS := $(patsubst $(TEST_DIR)/%.$(SRC_EXT), $(BIN_DIR)/%, $(TEST_SRCS))
 main: main.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BIN_DIR)/$@
 
+run_main: main
+	-make clean_cov
+	./bin/main
+
 allobjs: $(OBJS)
 
 ###########################

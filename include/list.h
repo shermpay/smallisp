@@ -144,7 +144,7 @@ struct Nil : public List {
  public:
   static const Nil *Get(void);
   virtual const ConsC *head(void) const {
-    // fprintf(stderr, "Cannot dereference nil\n");
+    assert(false && "Cannot dereference nil");
     return nullptr;
   };
 

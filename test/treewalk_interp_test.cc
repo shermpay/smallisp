@@ -23,9 +23,9 @@ TEST(Environments, BindLookup) {
   ASSERT_EQ(Int::Val(3), *interp.Lookup(Symbol::Val("x")));
 }
 
-TEST(SpecialFormHandler, Define) {
+TEST(SpecialForm, Def) {
   interp::Treewalker interp;
-  const List expr({&specialforms::kDefine, Symbol::Get("x"), Int::Get(1)});
+  const List expr({&specialforms::kDef, Symbol::Get("x"), Int::Get(1)});
   const Object *obj = interp.Define(expr);
   ASSERT_NE(Error(""), *obj);
   ASSERT_EQ(Int::Val(1), *interp.Lookup(Symbol::Val("x")));
@@ -33,16 +33,38 @@ TEST(SpecialFormHandler, Define) {
   ASSERT_EQ(Error(""), *interp.Define(expr));
 }
 
-TEST(SpecialFormHandler, UnsafeSet) {
+TEST(SpecialForm, UnsafeSet) {
   interp::Treewalker interp;
   const List expr({&specialforms::kUnsafeSet, Symbol::Get("x"), Int::Get(2)});
   // Undefined symbol
   ASSERT_EQ(Error(""), *interp.UnsafeSet(expr));
-  const List def_expr({&specialforms::kDefine, Symbol::Get("x"), Int::Get(1)});
+  const List def_expr({&specialforms::kDef, Symbol::Get("x"), Int::Get(1)});
   interp.Define(def_expr);
   ASSERT_EQ(Int::Val(1), *interp.Lookup(Symbol::Val("x")));
   interp.UnsafeSet(expr);
   ASSERT_EQ(Int::Val(2), *interp.Lookup(Symbol::Val("x")));
+}
+
+TEST(SpecialForm, Lambda) {
+  interp::Treewalker interp;
+  const List id_lambda_expr{
+      {&specialforms::kLambda, new List{Symbol::Get("x")}, Symbol::Get("x")}};
+  const Object *id_fn_obj = interp.Eval(id_lambda_expr);
+  ASSERT_EQ(Type::kFunction, id_fn_obj->GetType());
+  const Function &id_fn = *static_cast<const Function *>(id_fn_obj);
+  ASSERT_EQ(List{Symbol::Get("x")}, id_fn.params());
+  ASSERT_EQ(List{Symbol::Get("x")}, id_fn.body());
+}
+
+TEST(Functions, Call) {
+  interp::Treewalker interp;
+  const List id_lambda_expr{
+      {&specialforms::kLambda, new List{Symbol::Get("x")}, Symbol::Get("x")}};
+  const Object *id_fn_obj = interp.Eval(id_lambda_expr);
+  ASSERT_EQ(Type::kFunction, id_fn_obj->GetType());
+  const Function &id_fn = *static_cast<const Function *>(id_fn_obj);
+  const Object *result = interp.Call(id_fn, List{Int::Get(1)});
+  ASSERT_EQ(Int::Val(1), *result);
 }
 
 TEST(Eval, EvalPrimitives) {

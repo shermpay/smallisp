@@ -11,12 +11,14 @@ namespace specialforms {
 
 enum class SFKind {
   kInvalidSF,
-  kDefine,
+  kDef,
   kUnsafeSet,
+  kLambda,
 };
 
-extern const Symbol &kDefine;
+extern const Symbol &kDef;
 extern const Symbol &kUnsafeSet;
+extern const Symbol &kLambda;
 
 // Check if Symbol is a special form
 bool IsSpecialForm(const Symbol &);

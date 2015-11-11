@@ -1,9 +1,11 @@
 #include "treewalk_interp.h"
 
-#include "specialforms.h"
+#include <list>
+
+#include "function.h"
 #include "list.h"
 #include "objects.h"
-#include <vector>
+#include "specialforms.h"
 
 namespace sl {
 
@@ -34,10 +36,15 @@ const Object *Treewalker::Eval(const Object &obj) {
           return HandleSpecialForm(lst, sf_kind);
         }
       }
-      std::vector<const Object *> vec;
-      for (const auto &elt : lst) {
-        vec.push_back(Eval(elt));
+      const List &func_lst = *EvalList(lst);
+      if (func_lst.First()->GetType() == Type::kFunction) {
+        result = Call(*static_cast<const Function *>(func_lst.First()),
+                      *func_lst.Rest());
+      } else {
+        result = new Error("Cannot call non-function in expression " +
+                           func_lst.Str());
       }
+
       break;
     }
     default: {
@@ -56,11 +63,15 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
     case SFKind::kInvalidSF:
       assert(false && "Special Form Invalid cannot be handled.");
       break;
-    case SFKind::kDefine:
+    case SFKind::kDef:
       ret = Define(sf);
       break;
     case SFKind::kUnsafeSet: {
       ret = UnsafeSet(sf);
+      break;
+    }
+    case SFKind::kLambda: {
+      ret = Lambda(sf);
       break;
     }
     default: {
@@ -111,6 +122,17 @@ const Object *Treewalker::UnsafeSet(const List &sf) {
   }
 }
 
+const Object *Treewalker::Lambda(const sl::List &sf) {
+  const List &lambda_expr = *sf.Rest();
+  if (lambda_expr.First()->GetType() == Type::kList) {
+    const List &param_list = *static_cast<const List *>(lambda_expr.First());
+    Environment &curr_env = frame() ? frame()->locals : globals();
+    return new Function(curr_env, param_list, *lambda_expr.Rest());
+  } else {
+    return new Error("lambda invalid: expects param list");
+  }
+}
+
 const Object *Treewalker::LocalLookup(const Symbol &sym) {
   Environment local_env = frame() ? frame()->locals : globals();
   auto iter = local_env.find(&sym);
@@ -139,6 +161,33 @@ const Object *Treewalker::MakeDef(const Symbol &sym, const Object &obj) {
   return Bind(sym, obj);
 }
 
+const Object *Treewalker::Call(const Function &func, const List &args) {
+  Frame *frame = new Frame{Environment{}, &func.body()};
+  const List &func_params = func.params();
+  const ConsC *curr_param = func_params.head();
+  // Bind args
+  for (const Object &obj : args) {
+    const Symbol &param = *static_cast<const Symbol *>(curr_param->car());
+    frame->locals.insert({&param, &obj});
+  }
+  this->set_frame(frame);
+  const Object *ret_val;
+  for (const Object &expr : *frame->body) {
+    ret_val = Eval(expr);
+  }
+  // unwind stack
+  // TODO: change this to use static link
+  this->set_frame(nullptr);
+  return ret_val;
+}
+
+const List *Treewalker::EvalList(const List &lst) {
+  if (&lst == kNil) {
+    return kNil;
+  } else {
+    return Cons(Eval(*lst.First()), EvalList(*lst.Rest()));
+  }
+}
 }  // namespace interp
 
 }  // namespace sl

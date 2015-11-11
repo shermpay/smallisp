@@ -11,6 +11,7 @@
 #include "builtins.h"
 #include "environment.h"
 #include "frame.h"
+#include "function.h"
 #include "list.h"
 #include "objects.h"
 #include "specialforms.h"
@@ -32,12 +33,14 @@ class Treewalker {
   const Object *Eval(const Object &);
   // Handle a special form given the form and the kind of form.
   const Object *HandleSpecialForm(const List &sf, specialforms::SFKind sf_kind);
-  // The define special form
+  // The def special form
   const Object *Define(const List &sf);
   // The set! special form
   // set! is defined to change the bindings of variables of the smallest scope.
   // It requires the symbol to have an existing definition.
   const Object *UnsafeSet(const List &sf);
+  // This should return a sl::Function
+  const Object *Lambda(const List &sf);
 
   // Lookup a variable in all scopes.
   const Object *Lookup(const Symbol &);
@@ -49,10 +52,12 @@ class Treewalker {
   const Object *Bind(const Symbol &sym, const Object &obj);
   // Create a definition and bind the symbol to the object.
   const Object *MakeDef(const Symbol &sym, const Object &obj);
+  const Object *Call(const Function &func, const List &args);
 
  private:
   Environment globals_;  // Global bindings symbol table
   Frame *frame_;         // Current stack frame
+  const List *EvalList(const List &);
 };
 }  // namespace interp
 

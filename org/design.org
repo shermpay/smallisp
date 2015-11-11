@@ -49,10 +49,12 @@ meant to have a complete and rich runtime.
    *set!* changes the binding of a variable found in the smallest scope that
    encloses to a new value.
    
+
 * Implementation Design
 ** Components
    Smallisp 
 *** Data Types
+**** Object
 All Smallisp Datatypes implement the an sl::Object ABC.
 
 #+BEGIN_SRC C++
@@ -71,6 +73,7 @@ class Object {
 We do not want to have another layer of indirection for ints, to keep the
 language fast and simple. 
 
+**** Int and Symbol
 So the definitions of sl::Int, sl::Symbol, and sl::List is as follows.
 #+BEGIN_SRC C++
 namespace sl {
@@ -91,6 +94,9 @@ public:
   static Symbol get(const std::string &Name) {};
 }
 
+#+END_SRC
+**** Cons and List
+#+BEGIN_SRC C++
 struct Cons {
   Object *Object;
   Cons *Next;
@@ -106,6 +112,39 @@ public:
 
 We would like our runtime to interact with primitive in "primitive
 form". Meaning that we have minimal wrapping.
+
+**** Function
+Functions in user space represent an object that can be /called/ with a given
+number of arguments.
+Functions in interpreter space encompasses a definition and each instance of
+that definition is a /stack frame/.
+The /calling semantics/ of a function object is defined by the interpreter,
+which makes the Function type very unique from the other primitives.
+
+#+BEGIN_SRC C++
+  class Function : public Object {
+   public:
+    // Environment is enclosing environment
+    Function(const Environment env, const List *params, const Object *body)
+        : params_(params), body_(body), env_(env){};
+
+    const List *params(void) const { return params_; };
+    const Object *body(void) const { return body_; };
+    Type GetType(void) const override { return Type::kFunction; };
+    // Function equality is address equality, it should rarely if not ever be used
+    bool IsEqual(const Object *o) const override { return this == o; };
+    // Inherit hashcode
+
+   private:
+    const List *params_;
+    const Object *body_;
+    // Make this function a *closure*
+    const Environment env_;
+  };
+#+END_SRC
+
+The interpreter should be able to take a function an create a stack frame when
+the function is called.
 
 *** Reader
 Instead of having a lexer and parser. I would like to implement a

@@ -16,26 +16,27 @@ namespace sl {
 // which can be given to an interpreter to be executed.
 class Function : public Object {
  public:
-  Function(const Environment env, const List *params, const Object *body)
+  // Environment is enclosing environment
+  Function(const Environment env, const List &params, const List &body)
       : params_(params), body_(body), env_(env){};
-  virtual ~Function() {
-    delete params_;
-    delete body_;
-  };
 
-  const List *params(void) const { return params_; };
-  const Object *body(void) const { return body_; };
-  virtual Type GetType(void) const override { return Type::kFunction; };
-  virtual bool IsEqual(const Object *o) const override { return this == o; };
-  virtual bool IsEqual(const Object &o) const override {
-    return this->IsEqual(&o);
+  const List &params(void) const { return params_; };
+  const List &body(void) const { return body_; };
+  Type GetType(void) const override { return Type::kFunction; };
+  bool IsEqual(const Object *o) const override { return this == o; };
+  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
+
+  std::size_t Hashcode(void) const override {
+    return reinterpret_cast<std::size_t>(this);
   };
-  // Creates a Smallisp Stack Frame
-  const Frame *MakeFrame(const List *args) const;
+  const std::string Str(void) const override {
+    return "Function: " + params().Str() + " -> Object";
+  };
 
  private:
-  const List *params_;
-  const Object *body_;
+  const List &params_;
+  // An implicit list of expressions to evaluate
+  const List &body_;
   // Make this function a *closure*
   const Environment env_;
 };
