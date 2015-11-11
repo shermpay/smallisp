@@ -28,7 +28,8 @@ BIN_DIR := ./bin
 #############
 CXX_INCLUDE_FLAGS := -I$(INCL_DIR)
 CXX_SAFETY_FLAGS := -Wall
-CXX_DEBUG_FLAGS := -g
+ # -Wl passes arg to linker
+CXX_DEBUG_FLAGS := -g -Wl,--export-dynamic
 CXX_INST_FLAGS := --coverage
 CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
 	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS) $(CXX_INST_FLAGS)
@@ -123,7 +124,8 @@ $(BIN_DIR)/meta_test: $(TEST_DIR)/meta_test.cc
 
 .PHONY: clean
 clean: 
-	rm -r $(BUILD_DIR)/* main
+	rm -r $(BUILD_DIR)/* 
+	rm -r $(BIN_DIR)/*
 
 .PHONY: clean_tests
 clean_tests:
