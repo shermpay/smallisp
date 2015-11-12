@@ -16,8 +16,8 @@ namespace treewalker {
 class BuiltinAdd : public CodeObject {
  public:
   const Object *operator()(const List &args) const override {
-    if (args.First()->GetType() == Type::kInt &&
-        args.Rest()->First()->GetType() == Type::kInt) {
+    if (!IsNil(&args) && args.First()->GetType() == Type::kInt &&
+        !IsNil(args.Rest()) && args.Rest()->First()->GetType() == Type::kInt) {
       const Int &left = *static_cast<const Int *>(args.First());
       const Int &right = *static_cast<const Int *>(args.Rest()->First());
       return &(left + right);
@@ -25,12 +25,10 @@ class BuiltinAdd : public CodeObject {
       return new Error("binary add requires 2 ints");
   }
   const std::string Str(void) const override { return "add"; }
-  static const BuiltinAdd &kInstance;
 };
-const BuiltinAdd &kBuiltinAdd = *(new BuiltinAdd());
 
-const Function *MakeFunction(const List *params, const CodeObject &co) {
-  return new Function(Environment{}, *params, co);
+const Function *MakeFunction(const List *params, const CodeObject *co) {
+  return new Function(Environment{}, *params, *co);
 }
 
 }  // namespace treewalker
@@ -38,7 +36,7 @@ const Function *MakeFunction(const List *params, const CodeObject &co) {
 Environment Treewalker::builtins = {
     {Symbol::Get("add"),
      treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
-                              treewalker::kBuiltinAdd)},
+                              new treewalker::BuiltinAdd)},
 };
 
 const Object *Treewalker::Eval(const Object &obj) {
@@ -176,7 +174,14 @@ const Object *Treewalker::LocalLookup(const Symbol &sym) {
 // TODO: change this when static links are implemented
 const Object *Treewalker::Lookup(const Symbol &sym) {
   const Object *obj = LocalLookup(sym);
-  if (obj == kVoid) return new Error("Symbol '" + sym.Str() + "' unbound.");
+  if (obj == kVoid) {
+    auto iter = globals().find(&sym);
+    if (iter != globals().end()) {
+      obj = iter->second;
+    } else {
+      return new Error("Symbol '" + sym.Str() + "' unbound.");
+    }
+  }
   return obj;
 };
 
@@ -196,12 +201,25 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
   const Object *ret_val;
   if (func.body().GetType() == Type::kList) {
     Frame *frame = new Frame{Environment{}, &func.body()};
-    const List &func_params = func.params();
-    const ConsC *curr_param = func_params.head();
+    const List *rest_params = &func.params();
     // Bind args
     for (const Object &obj : args) {
-      const Symbol &param = *static_cast<const Symbol *>(curr_param->car());
-      frame->locals.insert({&param, &obj});
+      if (IsNil(rest_params)) {
+        // Too many args
+        return new Error("Invalid number of args. expect: " +
+                         std::to_string(func.params().Count()) + ", got: " +
+                         std::to_string(args.Count()));
+      }
+      const Symbol *curr_param =
+          static_cast<const Symbol *>(rest_params->First());
+      rest_params = rest_params->Rest();
+      frame->locals.insert({curr_param, &obj});
+    }
+    if (!IsNil(rest_params)) {
+      // Too few args
+      return new Error("Invalid number of args. expect: " +
+                       std::to_string(func.params().Count()) + ", got: " +
+                       std::to_string(args.Count()));
     }
     this->set_frame(frame);
     for (const Object &expr : *static_cast<const List *>(frame->body)) {
@@ -225,7 +243,8 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
 void Treewalker::Print(void) const {
   std::cout << "Globals: {\n";
   for (const auto pair : globals_) {
-    std::cout << pair.first << " => " << pair.second->Str() << "\n";
+    assert(pair.first != nullptr && pair.second != nullptr);
+    std::cout << pair.first->Str() << " => " << pair.second->Str() << "\n";
   }
   std::cout << "}" << std::endl;
 }
