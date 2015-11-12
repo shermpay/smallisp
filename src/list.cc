@@ -36,9 +36,8 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 
 // ListIterator
 List::ListIterator &List::ListIterator::operator++() {
-  assert(curr_->cdr()->GetType() == sl::Type::kList);
-  curr_ = dynamic_cast<const ConsC *>(
-      static_cast<const List *>(curr_->cdr())->head());
+  assert(curr_->Rest()->GetType() == sl::Type::kList);
+  curr_ = curr_->Rest();
   ++curr_count_;
   return *this;
 }
@@ -126,11 +125,8 @@ const List *List::Rest(void) const {
 
 size_t List::Count(void) const {
   size_t count = 0;
-  const ConsC *curr = this->head();
-  while (curr) {
-    count++;
-    curr = (static_cast<const List *>(curr->cdr()))->head();
-  }
+  count++;
+  if (this != kNil) count += this->Rest()->Count();
   return count;
 }
 

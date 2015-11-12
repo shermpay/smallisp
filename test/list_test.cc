@@ -27,7 +27,6 @@ TEST(ConsC, Equality) {
 TEST(Nil, Equality) {
   ASSERT_EQ(kNil, kNil);
   ASSERT_NE(*kNil, *Cons(Int::Get(1), kNil));
-  ASSERT_EQ(nullptr, kNil->head());
 }
 
 TEST(Nil, IsNil) {

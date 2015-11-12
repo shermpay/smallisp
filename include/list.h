@@ -63,10 +63,10 @@ class List : public Object {
     typedef Object *pointer;
     typedef Object &reference;
 
-    ListIterator(const List &list) : curr_(list.head()), curr_count_(0){};
-    inline const ConsC *curr() const { return this->curr_; };
+    ListIterator(const List &list) : curr_(&list), curr_count_(0){};
+    inline const List *curr() const { return this->curr_; };
     inline size_t curr_count(void) const { return this->curr_count_; };
-    const Object &operator*() { return *(this->curr()->car()); };
+    const Object &operator*() { return *(this->curr()->head()->car()); };
     ListIterator &operator++();
     ListIterator operator++(int);
 
@@ -79,7 +79,7 @@ class List : public Object {
     }
 
    private:
-    const ConsC *curr_;
+    const List *curr_;
     size_t curr_count_;
   };
 
@@ -143,10 +143,21 @@ class List : public Object {
 struct Nil : public List {
  public:
   static const Nil *Get(void);
-  virtual const ConsC *head(void) const {
+  const ConsC *head(void) const override {
     assert(false && "Cannot dereference nil");
     return nullptr;
   };
+
+  const Object *First() const override {
+    assert(false && "Cannot dereference nil");
+    return nullptr;
+  };
+  const List *Rest(void) const override {
+    assert(false && "Cannot dereference nil");
+    return nullptr;
+  };
+  size_t Count(void) const override { return 0; };
+  const std::string Str(void) const override { return "()"; };
 
  private:
   static Nil *instance;
