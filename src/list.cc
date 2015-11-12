@@ -55,11 +55,14 @@ const Nil *Nil::Get(void) {
   return instance;
 }
 
-const List *kNil = Nil::Get();
-const List *List::kEmpty = kNil;
+const List *kNil(void) {
+  static const Nil *nil = Nil::Get();
+  return nil;
+}
+const List *List::kEmpty = kNil();
 
 const List *InitHelperPtr(std::initializer_list<const Object *> il) {
-  const List *curr = kNil;
+  const List *curr = kNil();
   for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
     const Object *o = (*ptr);
     curr = Cons(o, curr);
@@ -112,8 +115,8 @@ const std::string List::Str(void) const {
 }
 
 const Object *List::First() const {
-  if (this == kNil) {
-    return kNil;
+  if (this == kNil()) {
+    return kNil();
   }
   return this->head_->car();
 }
@@ -126,15 +129,15 @@ const List *List::Rest(void) const {
 size_t List::Count(void) const {
   size_t count = 0;
   count++;
-  if (this != kNil) count += this->Rest()->Count();
+  if (this != kNil()) count += this->Rest()->Count();
   return count;
 }
 
 // ---------------- List Operators ----------------
 bool operator==(const List &lhs, const List &rhs) {
-  if (&lhs != kNil && &rhs != kNil) {
+  if (!IsNil(&lhs) && !IsNil(&rhs)) {
     return lhs.head()->IsEqual(*(rhs.head()));
-  } else if (&lhs == kNil && &rhs == kNil) {
+  } else if (IsNil(&lhs) && IsNil(&rhs)) {
     return true;
   } else {
     return false;
@@ -155,6 +158,6 @@ const List *Cons(const Object *o1, const List *o2) {
 }
 
 // ---------------- Nil Definitions ----------------
-bool IsNil(const Object *o) { return o == kNil; }
+bool IsNil(const Object *o) { return o == kNil(); }
 
 }  // namespace sl

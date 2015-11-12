@@ -166,7 +166,7 @@ struct Nil : public List {
   Nil &operator=(Nil const &) = delete;
 };
 
-extern const List *kNil;
+extern const List *kNil(void);
 
 bool operator==(const List &lhs, const List &rhs);
 
