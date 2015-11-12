@@ -49,11 +49,21 @@ meant to have a complete and rich runtime.
    *set!* changes the binding of a variable found in the smallest scope that
    encloses to a new value.
    
+** Builtin Operations
+Regardless of implementation choice, the following list specifies all primitive
+builtin operations that have to be implemented.
+*** Int
+- add: Addition without auto promotion or overflow check
+- sub: Subtraction without auto promotion or overflow check
+- mul: Multiplication without auto promotion or overflow check
+- div: Integer division
+*** Cons and List
+- cons: Construct a cons cell, a pair or a list
 
 * Implementation Design
 ** Components
    Smallisp 
-*** Data Types
+** Data Types
 **** Object
 All Smallisp Datatypes implement the an sl::Object ABC.
 
@@ -146,19 +156,31 @@ which makes the Function type very unique from the other primitives.
 The interpreter should be able to take a function an create a stack frame when
 the function is called.
 
-*** Reader
+**** BuiltinFunctions
+Builtin functions are tied to the implementation of the interpreter.
+
+For treewalking interpreters, the builtin function is executing code that
+is written in the implementation language.
+
+For bytecode interpreters, builtin functions are just a set of bytecodes the
+implement the function. For example to implement integer addition, the bytecode
+interpreter might have a int_add instruction.
+
+For JIT compilers, the builtin functions can just be native code that we link to.
+
+** Reader
 Instead of having a lexer and parser. I would like to implement a
 LispReader. The reader would parse the input and produce Sl_List objects,
 keeping the language 'list' and the implementation 'list' consistent would keep
 the language smaller and also provide efficient implementations. The minor
 setback would be that we have to keep the list object as simple as possible to
 minimize the overhead of list objects.
-*** Interpreter
+** Interpreter
 **** AST Interpreter
      To provide a starter and baseline for the runtime, I would like to
      implement an AST walking interpeter. This would mean a slow but nonetheless
      working interpreter.
-****  LLVM JIT Compiler
+**** LLVM JIT Compiler
       Fitting  on a the LLVM JIT compiler would allow us to benchmark our
       bytecode interpreter implementation and JIT implementation. It would also
       serve as another execution engine.
@@ -167,7 +189,8 @@ minimize the overhead of list objects.
      compiler and interpreter.
 **** JIT Compiler
      Finally is a JIT compiler from bytecode to machine code.
-*** Userspace vs Interpreter space
+** Builtin Operations
+** Userspace vs Interpreter space
     Because this is a dynamic lisp, it is expected to have large amounts of
     overlap between userspace and interpreter space objects. However a few key
     things to note:
@@ -180,7 +203,7 @@ minimize the overhead of list objects.
     All functions that will be called in userspace will have a return type of
     ~const Object *~ and parameter types of ~const Object *~, *NOT* specific types.
     Therefore, some level of type checking has to be done for builtin functions.
-*** Using references vs pointers
+** Using references vs pointers
     _Prefer reference over pointers_
     Ideally we have functions that take and return references in all cases.
     But that has proven to be a nuisance, because there are times we want to

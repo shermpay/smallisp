@@ -8,8 +8,12 @@
 #ifndef _TREEWALK_INTERP_DEF
 #define _TREEWALK_INTERP_DEF
 
-#include "builtins.h"
 #include "environment.h"
+
+#include <functional>
+#include <iostream>
+
+#include "builtins.h"
 #include "frame.h"
 #include "function.h"
 #include "list.h"
@@ -20,9 +24,28 @@ namespace sl {
 
 namespace interp {
 
+namespace treewalker {
+class CodeObject : public Object {
+ public:
+  Type GetType() const override { return Type::kCodeObject; };
+  // Value equality between 2 smallisp objects.
+  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
+  bool IsEqual(const Object *o) const override { return this == o; };
+  // Hash code of this object
+  std::size_t Hashcode(void) const override {
+    return reinterpret_cast<std::size_t>(this);
+  }
+  // Str should return a human readable std::string object
+  virtual const std::string Str(void) const override = 0;
+  virtual const Object *operator()(const List &lst) const = 0;
+};
+
+}  // namespace treewalker
+
 class Treewalker {
  public:
-  Treewalker(void) : globals_(builtins::environment), frame_(nullptr){};
+  static Environment builtins;
+  Treewalker(void) : globals_(builtins), frame_(nullptr){};
   // The environment is returned directly and can be manipulated directly.
   Environment &globals(void) { return globals_; };
   // A pointer to current frame and nullptr if there is not frame.
@@ -53,6 +76,8 @@ class Treewalker {
   // Create a definition and bind the symbol to the object.
   const Object *MakeDef(const Symbol &sym, const Object &obj);
   const Object *Call(const Function &func, const List &args);
+
+  void Print(void) const;
 
  private:
   Environment globals_;  // Global bindings symbol table

@@ -18,6 +18,7 @@ int Start() {
   puts("Press Ctrl-D to exit");
   interp::Treewalker interp;
   for (;;) {
+    interp.Print();  // For debugging
     std::cout << kPrompt;
     Reader reader(std::cin);
     const Object *expr = reader.ReadExpr();

@@ -33,6 +33,7 @@ enum class Type {
   kFunction,
   kVoid,
   kError,
+  kCodeObject,
 };
 
 std::ostream &operator<<(std::ostream &os, const Type &type);
@@ -106,19 +107,19 @@ class Int : public Object {
   static Int &Val(const long &x);
 
   // operators
-  inline Int &operator+(const Int &oi) {
+  inline Int &operator+(const Int &oi) const {
     return Int::Val(this->value() + oi.value());
   };
 
-  inline Int &operator-(const Int &oi) {
+  inline Int &operator-(const Int &oi) const {
     return Int::Val(this->value() - oi.value());
   };
 
-  inline Int &operator*(const Int &oi) {
+  inline Int &operator*(const Int &oi) const {
     return Int::Val(this->value() * oi.value());
   };
 
-  inline Int &operator/(const Int &oi) {
+  inline Int &operator/(const Int &oi) const {
     return Int::Val(this->value() / oi.value());
   };
 

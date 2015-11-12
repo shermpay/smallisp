@@ -3,11 +3,12 @@
 namespace sl {
 
 namespace builtins {
-Environment environment{
-    // {Symbol::Get("add"), Int::Get(0)},     {Symbol::Get("sub"), Int::Get(0)},
-    // {Symbol::Get("mul"), Int::Get(0)},     {Symbol::Get("div"), Int::Get(0)},
-    // {Symbol::Get("println"), Int::Get(0)},
-};
+
+const Symbol *kAdd = Symbol::Get("add");
+const Symbol *kSub = Symbol::Get("sub");
+const Symbol *kMul = Symbol::Get("mul");
+const Symbol *kDiv = Symbol::Get("div");
+const Symbol *kCons = Symbol::Get("cons");
 
 }  // namespace builtins
 }  // namespace sl

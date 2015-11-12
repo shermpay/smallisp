@@ -2,6 +2,7 @@
 
 #include <list>
 
+#include "builtins.h"
 #include "function.h"
 #include "list.h"
 #include "objects.h"
@@ -10,6 +11,36 @@
 namespace sl {
 
 namespace interp {
+
+namespace treewalker {
+class BuiltinAdd : public CodeObject {
+ public:
+  const Object *operator()(const List &args) const override {
+    if (args.First()->GetType() == Type::kInt &&
+        args.Rest()->First()->GetType() == Type::kInt) {
+      const Int &left = *static_cast<const Int *>(args.First());
+      const Int &right = *static_cast<const Int *>(args.Rest()->First());
+      return &(left + right);
+    } else
+      return new Error("binary add requires 2 ints");
+  }
+  const std::string Str(void) const override { return "add"; }
+  static const BuiltinAdd &kInstance;
+};
+const BuiltinAdd &kBuiltinAdd = *(new BuiltinAdd());
+
+const Function *MakeFunction(const List *params, const CodeObject &co) {
+  return new Function(Environment{}, *params, co);
+}
+
+}  // namespace treewalker
+
+Environment Treewalker::builtins = {
+    {Symbol::Get("add"),
+     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
+                              treewalker::kBuiltinAdd)},
+};
+
 const Object *Treewalker::Eval(const Object &obj) {
   const Object *result = nullptr;
   switch (obj.GetType()) {
@@ -162,28 +193,46 @@ const Object *Treewalker::MakeDef(const Symbol &sym, const Object &obj) {
 }
 
 const Object *Treewalker::Call(const Function &func, const List &args) {
-  Frame *frame = new Frame{Environment{}, &func.body()};
-  const List &func_params = func.params();
-  const ConsC *curr_param = func_params.head();
-  // Bind args
-  for (const Object &obj : args) {
-    const Symbol &param = *static_cast<const Symbol *>(curr_param->car());
-    frame->locals.insert({&param, &obj});
-  }
-  this->set_frame(frame);
   const Object *ret_val;
-  for (const Object &expr : *frame->body) {
-    ret_val = Eval(expr);
+  if (func.body().GetType() == Type::kList) {
+    Frame *frame = new Frame{Environment{}, &func.body()};
+    const List &func_params = func.params();
+    const ConsC *curr_param = func_params.head();
+    // Bind args
+    for (const Object &obj : args) {
+      const Symbol &param = *static_cast<const Symbol *>(curr_param->car());
+      frame->locals.insert({&param, &obj});
+    }
+    this->set_frame(frame);
+    for (const Object &expr : *static_cast<const List *>(frame->body)) {
+      ret_val = Eval(expr);
+    }
+    this->set_frame(nullptr);
+  } else if (func.body().GetType() == Type::kCodeObject) {
+    // Body is a builtin object
+    const treewalker::CodeObject &builtin_fn =
+        static_cast<const treewalker::CodeObject &>(func.body());
+    ret_val = builtin_fn(args);
+  } else {
+    assert(false && "should not be here");
+    ret_val = new Error("");
   }
   // unwind stack
   // TODO: change this to use static link
-  this->set_frame(nullptr);
   return ret_val;
 }
 
+void Treewalker::Print(void) const {
+  std::cout << "Globals: {\n";
+  for (const auto pair : globals_) {
+    std::cout << pair.first << " => " << pair.second->Str() << "\n";
+  }
+  std::cout << "}" << std::endl;
+}
+
 const List *Treewalker::EvalList(const List &lst) {
-  if (&lst == kNil) {
-    return kNil;
+  if (IsNil(&lst)) {
+    return kNil();
   } else {
     return Cons(Eval(*lst.First()), EvalList(*lst.Rest()));
   }

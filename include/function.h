@@ -12,16 +12,16 @@ namespace sl {
 
 // A Smallisp Function Object
 // Constructing the function creates a new function definition.
-// The function cannot be "called", rather it is able to create stack frames
-// which can be given to an interpreter to be executed.
+// The function cannot be "called", rather it holds an Object that can be
+// evaluated by the interpreter.
 class Function : public Object {
  public:
   // Environment is enclosing environment
-  Function(const Environment env, const List &params, const List &body)
+  Function(const Environment env, const List &params, const Object &body)
       : params_(params), body_(body), env_(env){};
 
   const List &params(void) const { return params_; };
-  const List &body(void) const { return body_; };
+  const Object &body(void) const { return body_; };
   Type GetType(void) const override { return Type::kFunction; };
   bool IsEqual(const Object *o) const override { return this == o; };
   bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
@@ -36,7 +36,7 @@ class Function : public Object {
  private:
   const List &params_;
   // An implicit list of expressions to evaluate
-  const List &body_;
+  const Object &body_;
   // Make this function a *closure*
   const Environment env_;
 };

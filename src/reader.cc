@@ -162,7 +162,7 @@ static const List *ReadSexpHelper(Reader *reader) {
   reader->ReadWhitespace();
   if (reader->PeekChar() == Delim::kRParen) {
     reader->GetChar();
-    return Cons(obj, kNil);
+    return Cons(obj, kNil());
   } else if (reader->PeekChar() == EOF) {
     return nullptr;
   } else {

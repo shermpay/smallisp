@@ -10,7 +10,7 @@ namespace sl {
 // Smallisp Frame Structure
 struct Frame {
   Environment locals;  // Local bindings symbol table
-  const List *body;
+  const Object *body;
   /* Missing Fields
      static_link: Link to previous frame
    */
