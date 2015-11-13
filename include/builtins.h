@@ -10,11 +10,11 @@ namespace sl {
 
 namespace builtins {
 
-extern const Symbol *kAdd;
-extern const Symbol *kSub;
-extern const Symbol *kMul;
-extern const Symbol *kDiv;
-extern const Symbol *kCons;
+const Symbol *kAdd(void);
+const Symbol *kSub(void);
+const Symbol *kMul(void);
+const Symbol *kDiv(void);
+const Symbol *kCons(void);
 
 }  // namespace builtins
 }  // namespace sl

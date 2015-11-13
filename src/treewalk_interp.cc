@@ -1,6 +1,8 @@
 #include "treewalk_interp.h"
 
+#include <functional>
 #include <list>
+#include <utility>
 
 #include "builtins.h"
 #include "function.h"
@@ -13,18 +15,48 @@ namespace sl {
 namespace interp {
 
 namespace treewalker {
+static const Object *BinaryOp(
+    const List &args,
+    const std::function<const Int &(const Int &, const Int &)> &op) {
+  if (!IsNil(&args) && args.First()->GetType() == Type::kInt &&
+      !IsNil(args.Rest()) && args.Rest()->First()->GetType() == Type::kInt) {
+    const Int *left = static_cast<const Int *>(args.First());
+    const Int *right = static_cast<const Int *>(args.Rest()->First());
+    return &op(*left, *right);
+  }
+  return new Error("binary op requires 2 ints");
+}
+
 class BuiltinAdd : public CodeObject {
  public:
   const Object *operator()(const List &args) const override {
-    if (!IsNil(&args) && args.First()->GetType() == Type::kInt &&
-        !IsNil(args.Rest()) && args.Rest()->First()->GetType() == Type::kInt) {
-      const Int &left = *static_cast<const Int *>(args.First());
-      const Int &right = *static_cast<const Int *>(args.Rest()->First());
-      return &(left + right);
-    } else
-      return new Error("binary add requires 2 ints");
+    return BinaryOp(args, std::plus<const Int &>());
   }
   const std::string Str(void) const override { return "add"; }
+};
+
+class BuiltinSub : public CodeObject {
+ public:
+  const Object *operator()(const List &args) const override {
+    return BinaryOp(args, std::minus<const Int &>());
+  }
+  const std::string Str(void) const override { return "sub"; }
+};
+
+class BuiltinMul : public CodeObject {
+ public:
+  const Object *operator()(const List &args) const override {
+    return BinaryOp(args, std::multiplies<const Int &>());
+  }
+  const std::string Str(void) const override { return "mul"; }
+};
+
+class BuiltinDiv : public CodeObject {
+ public:
+  const Object *operator()(const List &args) const override {
+    return BinaryOp(args, std::divides<const Int &>());
+  }
+  const std::string Str(void) const override { return "div"; }
 };
 
 const Function *MakeFunction(const List *params, const CodeObject *co) {
@@ -34,9 +66,18 @@ const Function *MakeFunction(const List *params, const CodeObject *co) {
 }  // namespace treewalker
 
 Environment Treewalker::builtins = {
-    {Symbol::Get("add"),
+    {builtins::kAdd(),
      treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
                               new treewalker::BuiltinAdd)},
+    {builtins::kSub(),
+     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
+                              new treewalker::BuiltinSub)},
+    {builtins::kMul(),
+     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
+                              new treewalker::BuiltinMul)},
+    {builtins::kDiv(),
+     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
+                              new treewalker::BuiltinDiv)},
 };
 
 const Object *Treewalker::Eval(const Object &obj) {
