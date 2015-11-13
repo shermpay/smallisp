@@ -157,15 +157,16 @@ const Object *Reader::ReadSymbol(const std::string &symbol_name) {
   return Symbol::Get(symbol_name);
 }
 
+// Reads zero or more exprs until closing paren
 static const List *ReadSexpHelper(Reader *reader) {
-  const Object *obj = reader->ReadExpr();
-  reader->ReadWhitespace();
   if (reader->PeekChar() == Delim::kRParen) {
     reader->GetChar();
-    return Cons(obj, kNil());
+    return kNil();
   } else if (reader->PeekChar() == EOF) {
     return nullptr;
   } else {
+    const Object *obj = reader->ReadExpr();
+    reader->ReadWhitespace();
     const List *rest = ReadSexpHelper(reader);
     return (rest ? Cons(obj, rest) : nullptr);
   }
