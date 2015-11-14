@@ -74,7 +74,9 @@ TEST(Eval, EvalPrimitives) {
   interp.Eval(expr);
   ASSERT_EQ(Int::Val(2), *interp.Lookup(Symbol::Val("x")));
   const Object *err =
-      interp.Eval(List{new List({&specialforms::kLambda, kNil()}), kNil()});
+      interp.Eval(List{new List({&specialforms::kLambda, kNil()})});
+  ASSERT_EQ(Error(""), *err);
+  err = interp.Eval(List{new List({&specialforms::kLambda})});
   ASSERT_EQ(Error(""), *err);
 }
 

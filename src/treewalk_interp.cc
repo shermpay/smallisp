@@ -198,6 +198,8 @@ const Object *Treewalker::Lambda(const sl::List &sf) {
   const List &lambda_expr = *sf.Rest();
   if (lambda_expr.First()->GetType() == Type::kList) {
     const List &param_list = *static_cast<const List *>(lambda_expr.First());
+    if (IsNil(&param_list))
+      return new Error("Syntax error: lambda must have param list");
     Environment &curr_env = frame() ? frame()->locals : globals();
     const List *body = lambda_expr.Rest();
     if (IsNil(body)) return new Error("Syntax error: lambda must have body");
