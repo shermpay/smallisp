@@ -132,6 +132,8 @@ TEST(List, Rest) {
   const List *list = Cons(Int::Get(6), tail);
   EXPECT_TRUE(list->Rest()->IsEqual(*tail));
   ASSERT_EQ(*tail, *(list->Rest()));
+  ASSERT_EQ(*kNil(), *tail->Rest());
+  ASSERT_EQ(Error(""), *kNil()->Rest());
 }
 
 TEST(List, Count) {

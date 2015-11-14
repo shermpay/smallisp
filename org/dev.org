@@ -3,5 +3,7 @@
 * Bugs
 ** DONE #1: Reader does not seem to read empty lists
    Reproducible case: (def foo (lambda () 1)), (lambda () 1)
-   Fix: make ReadSexpHelper read 0 or more instead of 1 or more
-** TODO #2: (lambda ()) segfaults
+   Fix(#587271b422): make ReadSexpHelper read 0 or more instead of 1 or more
+** DONE #2: Evaluating (lambda ()) segfaults
+   Repro: ((lambda()))
+   Fix: Ensure lambda has a body, add assertion if evaluating function without body

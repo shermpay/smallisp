@@ -16,35 +16,40 @@ TEST(Type, TypeNameMap) {
 }
 
 TEST(ObjectAllocation, IntAllocation) {
-  Int &integer = Int::Val(5);
+  const Int &integer = Int::Val(5);
   EXPECT_EQ(5, integer.value());
+  EXPECT_EQ(5, Int::Val(5).value());
+  EXPECT_EQ(3, Int::Val(3).value());
+  EXPECT_EQ(2, Int::Val(2).value());
+  EXPECT_EQ(1, Int::Val(1).value());
 }
 
 TEST(ObjectAllocation, SymbolAllocation) {
-  Symbol &sym_foo = Symbol::Val("Foo");
+  const Symbol &sym_foo = Symbol::Val("Foo");
   EXPECT_EQ("Foo", sym_foo.name());
-  Symbol &sym_bar = Symbol::Val("Bar");
+  const Symbol &sym_bar = Symbol::Val("Bar");
   EXPECT_EQ("Bar", sym_bar.name());
-  Symbol &sym_foo_ptr = Symbol::Val("Foo");
+  const Symbol &sym_foo_ptr = Symbol::Val("Foo");
   EXPECT_EQ("Foo", sym_foo_ptr.name());
   EXPECT_EQ(sym_foo, sym_foo_ptr);
 }
 
 TEST(ObjectEquality, IntEquality) {
-  Int &integer = Int::Val(5);
+  const Int &integer = Int::Val(5);
+  EXPECT_EQ(Int::Val(1), Int::Val(1));
   EXPECT_EQ(Int::Val(5), integer);
   EXPECT_NE(Int::Val(6), integer);
   EXPECT_EQ(Int::Val(7), Int::Val(7));
 };
 
 TEST(ObjectEquality, SymbolEquality) {
-  Symbol &sym_foo = Symbol::Val("foo");
+  const Symbol &sym_foo = Symbol::Val("foo");
   EXPECT_EQ(Symbol::Val("foo"), sym_foo);
   EXPECT_NE(Symbol::Val("bar"), sym_foo);
 }
 
 TEST(ObjectTestPrinter, IntTestPrinter) {
-  Int &integer = Int::Val(5);
+  const Int &integer = Int::Val(5);
   EXPECT_EQ("5", ::testing::PrintToString(integer));
 }
 
@@ -69,11 +74,13 @@ TEST(Hashing, ObjectHashFn) {
 }
 
 TEST(Hashing, ObjectInHashSet) {
-  std::unordered_set<std::reference_wrapper<Object>, HashFn<Object>> obj_set;
+  std::unordered_set<std::reference_wrapper<const Object>, HashFn<Object>>
+      obj_set;
   obj_set.insert(Int::Val(1));
   obj_set.insert(Symbol::Val("foo"));
   EXPECT_EQ(2, obj_set.size());
-  std::unordered_set<std::reference_wrapper<Symbol>, HashFn<Object>> sym_set;
+  std::unordered_set<std::reference_wrapper<const Symbol>, HashFn<Object>>
+      sym_set;
   sym_set.insert(Symbol::Val("foo"));
   sym_set.insert(Symbol::Val("bar"));
   EXPECT_EQ(2, sym_set.size());

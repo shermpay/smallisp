@@ -97,6 +97,8 @@ const Object *Treewalker::Eval(const Object &obj) {
     case Type::kList: {
       // TODO: Change this once we have Sexprs.
       // For now we do not have quoted lists, so a list is a S-Expression.
+      if (IsNil(&obj)) return new Error("Cannot evaluate nil");
+
       const List &lst = static_cast<const List &>(obj);
       const Object *head = lst.First();
       if (head->GetType() == Type::kSymbol) {
@@ -197,7 +199,9 @@ const Object *Treewalker::Lambda(const sl::List &sf) {
   if (lambda_expr.First()->GetType() == Type::kList) {
     const List &param_list = *static_cast<const List *>(lambda_expr.First());
     Environment &curr_env = frame() ? frame()->locals : globals();
-    return new Function(curr_env, param_list, *lambda_expr.Rest());
+    const List *body = lambda_expr.Rest();
+    if (IsNil(body)) return new Error("Syntax error: lambda must have body");
+    return new Function(curr_env, param_list, *body);
   } else {
     return new Error("lambda invalid: expects param list");
   }
@@ -262,11 +266,16 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
                        std::to_string(func.params().Count()) + ", got: " +
                        std::to_string(args.Count()));
     }
-    this->set_frame(frame);
-    for (const Object &expr : *static_cast<const List *>(frame->body)) {
-      ret_val = Eval(expr);
+    if (IsNil(frame->body)) {
+      assert(false && "Function body cannot be empty");
+      ret_val = new Error("Panic!");
+    } else {
+      this->set_frame(frame);
+      for (const Object &expr : *static_cast<const List *>(frame->body)) {
+        ret_val = Eval(expr);
+      }
+      this->set_frame(nullptr);
     }
-    this->set_frame(nullptr);
   } else if (func.body().GetType() == Type::kCodeObject) {
     // Body is a builtin object
     const treewalker::CodeObject &builtin_fn =
@@ -274,7 +283,7 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
     ret_val = builtin_fn(args);
   } else {
     assert(false && "should not be here");
-    ret_val = new Error("");
+    ret_val = new Error("Panic!");
   }
   // unwind stack
   // TODO: change this to use static link

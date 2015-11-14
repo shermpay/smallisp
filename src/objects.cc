@@ -28,24 +28,24 @@ std::ostream &operator<<(std::ostream &os, const Type &type) {
 // void PrintTo(const Int &o, std::ostream *os) { *os << ""; }
 
 // -------- Definitions for Int -----------
-static std::unordered_map<long, Int &> &IntPool(void) {
-  static std::unordered_map<long, Int &> pool;
+static std::unordered_map<long, const Int &> &IntPool(void) {
+  static std::unordered_map<long, const Int &> pool;
   return pool;
 };
 
-Int *Int::Get(const long &x) {
-  Int *result;
+const Int *Int::Get(const long &x) {
   auto found = IntPool().find(x);
   if (found == IntPool().end()) {
-    result = new Int(x);
+    const Int *result = new Int(x);
     IntPool().insert({x, *result});
+    return result;
   } else {
-    result = &(found->second);
+    const Int *result = &(found->second);
+    return result;
   }
-  return result;
 }
 
-Int &Int::Val(const long &x) { return *Int::Get(x); };
+const Int &Int::Val(const long &x) { return *Int::Get(x); };
 
 // -------- Definition for Symbol ----------
 static std::unordered_map<std::string, Symbol &> &SymbolPool(void) {
@@ -53,7 +53,7 @@ static std::unordered_map<std::string, Symbol &> &SymbolPool(void) {
   return pool;
 };
 
-Symbol *Symbol::Get(const std::string &name) {
+const Symbol *Symbol::Get(const std::string &name) {
   Symbol *sym;
   assert(SymbolPool().bucket_count() > 0 &&
          "SymbolPool not initialized, bucket_count < 0");
@@ -67,7 +67,9 @@ Symbol *Symbol::Get(const std::string &name) {
   return sym;
 }
 
-Symbol &Symbol::Val(const std::string &name) { return *Symbol::Get(name); }
+const Symbol &Symbol::Val(const std::string &name) {
+  return *Symbol::Get(name);
+}
 
 Void *Void::instance = nullptr;
 const Void *Void::Get(void) {

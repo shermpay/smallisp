@@ -8,8 +8,6 @@ namespace sl {
 
 namespace {
 
-#define ASSERT_NOTNULL(x) (ASSERT_NE(nullptr, x))
-
 TEST(Environments, BindLookup) {
   interp::Treewalker interp;
   interp.Bind(Symbol::Val("x"), Int::Val(1));
@@ -70,11 +68,14 @@ TEST(Functions, Call) {
 TEST(Eval, EvalPrimitives) {
   interp::Treewalker interp;
   ASSERT_EQ(Int::Val(1), *interp.Eval(Int::Val(1)));
-  interp.Bind(Symbol::Val("x"), Int::Val(1));
+  interp.Eval(List{&specialforms::kDef, Symbol::Get("x"), Int::Get(1)});
   ASSERT_EQ(Int::Val(1), *interp.Eval(Symbol::Val("x")));
   const List expr({&specialforms::kUnsafeSet, Symbol::Get("x"), Int::Get(2)});
   interp.Eval(expr);
   ASSERT_EQ(Int::Val(2), *interp.Lookup(Symbol::Val("x")));
+  const Object *err =
+      interp.Eval(List{new List({&specialforms::kLambda, kNil()}), kNil()});
+  ASSERT_EQ(Error(""), *err);
 }
 
 }  // anonymous
