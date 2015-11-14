@@ -57,7 +57,7 @@ class Treewalker {
   // Handle a special form given the form and the kind of form.
   const Object *HandleSpecialForm(const List &sf, specialforms::SFKind sf_kind);
   // The def special form
-  const Object *Define(const List &sf);
+  const Object *Def(const List &sf);
   // The set! special form
   // set! is defined to change the bindings of variables of the smallest scope.
   // It requires the symbol to have an existing definition.

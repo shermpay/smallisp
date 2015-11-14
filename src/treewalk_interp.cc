@@ -136,7 +136,7 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
       assert(false && "Special Form Invalid cannot be handled.");
       break;
     case SFKind::kDef:
-      ret = Define(sf);
+      ret = Def(sf);
       break;
     case SFKind::kUnsafeSet: {
       ret = UnsafeSet(sf);
@@ -153,7 +153,7 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
   return ret;
 }
 
-const Object *Treewalker::Define(const List &sf) {
+const Object *Treewalker::Def(const List &sf) {
   const List &define_expr = *sf.Rest();
   if (define_expr.First()->GetType() == Type::kSymbol) {
     const Symbol &define_sym =

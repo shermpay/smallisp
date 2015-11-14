@@ -1,4 +1,4 @@
-# Local Variables
+# Local Variables:
 # fill-column: 80
 # eval: (auto-fill-mode)
 # End:
@@ -190,6 +190,12 @@ minimize the overhead of list objects.
 **** JIT Compiler
      Finally is a JIT compiler from bytecode to machine code.
 ** Builtin Operations
+Builtin operations are currently segregated and interpreter dependent. One way
+to decouple and allow reuse is to have a native FFI(Foreign Function
+Interface). This would allow us to have functions that link with native code
+that can be shared amongst all intepreters. Builtin operations would live in the
+global environment as symbol => native code. Evaluating native code would be a
+shared feature that all intepreters can use.
 ** Userspace vs Interpreter space
     Because this is a dynamic lisp, it is expected to have large amounts of
     overlap between userspace and interpreter space objects. However a few key
