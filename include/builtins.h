@@ -10,11 +10,15 @@ namespace sl {
 
 namespace builtins {
 
-const Symbol *kAdd(void);
-const Symbol *kSub(void);
-const Symbol *kMul(void);
-const Symbol *kDiv(void);
-const Symbol *kCons(void);
+const Symbol *NilSym(void);
+const Symbol *TrueSym(void);
+const Symbol *FalseSym(void);
+
+const Symbol *AddSym(void);
+const Symbol *SubSym(void);
+const Symbol *MulSym(void);
+const Symbol *DivSym(void);
+const Symbol *ConsSym(void);
 
 }  // namespace builtins
 }  // namespace sl

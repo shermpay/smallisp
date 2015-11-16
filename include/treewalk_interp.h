@@ -64,6 +64,8 @@ class Treewalker {
   const Object *UnsafeSet(const List &sf);
   // This should return a sl::Function
   const Object *Lambda(const List &sf);
+  // The 'if' special form
+  const Object *If(const List &sf);
 
   // Lookup a variable in all scopes.
   const Object *Lookup(const Symbol &);

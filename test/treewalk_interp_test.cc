@@ -54,6 +54,15 @@ TEST(SpecialForm, Lambda) {
   ASSERT_EQ(List{Symbol::Get("x")}, id_fn.body());
 }
 
+TEST(SpecialForm, If) {
+  interp::Treewalker interp;
+  const List true_if_expr{&specialforms::kIf, &TRUE, Int::Get(1), Int::Get(2)};
+  ASSERT_EQ(Int::Val(1), *interp.If(true_if_expr));
+  const List false_if_expr{&specialforms::kIf, &FALSE, Int::Get(1),
+                           Int::Get(2)};
+  ASSERT_EQ(Int::Val(2), *interp.If(false_if_expr));
+}
+
 TEST(Functions, Call) {
   interp::Treewalker interp;
   const List id_lambda_expr{

@@ -68,17 +68,21 @@ const Function *MakeFunction(const List *params, const CodeObject *co) {
 
 }  // namespace treewalker
 
+// Initialize builtin environment
 Environment Treewalker::builtins = {
-    {builtins::kAdd(),
+    {builtins::NilSym(), NIL},
+    {builtins::TrueSym(), &TRUE},
+    {builtins::FalseSym(), &FALSE},
+    {builtins::AddSym(),
      treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
                               new treewalker::BuiltinAdd)},
-    {builtins::kSub(),
+    {builtins::SubSym(),
      treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
                               new treewalker::BuiltinSub)},
-    {builtins::kMul(),
+    {builtins::MulSym(),
      treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
                               new treewalker::BuiltinMul)},
-    {builtins::kDiv(),
+    {builtins::DivSym(),
      treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
                               new treewalker::BuiltinDiv)},
 };
@@ -87,6 +91,9 @@ const Object *Treewalker::Eval(const Object &obj) {
   const Object *result = nullptr;
   switch (obj.GetType()) {
     case Type::kInt: {
+      return &obj;
+    }
+    case Type::kBool: {
       return &obj;
     }
     case Type::kSymbol: {
@@ -124,7 +131,10 @@ const Object *Treewalker::Eval(const Object &obj) {
     }
     default: {
       // Error
-      result = new Error("Unable to recognize type of Object!");
+      result = new Error(
+          "Unable to recognize type."
+          "\n   object: " +
+          obj.Str());
     }
   }
   return result;
@@ -149,6 +159,10 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
       ret = Lambda(sf);
       break;
     }
+    case SFKind::kIf: {
+      ret = If(sf);
+      break;
+    }
     default: {
       assert(false && "Special Form not handled, this is a programming error!");
     }
@@ -159,22 +173,16 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
 const Object *Treewalker::Def(const List &sf) {
   // Guaranteed to have at least 1 element
   const List &define_expr = *static_cast<const List *>(sf.Rest());
-  if (IsNil(&define_expr))
-    return new Error("syntax error: def requires 2 args");
+  if (define_expr.Count() != 2)
+    return new Error(
+        "syntax error: define expression should be of the form "
+        "(define symbol expr)");
   if (define_expr.First()->GetType() == Type::kSymbol) {
     const Symbol &define_sym =
         *static_cast<const Symbol *>(define_expr.First());
     const List &define_body = *static_cast<const List *>(define_expr.Rest());
-
-    if (IsNil(&define_body))
-      return new Error("syntax error: def requires 2 args");
-    if (define_body.Count() == 1) {
-      const Object &obj = *Eval(*define_body.First());
-      return MakeDef(define_sym, obj);
-    } else {
-      // Error: (define symbol expr)
-      return new Error("syntax error: def expects (def! symbol expr)");
-    }
+    const Object &obj = *Eval(*define_body.First());
+    return MakeDef(define_sym, obj);
   } else {
     // Error: cannot bind to non-symbol
     return new Error("syntax error: def cannot bind to non-symbol");
@@ -183,19 +191,16 @@ const Object *Treewalker::Def(const List &sf) {
 
 const Object *Treewalker::UnsafeSet(const List &sf) {
   const List &set_expr = *static_cast<const List *>(sf.Rest());
+  if (set_expr.Count() != 2)
+    return new Error(
+        "syntax error: set! expression should be of the form "
+        "(set! symbol expr)");
   if (set_expr.First()->GetType() == Type::kSymbol) {
     const Symbol &set_sym = *static_cast<const Symbol *>(set_expr.First());
     if (*Lookup(set_sym) != Error("")) {
-      if (IsNil(&set_expr))
-        return new Error("syntax error: set! requires 2 args");
       const List &set_body = *static_cast<const List *>(set_expr.Rest());
-      if (set_body.Count() == 1) {
-        const Object &obj = *Eval(*set_body.First());
-        return Bind(set_sym, obj);
-      } else {
-        // Error: (set! symbol expr)
-        return new Error("syntax error: set! expects (set! symbol expr)");
-      }
+      const Object &obj = *Eval(*set_body.First());
+      return Bind(set_sym, obj);
     } else {
       return new Error("Cannot set! an undefined symbol");
     }
@@ -207,16 +212,41 @@ const Object *Treewalker::UnsafeSet(const List &sf) {
 
 const Object *Treewalker::Lambda(const sl::List &sf) {
   const List &lambda_expr = *static_cast<const List *>(sf.Rest());
+  if (lambda_expr.Count() != 2)
+    return new Error(
+        "syntax error: lambda expresion should be of the form "
+        "(lambda (params) body)");
   if (lambda_expr.First()->GetType() == Type::kList) {
     const List &param_list = *static_cast<const List *>(lambda_expr.First());
-    if (IsNil(&param_list))
-      return new Error("Syntax error: lambda must have param list");
     Environment &curr_env = frame() ? frame()->locals : globals();
     const List *body = static_cast<const List *>(lambda_expr.Rest());
-    if (IsNil(body)) return new Error("Syntax error: lambda must have body");
     return new Function(curr_env, param_list, *body);
   } else {
     return new Error("lambda invalid: expects param list");
+  }
+}
+
+const Object *Treewalker::If(const List &sf) {
+  const List &if_expr = *static_cast<const List *>(sf.Rest());
+  if (if_expr.Count() != 3)
+    return new Error(
+        "syntax error: if expression should be of the form "
+        "(if cond then else)");
+  const Object &if_cond = *Eval(*if_expr.First());
+  if (if_cond.GetType() == Type::kBool) {
+    // Check Syntax
+    const List &if_body = *static_cast<const List *>(if_expr.Rest());
+    assert(if_body.GetType() == Type::kList && "if body should be list");
+    if (bool(static_cast<const Bool &>(if_cond))) {
+      return Eval(*if_body.First());
+    } else {
+      return Eval(*static_cast<const List *>(if_body.Rest())->First());
+    }
+  } else {
+    return new Error(
+        "if condition must be of type Bool"
+        "\ncondition: " +
+        if_cond.Str());
   }
 }
 
@@ -280,7 +310,7 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
                        std::to_string(args.Count()));
     }
     if (IsNil(frame->body)) {
-      assert(false && "Function body cannot be empty");
+      assert(false && "FUNCTION BODY CANNOT BE EMPTY");
       ret_val = new Error("Panic!");
     } else {
       this->set_frame(frame);

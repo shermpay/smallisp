@@ -14,11 +14,13 @@ enum class SFKind {
   kDef,
   kUnsafeSet,
   kLambda,
+  kIf,
 };
 
 extern const Symbol &kDef;
 extern const Symbol &kUnsafeSet;
 extern const Symbol &kLambda;
+extern const Symbol &kIf;
 
 // Check if Symbol is a special form
 bool IsSpecialForm(const Symbol &);

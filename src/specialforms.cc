@@ -10,11 +10,13 @@ using SFTable = std::unordered_map<const Symbol *, SFKind>;
 const Symbol &kDef = Symbol::Val("def");
 const Symbol &kUnsafeSet = Symbol::Val("set!");
 const Symbol &kLambda = Symbol::Val("lambda");
+const Symbol &kIf = Symbol::Val("if");
 
 static SFTable kSFTable = {
     {&kDef, SFKind::kDef},
     {&kUnsafeSet, SFKind::kUnsafeSet},
     {&kLambda, SFKind::kLambda},
+    {&kIf, SFKind::kIf},
 };
 
 bool IsSpecialForm(const Symbol &sym) {

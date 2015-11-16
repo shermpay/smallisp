@@ -30,7 +30,7 @@ CXX_INCLUDE_FLAGS := -I$(INCL_DIR)
 CXX_SAFETY_FLAGS := -Wall
  # -Wl passes arg to linker
 CXX_DEBUG_FLAGS := -g -Wl,--export-dynamic
-CXX_INST_FLAGS := --coverage
+CXX_INST_FLAGS := # --coverage
 CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
 	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS) $(CXX_INST_FLAGS)
 
@@ -99,7 +99,7 @@ cov: $(TEST_BINS)
 tests: $(TEST_BINS)
 	for test in $(BIN_DIR)/*; do \
 		./$$test; \
-		mv *.gcda *.gcno $(PROFDIR); \
+		-mv *.gcda *.gcno $(PROFDIR); \
 	done
 
 %.cov: $(BIN_DIR)/%
@@ -110,7 +110,7 @@ tests: $(TEST_BINS)
 %: $(BIN_DIR)/%
 	$<
 	@echo "============ MOVING COVERAGE FILES ============="
-	mv *.gcda *.gcno $(PROFDIR)
+	-mv *.gcda *.gcno $(PROFDIR)
 
 ##################
 # Building Tests #
