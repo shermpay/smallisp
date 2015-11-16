@@ -40,6 +40,7 @@ CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
 SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))
 
 OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
+BASE_OBJS := $(BUILD_DIR)/objects.o $(BUILD_DIR)/utils.o
 
 ###########
 # Testing #
@@ -68,9 +69,12 @@ TEST_BINS := $(patsubst $(TEST_DIR)/%.$(SRC_EXT), $(BIN_DIR)/%, $(TEST_SRCS))
 main: main.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BIN_DIR)/$@
 
-run_main: main
+$(BIN_DIR)/main: main.cc $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
+
+run_main: $(BIN_DIR)/main
 	-make clean_cov
-	./bin/main
+	$(BIN_DIR)/main
 
 allobjs: $(OBJS)
 
@@ -111,16 +115,20 @@ tests: $(TEST_BINS)
 ##################
 # Building Tests #
 ##################
-$(BIN_DIR)/treewalk_interp_test: $(TEST_DIR)/treewalk_interp_test.cc $(BUILD_DIR)/objects.o $(BUILD_DIR)/list.o $(BUILD_DIR)/reader.o $(BUILD_DIR)/treewalk_interp.o $(BUILD_DIR)/specialforms.o $(BUILD_DIR)/builtins.o
+$(BIN_DIR)/treewalk_interp_test: $(TEST_DIR)/treewalk_interp_test.cc $(BUILD_DIR)/list.o \
+$(BUILD_DIR)/reader.o $(BUILD_DIR)/treewalk_interp.o \
+$(BUILD_DIR)/specialforms.o $(BUILD_DIR)/builtins.o \
+$(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
-$(BIN_DIR)/reader_test: $(TEST_DIR)/reader_test.cc $(BUILD_DIR)/objects.o $(BUILD_DIR)/list.o  $(BUILD_DIR)/reader.o
+$(BIN_DIR)/reader_test: $(TEST_DIR)/reader_test.cc $(BUILD_DIR)/list.o  $(BUILD_DIR)/reader.o \
+$(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
-$(BIN_DIR)/list_test: $(TEST_DIR)/list_test.cc $(BUILD_DIR)/list.o $(BUILD_DIR)/objects.o
+$(BIN_DIR)/list_test: $(TEST_DIR)/list_test.cc $(BUILD_DIR)/list.o $(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
-$(BIN_DIR)/objects_test: $(TEST_DIR)/objects_test.cc $(BUILD_DIR)/objects.o
+$(BIN_DIR)/objects_test: $(TEST_DIR)/objects_test.cc $(BASE_OBJS)
 	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
 $(BIN_DIR)/meta_test: $(TEST_DIR)/meta_test.cc
@@ -128,16 +136,19 @@ $(BIN_DIR)/meta_test: $(TEST_DIR)/meta_test.cc
 
 .PHONY: clean
 clean: 
-	rm -r $(BUILD_DIR)/* 
-	rm -r $(BIN_DIR)/*
+	-rm -r $(BUILD_DIR)/* 
+	-rm -r $(BIN_DIR)/*
 
 .PHONY: clean_tests
 clean_tests:
-	rm -r $(BIN_DIR)/*
-	rm -r $(COVDIR)/*
-	rm -r $(HTMLDIR)/*
-	rm -r $(PROFDIR)/*
+	-rm -r $(BIN_DIR)/*
+	-rm -r $(COVDIR)/*
+	-rm -r $(HTMLDIR)/*
+	-rm -r $(PROFDIR)/*
 .PHONY: clean_cov
 clean_cov:
-	rm -r $(BUILD_DIR)/*.gcda $(BUILD_DIR)/*.gcno
+	-rm -r $(BUILD_DIR)/*.gcda $(BUILD_DIR)/*.gcno
+	-rm -r $(COVDIR)/*
+	-rm -r $(HTMLDIR)/*
+	-rm -r $(PROFDIR)/*
 
