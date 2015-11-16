@@ -87,7 +87,7 @@ TEST(Reader, ReadSexp) {
   std::stringstream ss_empty("()");
   Reader reader_empty(ss_empty);
   sexp = reader_empty.ReadSexp();
-  ASSERT_EQ(*kNil(), *sexp);
+  ASSERT_EQ(*NIL, *sexp);
 }
 
 TEST(Reader, ReadExpr) {

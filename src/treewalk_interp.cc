@@ -19,9 +19,12 @@ static const Object *BinaryOp(
     const List &args,
     const std::function<const Int &(const Int &, const Int &)> &op) {
   if (!IsNil(&args) && args.First()->GetType() == Type::kInt &&
-      !IsNil(args.Rest()) && args.Rest()->First()->GetType() == Type::kInt) {
+      !IsNil(args.Rest()) &&
+      static_cast<const List *>(args.Rest())->First()->GetType() ==
+          Type::kInt) {
     const Int *left = static_cast<const Int *>(args.First());
-    const Int *right = static_cast<const Int *>(args.Rest()->First());
+    const Int *right = static_cast<const Int *>(
+        static_cast<const List *>(args.Rest())->First());
     return &op(*left, *right);
   }
   return new Error("binary op requires 2 ints");
@@ -111,7 +114,7 @@ const Object *Treewalker::Eval(const Object &obj) {
       const List &func_lst = *EvalList(lst);
       if (func_lst.First()->GetType() == Type::kFunction) {
         result = Call(*static_cast<const Function *>(func_lst.First()),
-                      *func_lst.Rest());
+                      *static_cast<const List *>(func_lst.Rest()));
       } else {
         result = new Error("Cannot call non-function in expression " +
                            func_lst.Str());
@@ -154,36 +157,44 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
 }
 
 const Object *Treewalker::Def(const List &sf) {
-  const List &define_expr = *sf.Rest();
+  // Guaranteed to have at least 1 element
+  const List &define_expr = *static_cast<const List *>(sf.Rest());
+  if (IsNil(&define_expr))
+    return new Error("syntax error: def requires 2 args");
   if (define_expr.First()->GetType() == Type::kSymbol) {
     const Symbol &define_sym =
         *static_cast<const Symbol *>(define_expr.First());
-    const List &define_body = *define_expr.Rest();
+    const List &define_body = *static_cast<const List *>(define_expr.Rest());
+
+    if (IsNil(&define_body))
+      return new Error("syntax error: def requires 2 args");
     if (define_body.Count() == 1) {
       const Object &obj = *Eval(*define_body.First());
       return MakeDef(define_sym, obj);
     } else {
       // Error: (define symbol expr)
-      return new Error("define syntax invalid: expects (define! symbol expr)");
+      return new Error("syntax error: def expects (def! symbol expr)");
     }
   } else {
     // Error: cannot bind to non-symbol
-    return new Error("define invalid: cannot bind to non-symbol");
+    return new Error("syntax error: def cannot bind to non-symbol");
   }
 }
 
 const Object *Treewalker::UnsafeSet(const List &sf) {
-  const List &set_expr = *sf.Rest();
+  const List &set_expr = *static_cast<const List *>(sf.Rest());
   if (set_expr.First()->GetType() == Type::kSymbol) {
     const Symbol &set_sym = *static_cast<const Symbol *>(set_expr.First());
     if (*Lookup(set_sym) != Error("")) {
-      const List &set_body = *set_expr.Rest();
+      if (IsNil(&set_expr))
+        return new Error("syntax error: set! requires 2 args");
+      const List &set_body = *static_cast<const List *>(set_expr.Rest());
       if (set_body.Count() == 1) {
         const Object &obj = *Eval(*set_body.First());
         return Bind(set_sym, obj);
       } else {
         // Error: (set! symbol expr)
-        return new Error("set! syntax invalid: expects (set! symbol expr)");
+        return new Error("syntax error: set! expects (set! symbol expr)");
       }
     } else {
       return new Error("Cannot set! an undefined symbol");
@@ -195,13 +206,13 @@ const Object *Treewalker::UnsafeSet(const List &sf) {
 }
 
 const Object *Treewalker::Lambda(const sl::List &sf) {
-  const List &lambda_expr = *sf.Rest();
+  const List &lambda_expr = *static_cast<const List *>(sf.Rest());
   if (lambda_expr.First()->GetType() == Type::kList) {
     const List &param_list = *static_cast<const List *>(lambda_expr.First());
     if (IsNil(&param_list))
       return new Error("Syntax error: lambda must have param list");
     Environment &curr_env = frame() ? frame()->locals : globals();
-    const List *body = lambda_expr.Rest();
+    const List *body = static_cast<const List *>(lambda_expr.Rest());
     if (IsNil(body)) return new Error("Syntax error: lambda must have body");
     return new Function(curr_env, param_list, *body);
   } else {
@@ -259,8 +270,8 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
       }
       const Symbol *curr_param =
           static_cast<const Symbol *>(rest_params->First());
-      rest_params = rest_params->Rest();
       frame->locals.insert({curr_param, &obj});
+      rest_params = static_cast<const List *>(rest_params->Rest());
     }
     if (!IsNil(rest_params)) {
       // Too few args
@@ -284,7 +295,7 @@ const Object *Treewalker::Call(const Function &func, const List &args) {
         static_cast<const treewalker::CodeObject &>(func.body());
     ret_val = builtin_fn(args);
   } else {
-    assert(false && "should not be here");
+    assert(false && "SHOULD NOT BE HERE");
     ret_val = new Error("Panic!");
   }
   // unwind stack
@@ -303,9 +314,10 @@ void Treewalker::Print(void) const {
 
 const List *Treewalker::EvalList(const List &lst) {
   if (IsNil(&lst)) {
-    return kNil();
+    return NIL;
   } else {
-    return Cons(Eval(*lst.First()), EvalList(*lst.Rest()));
+    return Cons(Eval(*lst.First()),
+                EvalList(*static_cast<const List *>(lst.Rest())));
   }
 }
 }  // namespace interp

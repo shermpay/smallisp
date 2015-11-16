@@ -24,6 +24,13 @@ TEST(ObjectAllocation, IntAllocation) {
   EXPECT_EQ(1, Int::Val(1).value());
 }
 
+TEST(ObjectAllocation, Bool) {
+  const Bool &t = True();
+  ASSERT_TRUE(t.value());
+  const Bool &f = False();
+  ASSERT_FALSE(f.value());
+}
+
 TEST(ObjectAllocation, SymbolAllocation) {
   const Symbol &sym_foo = Symbol::Val("Foo");
   EXPECT_EQ("Foo", sym_foo.name());
@@ -40,6 +47,11 @@ TEST(ObjectEquality, IntEquality) {
   EXPECT_EQ(Int::Val(5), integer);
   EXPECT_NE(Int::Val(6), integer);
   EXPECT_EQ(Int::Val(7), Int::Val(7));
+};
+
+TEST(ObjectEquality, BoolEquality) {
+  EXPECT_EQ(True(), True());
+  EXPECT_EQ(False(), False());
 };
 
 TEST(ObjectEquality, SymbolEquality) {

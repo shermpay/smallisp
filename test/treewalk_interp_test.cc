@@ -24,11 +24,11 @@ TEST(Environments, BindLookup) {
 TEST(SpecialForm, Def) {
   interp::Treewalker interp;
   const List expr({&specialforms::kDef, Symbol::Get("x"), Int::Get(1)});
-  const Object *obj = interp.Define(expr);
+  const Object *obj = interp.Def(expr);
   ASSERT_NE(Error(""), *obj);
   ASSERT_EQ(Int::Val(1), *interp.Lookup(Symbol::Val("x")));
   // Redefining symbol
-  ASSERT_EQ(Error(""), *interp.Define(expr));
+  ASSERT_EQ(Error(""), *interp.Def(expr));
 }
 
 TEST(SpecialForm, UnsafeSet) {
@@ -37,7 +37,7 @@ TEST(SpecialForm, UnsafeSet) {
   // Undefined symbol
   ASSERT_EQ(Error(""), *interp.UnsafeSet(expr));
   const List def_expr({&specialforms::kDef, Symbol::Get("x"), Int::Get(1)});
-  interp.Define(def_expr);
+  interp.Def(def_expr);
   ASSERT_EQ(Int::Val(1), *interp.Lookup(Symbol::Val("x")));
   interp.UnsafeSet(expr);
   ASSERT_EQ(Int::Val(2), *interp.Lookup(Symbol::Val("x")));
@@ -74,7 +74,7 @@ TEST(Eval, EvalPrimitives) {
   interp.Eval(expr);
   ASSERT_EQ(Int::Val(2), *interp.Lookup(Symbol::Val("x")));
   const Object *err =
-      interp.Eval(List{new List({&specialforms::kLambda, kNil()})});
+      interp.Eval(List{new List({&specialforms::kLambda, NIL})});
   ASSERT_EQ(Error(""), *err);
   err = interp.Eval(List{new List({&specialforms::kLambda})});
   ASSERT_EQ(Error(""), *err);

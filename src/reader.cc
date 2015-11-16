@@ -161,7 +161,7 @@ const Object *Reader::ReadSymbol(const std::string &symbol_name) {
 static const List *ReadSexpHelper(Reader *reader) {
   if (reader->PeekChar() == Delim::kRParen) {
     reader->GetChar();
-    return kNil();
+    return NIL;
   } else if (reader->PeekChar() == EOF) {
     return nullptr;
   } else {
