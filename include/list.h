@@ -5,11 +5,13 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cassert>
+#include <cstdio>
 
 #include <iterator>
 #include <vector>
 #include <iostream>
 
+#include "utils.h"
 #include "objects.h"
 
 namespace sl {
@@ -93,14 +95,8 @@ class List : public Object {
     assert(cell->cdr()->GetType() != sl::Type::kCons);
   };
 
-  // Move constructor
-  List(List &&lst) noexcept : head_(std::move(lst.head())){};
-
   // Constructor for creating lists of objects.
   List(std::initializer_list<const Object *> il);
-
-  // Copy constructor
-  List(const List &lst) : head_(lst.head()){};
 
   // Destructor for list
   ~List(void);
@@ -116,7 +112,7 @@ class List : public Object {
   virtual const Object *First() const;
 
   // Returns the rest of the list
-  virtual const List *Rest(void) const;
+  virtual const Object *Rest(void) const;
 
   // Counts the number of elements in the list.
   virtual size_t Count(void) const;
@@ -143,19 +139,9 @@ class List : public Object {
 struct Nil : public List {
  public:
   static const Nil *Get(void);
-  const ConsC *head(void) const override {
-    assert(false && "Cannot dereference nil");
-    return nullptr;
-  };
-
-  const Object *First() const override {
-    assert(false && "Cannot dereference nil");
-    return nullptr;
-  };
-  const List *Rest(void) const override {
-    assert(false && "Cannot dereference nil");
-    return nullptr;
-  };
+  const ConsC *head(void) const override;
+  const Object *First() const override;
+  const Object *Rest(void) const override;
   size_t Count(void) const override { return 0; };
   const std::string Str(void) const override { return "()"; };
 
@@ -166,7 +152,7 @@ struct Nil : public List {
   Nil &operator=(Nil const &) = delete;
 };
 
-extern const List *kNil(void);
+#define NIL (Nil::Get())
 
 bool operator==(const List &lhs, const List &rhs);
 
@@ -177,7 +163,7 @@ inline void PrintTo(const List &o, std::ostream *os) { *os << o.Str(); };
 
 const ConsC *Cons(const Object *o1, const Object *o2);
 const List *Cons(const Object *o1, const List *o2);
-bool IsNil(const Object *o);
+inline bool IsNil(const Object *o) { return o == NIL; };
 }  // namespace sl
 
 #endif

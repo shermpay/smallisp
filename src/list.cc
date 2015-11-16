@@ -15,6 +15,8 @@
 #include <iostream>
 #include <iterator>
 
+#include "utils.h"
+
 namespace sl {
 
 // ---------------- ConsC ----------------
@@ -37,7 +39,7 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 // ListIterator
 List::ListIterator &List::ListIterator::operator++() {
   assert(curr_->Rest()->GetType() == sl::Type::kList);
-  curr_ = curr_->Rest();
+  curr_ = static_cast<const List *>(curr_->Rest());
   ++curr_count_;
   return *this;
 }
@@ -55,14 +57,10 @@ const Nil *Nil::Get(void) {
   return instance;
 }
 
-const List *kNil(void) {
-  static const Nil *nil = Nil::Get();
-  return nil;
-}
-const List *List::kEmpty = kNil();
+const List *List::kEmpty = NIL;
 
 const List *InitHelperPtr(std::initializer_list<const Object *> il) {
-  const List *curr = kNil();
+  const List *curr = NIL;
   for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
     const Object *o = (*ptr);
     curr = Cons(o, curr);
@@ -115,13 +113,13 @@ const std::string List::Str(void) const {
 }
 
 const Object *List::First() const {
-  if (this == kNil()) {
-    return kNil();
+  if (this == NIL) {
+    return NIL;
   }
   return this->head_->car();
 }
 
-const List *List::Rest(void) const {
+const Object *List::Rest(void) const {
   assert(this->head()->cdr()->GetType() == sl::Type::kList);
   return (static_cast<const List *>(this->head()->cdr()));
 }
@@ -129,7 +127,7 @@ const List *List::Rest(void) const {
 size_t List::Count(void) const {
   size_t count = 0;
   count++;
-  if (this != kNil()) count += this->Rest()->Count();
+  if (this != NIL) count += static_cast<const List *>(this->Rest())->Count();
   return count;
 }
 
@@ -158,6 +156,19 @@ const List *Cons(const Object *o1, const List *o2) {
 }
 
 // ---------------- Nil Definitions ----------------
-bool IsNil(const Object *o) { return o == kNil(); }
+static const std::string kDerefNilErrorMsg = "cannot dereference nil";
+
+const ConsC *Nil::head(void) const {
+  debug::ErrorWithTrace(kDerefNilErrorMsg);
+  return nullptr;
+};
+
+const Object *Nil::First(void) const {
+  return debug::ErrorWithTrace(kDerefNilErrorMsg);
+};
+
+const Object *Nil::Rest(void) const {
+  return debug::ErrorWithTrace(kDerefNilErrorMsg);
+};
 
 }  // namespace sl
