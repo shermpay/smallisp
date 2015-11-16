@@ -11,22 +11,12 @@
 
 #include <iostream>
 
-// Use the following code for stacktraces
-// #include <execinfo.h>
-// #define SIZE 8
-//     void *backtrace_buf[SIZE];
-//     int nptrs = backtrace(backtrace_buf, SIZE);
-//     printf("backtrace returned %d addresses.\n", nptrs);
-//     char **trace_strings = backtrace_symbols(backtrace_buf, nptrs);
-//     if (trace_strings) {
-//       for (int i = 0; i < nptrs; ++i) printf("%s\n", trace_strings[i]);
-//     }
-
 namespace sl {
 
 // Type defines all the primitive Smallisp Types.
 enum class Type {
   kInt,
+  kBool,
   kSymbol,
   kCons,
   kList,
@@ -97,7 +87,10 @@ class Int : public Object {
     return this->IsEqual(&o);
   };
   virtual bool IsEqual(const Object *o) const override { return this == o; };
-  virtual std::size_t Hashcode(void) const override { return value(); }
+  virtual std::size_t Hashcode(void) const override {
+    std::hash<long> fn;
+    return fn(value());
+  }
   virtual const std::string Str(void) const override {
     return std::to_string(this->value_);
   };
@@ -145,6 +138,56 @@ inline void PrintTo(const Int &o, std::ostream *os) { *os << o.Str(); };
 // inline std::ostream &operator<<(std::ostream &os, const Int &o) {
 //   return os << o.Str();
 // };
+
+class Bool : public Object {
+ public:
+  // Return the type of the object for introspection.
+  Type GetType() const override { return Type::kBool; };
+  // Value equality between 2 smallisp objects.
+  virtual bool IsEqual(const Object &o) const override {
+    return this->IsEqual(&o);
+  };
+  virtual bool IsEqual(const Object *o) const override { return this == o; };
+  // Hash code of this object
+  std::size_t Hashcode(void) const override {
+    std::hash<bool> fn;
+    return fn(value());
+  };
+  // Str should return a human readable std::string object
+  const std::string Str(void) const override {
+    return value_ ? "true" : "false";
+  };
+  bool value() const { return value_; };
+  static const Bool &True(void) {
+    static const Bool *t = new Bool(true);
+    return *t;
+  };
+  static const Bool &False(void) {
+    static const Bool *f = new Bool(false);
+    return *f;
+  };
+  explicit operator bool() const { return this->value(); };
+
+ private:
+  Bool(bool val) : value_(val){};
+  bool value_;
+};
+
+inline bool operator==(const Bool &lhs, const Bool &rhs) {
+  return &lhs == &rhs;
+};
+
+inline bool operator!=(const Bool &lhs, const Bool &rhs) {
+  return !(lhs == rhs);
+};
+
+const Bool &True(void);
+#define TRUE (True())
+const Bool &False(void);
+#define FALSE (False())
+
+// TODO: Remove when bug in gtest is fixed
+inline void PrintTo(const Bool &o, std::ostream *os) { *os << o.Str(); };
 
 // Smallisp Symbol Objects
 // Construction of Symbol objects is done via the Symbol::get(std::string)

@@ -47,6 +47,11 @@ const Int *Int::Get(const long &x) {
 
 const Int &Int::Val(const long &x) { return *Int::Get(x); };
 
+// -------- Definition for Bool --------
+
+const Bool &True(void) { return Bool::True(); };
+const Bool &False(void) { return Bool::False(); };
+
 // -------- Definition for Symbol ----------
 static std::unordered_map<std::string, Symbol &> &SymbolPool(void) {
   static std::unordered_map<std::string, Symbol &> pool;

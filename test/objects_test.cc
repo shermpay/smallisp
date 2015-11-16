@@ -15,6 +15,9 @@ TEST(Type, TypeNameMap) {
   EXPECT_EQ("Int", str);
 }
 
+////////////////////////
+// Generic Operations //
+////////////////////////
 TEST(ObjectAllocation, IntAllocation) {
   const Int &integer = Int::Val(5);
   EXPECT_EQ(5, integer.value());
@@ -28,6 +31,16 @@ TEST(ObjectAllocation, Bool) {
   const Bool &t = True();
   ASSERT_TRUE(t.value());
   const Bool &f = False();
+  ASSERT_FALSE(f.value());
+  // Checks if it is a singleton
+  ASSERT_EQ(&True(), &True());
+  ASSERT_EQ(&False(), &False());
+}
+
+TEST(ObjectAllocation, BoolMacro) {
+  const Bool &t = TRUE;
+  ASSERT_TRUE(t.value());
+  const Bool &f = FALSE;
   ASSERT_FALSE(f.value());
 }
 
@@ -52,6 +65,9 @@ TEST(ObjectEquality, IntEquality) {
 TEST(ObjectEquality, BoolEquality) {
   EXPECT_EQ(True(), True());
   EXPECT_EQ(False(), False());
+  EXPECT_NE(True(), False());
+  EXPECT_NE(False(), True());
+  EXPECT_EQ(TRUE, TRUE);
 };
 
 TEST(ObjectEquality, SymbolEquality) {
@@ -63,6 +79,11 @@ TEST(ObjectEquality, SymbolEquality) {
 TEST(ObjectTestPrinter, IntTestPrinter) {
   const Int &integer = Int::Val(5);
   EXPECT_EQ("5", ::testing::PrintToString(integer));
+}
+
+TEST(ObjectTestPrinter, BoolTestPrinter) {
+  EXPECT_EQ("true", ::testing::PrintToString(TRUE));
+  EXPECT_EQ("false", ::testing::PrintToString(FALSE));
 }
 
 TEST(ObjectTestPrinter, SymbolTestPrinter) {
@@ -103,6 +124,9 @@ TEST(Hashing, ObjectInHashSet) {
   EXPECT_EQ(3, sym_map.size());
 }
 
+//////////////////
+// Int Specific //
+//////////////////
 TEST(Int, Operators) {
   // +
   EXPECT_EQ(Int::Val(1), Int::Val(0) + Int::Val(1));
@@ -125,6 +149,14 @@ TEST(Int, Operators) {
   EXPECT_EQ(Int::Val(0), Int::Val(0) / Int::Val(2));
   // TODO: Divide by zero
   // TODO: Fractions
+}
+
+///////////////////
+// Bool Specific //
+///////////////////
+TEST(Bool, ExplicitConversion) {
+  EXPECT_TRUE(bool(TRUE));
+  EXPECT_FALSE(bool(FALSE));
 }
 }
 
