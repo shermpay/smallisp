@@ -4,12 +4,16 @@
 #define _UTILS_DEF
 
 #include <string>
+#include "objects.h"
 
 namespace sl {
 
 namespace debug {
 
-void ErrorWithTrace(const std::string &msg);
+// Enable debugging if passed in true, else disable debugging.
+void Enable(bool);
+
+const Error *ErrorWithTrace(const std::string &msg);
 
 }  // namespace debug
 }  // namespace sl

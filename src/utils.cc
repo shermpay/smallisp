@@ -7,9 +7,15 @@
 #include <string>
 #include <vector>
 
+#include "objects.h"
+
 namespace sl {
 
 namespace debug {
+
+static bool Enabled = false;
+
+void Enable(bool enable) { Enabled = enable; }
 
 static const size_t kStackTraceSize = 8;
 static const std::string kAddr2LineBin = "/bin/addr2line";
@@ -35,22 +41,24 @@ static bool ExecAddr2Line(const std::string &filename, void *addr) {
   return true;
 }
 
-void ErrorWithTrace(const std::string &msg) {
-  fprintf(stderr, "Error: %s\n", msg.c_str());
-  void *backtrace_buf[kStackTraceSize];
-  int nptrs = backtrace(backtrace_buf, kStackTraceSize);
-  fprintf(stderr, "Stack Trace(%d addresses): \n", nptrs);
-  char **trace_strs = backtrace_symbols(backtrace_buf, nptrs);
-  if (trace_strs) {
-    // Skip the first one, it is just this call.
-    for (int i = 1; i < nptrs; ++i) {
-      const std::string filename = ParseFilename(trace_strs[i]);
-      fprintf(stderr, "  %d %s \n    ", i, trace_strs[i]);
-      ExecAddr2Line(filename, backtrace_buf[i]);
+const Error *ErrorWithTrace(const std::string &msg) {
+  if (Enabled) {
+    fprintf(stderr, "Error: %s\n", msg.c_str());
+    void *backtrace_buf[kStackTraceSize];
+    int nptrs = backtrace(backtrace_buf, kStackTraceSize);
+    fprintf(stderr, "Stack Trace(%d addresses): \n", nptrs);
+    char **trace_strs = backtrace_symbols(backtrace_buf, nptrs);
+    if (trace_strs) {
+      // Skip the first one, it is just this call.
+      for (int i = 1; i < nptrs; ++i) {
+        const std::string filename = ParseFilename(trace_strs[i]);
+        fprintf(stderr, "  %d %s \n    ", i, trace_strs[i]);
+        ExecAddr2Line(filename, backtrace_buf[i]);
+      }
+      delete trace_strs;
     }
-    delete trace_strs;
-    exit(1);
   }
+  return new Error(msg);
 }
 }  // namespace debug
 }  // namespace sl
