@@ -166,6 +166,7 @@ class Bool : public Object {
     static const Bool *f = new Bool(false);
     return *f;
   };
+  static const Bool *Get(bool val) { return val ? &True() : &False(); };
   explicit operator bool() const { return this->value(); };
 
  private:
