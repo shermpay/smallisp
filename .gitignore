@@ -26,3 +26,8 @@ lexer
 # coverage output
 test/cov
 test/html
+
+# gtags
+GTAGS
+GRTAGS
+GPATH
