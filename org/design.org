@@ -1,6 +1,5 @@
 # Local Variables:
 # fill-column: 80
-# eval: (auto-fill-mode)
 # End:
 #+TITLE: Design
 
@@ -123,9 +122,12 @@ public:
 We would like our runtime to interact with primitive in "primitive
 form". Meaning that we have minimal wrapping.
 
+**** Callable
+Callable is an interface that implements the call operator:
+const Object *operator()(const Object *args);
 **** Function
 Functions in user space represent an object that can be /called/ with a given
-number of arguments.
+number of arguments. (They implement the /Callable/ interface)
 Functions in interpreter space encompasses a definition and each instance of
 that definition is a /stack frame/.
 The /calling semantics/ of a function object is defined by the interpreter,
@@ -134,39 +136,43 @@ which makes the Function type very unique from the other primitives.
 #+BEGIN_SRC C++
   class Function : public Object {
    public:
-    // Environment is enclosing environment
-    Function(const Environment env, const List *params, const Object *body)
-        : params_(params), body_(body), env_(env){};
+    Function(Interp *interp, const List *params, const Object *body)
+        : params_(params), body_(body), interp_(interp){};
 
     const List *params(void) const { return params_; };
     const Object *body(void) const { return body_; };
     Type GetType(void) const override { return Type::kFunction; };
     // Function equality is address equality, it should rarely if not ever be used
     bool IsEqual(const Object *o) const override { return this == o; };
-    // Inherit hashcode
+    // Use default hashcode
 
    private:
     const List *params_;
     const Object *body_;
-    // Make this function a *closure*
-    const Environment env_;
+    Interp *interp_;
   };
 #+END_SRC
+The interpreter passed in is the interpreter used for evaluation.  This would
+allow us to create a closure of the current environment. The function will be
+available to lookup variables either through the frame and static links, or
+directly at the global environment.
 
-The interpreter should be able to take a function an create a stack frame when
-the function is called.
+**** Builtin Functions
++Builtin functions are tied to the implementation of the interpreter.+
 
-**** BuiltinFunctions
-Builtin functions are tied to the implementation of the interpreter.
++For treewalking interpreters, the builtin function is executing code that+
++is written in the implementation language.+
 
-For treewalking interpreters, the builtin function is executing code that
-is written in the implementation language.
++For bytecode interpreters, builtin functions are just a set of bytecodes the+
++implement the function. For example to implement integer addition, the bytecode+
++interpreter might have a int_add instruction.+
 
-For bytecode interpreters, builtin functions are just a set of bytecodes the
-implement the function. For example to implement integer addition, the bytecode
-interpreter might have a int_add instruction.
++For JIT compilers, the builtin functions can just be native code that we link
+to.+
 
-For JIT compilers, the builtin functions can just be native code that we link to.
+Builtin functions can be composed of Smallisp expressions, or C functions.
+To use existing C functions, we wrap them with a class that implements the
+callable interface. To 
 
 ** Reader
 Instead of having a lexer and parser. I would like to implement a
@@ -190,12 +196,30 @@ minimize the overhead of list objects.
 **** JIT Compiler
      Finally is a JIT compiler from bytecode to machine code.
 ** Builtin Operations
-Builtin operations are currently segregated and interpreter dependent. One way
-to decouple and allow reuse is to have a native FFI(Foreign Function
-Interface). This would allow us to have functions that link with native code
-that can be shared amongst all intepreters. Builtin operations would live in the
-global environment as symbol => native code. Evaluating native code would be a
-shared feature that all intepreters can use.
++Builtin operations are currently segregated and interpreter dependent. One way+
++to decouple and allow reuse is to have a native FFI(Foreign Function+
++Interface). This would allow us to have functions that link with native code+
++that can be shared amongst all intepreters. Builtin operations would live in the+
++global environment as symbol => native code. Evaluating native code would be a+
++shared feature that all intepreters can use.+
+
+Builtin objects are objects that are implemented in C. Builtin functions are
+basically functions implemented in C. However a common interface between
+user-defined functions and builtin functions is essential to allowing
+flexibility with the use of functions.
+
+Currently builtin functions each define a class that extends ~class BuiltinFunction~
+The manual writing of these classes can be extinguished with templates/macros.
+
+Another way to define these builtin functions is have a BuiltinFunction class
+which takes in a pointer to a C++ function and invokes the function in the
+/call/ operator.
+
+Both approaches introduce a level of indirection that *might* be have
+significant performance cost.
+
+Currently we will take the first approach and redesign this if required.
+
 ** Userspace vs Interpreter space
     Because this is a dynamic lisp, it is expected to have large amounts of
     overlap between userspace and interpreter space objects. However a few key

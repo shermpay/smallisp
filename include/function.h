@@ -5,40 +5,61 @@
 
 #include "environment.h"
 #include "frame.h"
+#include "interpreter.h"
 #include "list.h"
 #include "objects.h"
 
 namespace sl {
 
+// Callable is an Abstract Base Class for all function types in smallisp.
+class Callable : public Object {
+ public:
+  virtual ~Callable(void){};
+  Type GetType(void) const override { return Type::kFunction; };
+  bool IsEqual(const Object *o) const override { return this == o; };
+  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
+  virtual const Object *operator()(const List &) const = 0;
+  // Return the number of parameters
+  virtual std::size_t param_count(void) const = 0;
+};
+
 // A Smallisp Function Object
 // Constructing the function creates a new function definition.
 // The function cannot be "called", rather it holds an Object that can be
 // evaluated by the interpreter.
-class Function : public Object {
+class Function : public Callable {
  public:
   // Environment is enclosing environment
-  Function(const Environment env, const List &params, const Object &body)
-      : params_(params), body_(body), env_(env){};
+  Function(Interpreter *interp, const std::string &name, const List &params,
+           const Object &body)
+      : interp_(interp),
+        name_(name),
+        params_(params),
+        param_count_(params.Count()),
+        body_(body){};
 
+  Interpreter *interpreter(void) const { return interp_; };
+  const std::string name(void) const { return name_; };
   const List &params(void) const { return params_; };
+  std::size_t param_count(void) const override { return param_count_; };
   const Object &body(void) const { return body_; };
-  Type GetType(void) const override { return Type::kFunction; };
-  bool IsEqual(const Object *o) const override { return this == o; };
-  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
 
   std::size_t Hashcode(void) const override {
     return reinterpret_cast<std::size_t>(this);
   };
   const std::string Str(void) const override {
-    return "Function: " + params().Str() + " -> Object";
+    return "<function: " + name() + ">";
   };
 
+  const Object *operator()(const List &args) const override;
+
  private:
+  Interpreter *interp_;
+  const std::string name_;
   const List &params_;
+  std::size_t param_count_;
   // An implicit list of expressions to evaluate
   const Object &body_;
-  // Make this function a *closure*
-  const Environment env_;
 };
 
 }  // namespace sl

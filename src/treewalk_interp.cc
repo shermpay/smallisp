@@ -14,79 +14,6 @@ namespace sl {
 
 namespace interp {
 
-namespace treewalker {
-static const Object *BinaryOp(
-    const List &args,
-    const std::function<const Int &(const Int &, const Int &)> &op) {
-  if (!IsNil(&args) && args.First()->GetType() == Type::kInt &&
-      !IsNil(args.Rest()) &&
-      static_cast<const List *>(args.Rest())->First()->GetType() ==
-          Type::kInt) {
-    const Int *left = static_cast<const Int *>(args.First());
-    const Int *right = static_cast<const Int *>(
-        static_cast<const List *>(args.Rest())->First());
-    return &op(*left, *right);
-  }
-  return new Error("binary op requires 2 ints");
-}
-
-class BuiltinAdd : public CodeObject {
- public:
-  const Object *operator()(const List &args) const override {
-    return BinaryOp(args, std::plus<const Int &>());
-  }
-  const std::string Str(void) const override { return "add"; }
-};
-
-class BuiltinSub : public CodeObject {
- public:
-  const Object *operator()(const List &args) const override {
-    return BinaryOp(args, std::minus<const Int &>());
-  }
-  const std::string Str(void) const override { return "sub"; }
-};
-
-class BuiltinMul : public CodeObject {
- public:
-  const Object *operator()(const List &args) const override {
-    return BinaryOp(args, std::multiplies<const Int &>());
-  }
-  const std::string Str(void) const override { return "mul"; }
-};
-
-class BuiltinDiv : public CodeObject {
- public:
-  const Object *operator()(const List &args) const override {
-    return BinaryOp(args, std::divides<const Int &>());
-  }
-  const std::string Str(void) const override { return "div"; }
-};
-
-const Function *MakeFunction(const List *params, const CodeObject *co) {
-  return new Function(Environment{}, *params, *co);
-}
-
-}  // namespace treewalker
-
-// Initialize builtin environment
-Environment Treewalker::builtins = {
-    {builtins::NilSym(), NIL},
-    {builtins::TrueSym(), &TRUE},
-    {builtins::FalseSym(), &FALSE},
-    {builtins::AddSym(),
-     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
-                              new treewalker::BuiltinAdd)},
-    {builtins::SubSym(),
-     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
-                              new treewalker::BuiltinSub)},
-    {builtins::MulSym(),
-     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
-                              new treewalker::BuiltinMul)},
-    {builtins::DivSym(),
-     treewalker::MakeFunction(new List({Symbol::Get("x"), Symbol::Get("y")}),
-                              new treewalker::BuiltinDiv)},
-};
-
 const Object *Treewalker::Eval(const Object &obj) {
   const Object *result = nullptr;
   switch (obj.GetType()) {
@@ -218,9 +145,10 @@ const Object *Treewalker::Lambda(const sl::List &sf) {
         "(lambda (params) body)");
   if (lambda_expr.First()->GetType() == Type::kList) {
     const List &param_list = *static_cast<const List *>(lambda_expr.First());
-    Environment &curr_env = frame() ? frame()->locals : globals();
+    // TODO: check this
+    // Environment &curr_env = frame() ? frame()->locals : globals();
     const List *body = static_cast<const List *>(lambda_expr.Rest());
-    return new Function(curr_env, param_list, *body);
+    return new Function(this, "<lambda>", param_list, *body);
   } else {
     return new Error("lambda invalid: expects param list");
   }
@@ -285,52 +213,16 @@ const Object *Treewalker::MakeDef(const Symbol &sym, const Object &obj) {
   return Bind(sym, obj);
 }
 
-const Object *Treewalker::Call(const Function &func, const List &args) {
-  const Object *ret_val;
-  if (func.body().GetType() == Type::kList) {
-    Frame *frame = new Frame{Environment{}, &func.body()};
-    const List *rest_params = &func.params();
-    // Bind args
-    for (const Object &obj : args) {
-      if (IsNil(rest_params)) {
-        // Too many args
-        return new Error("Invalid number of args. expect: " +
-                         std::to_string(func.params().Count()) + ", got: " +
-                         std::to_string(args.Count()));
-      }
-      const Symbol *curr_param =
-          static_cast<const Symbol *>(rest_params->First());
-      frame->locals.insert({curr_param, &obj});
-      rest_params = static_cast<const List *>(rest_params->Rest());
-    }
-    if (!IsNil(rest_params)) {
-      // Too few args
-      return new Error("Invalid number of args. expect: " +
-                       std::to_string(func.params().Count()) + ", got: " +
-                       std::to_string(args.Count()));
-    }
-    if (IsNil(frame->body)) {
-      assert(false && "FUNCTION BODY CANNOT BE EMPTY");
-      ret_val = new Error("Panic!");
-    } else {
-      this->set_frame(frame);
-      for (const Object &expr : *static_cast<const List *>(frame->body)) {
-        ret_val = Eval(expr);
-      }
-      this->set_frame(nullptr);
-    }
-  } else if (func.body().GetType() == Type::kCodeObject) {
-    // Body is a builtin object
-    const treewalker::CodeObject &builtin_fn =
-        static_cast<const treewalker::CodeObject &>(func.body());
-    ret_val = builtin_fn(args);
-  } else {
-    assert(false && "SHOULD NOT BE HERE");
-    ret_val = new Error("Panic!");
+const Object *Treewalker::Call(const Callable &func, const List &args) {
+  std::size_t param_count = func.param_count();
+  std::size_t arg_count = args.Count();
+  if (param_count != arg_count) {
+    return new Error("Calling " + func.Str() + " with invalid number of args." +
+                     "\n  expected: " + std::to_string(param_count) +
+                     "\n  actual:   " + std::to_string(arg_count));
   }
-  // unwind stack
-  // TODO: change this to use static link
-  return ret_val;
+
+  return func(args);
 }
 
 void Treewalker::Print(void) const {
@@ -350,6 +242,7 @@ const List *Treewalker::EvalList(const List &lst) {
                 EvalList(*static_cast<const List *>(lst.Rest())));
   }
 }
+
 }  // namespace interp
 
 }  // namespace sl

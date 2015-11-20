@@ -8,14 +8,14 @@
 #ifndef _TREEWALK_INTERP_DEF
 #define _TREEWALK_INTERP_DEF
 
-#include "environment.h"
-
 #include <functional>
 #include <iostream>
 
 #include "builtins.h"
+#include "environment.h"
 #include "frame.h"
 #include "function.h"
+#include "interpreter.h"
 #include "list.h"
 #include "objects.h"
 #include "specialforms.h"
@@ -42,18 +42,17 @@ class CodeObject : public Object {
 
 }  // namespace treewalker
 
-class Treewalker {
+class Treewalker : public Interpreter {
  public:
-  static Environment builtins;
-  Treewalker(void) : globals_(builtins), frame_(nullptr){};
+  Treewalker() : globals_(builtins::Defns()), frame_(nullptr){};
   // The environment is returned directly and can be manipulated directly.
-  Environment &globals(void) { return globals_; };
+  Environment &globals(void) override { return globals_; };
   // A pointer to current frame and nullptr if there is not frame.
-  Frame *frame(void) const { return frame_; }
+  Frame *frame(void) const override { return frame_; }
   // Set the frame of the interpreter to the frame passed in.
-  void set_frame(Frame *f) { frame_ = f; };
+  void set_frame(Frame *f) override { frame_ = f; };
   // Eval the object passed in.
-  const Object *Eval(const Object &);
+  const Object *Eval(const Object &) override;
   // Handle a special form given the form and the kind of form.
   const Object *HandleSpecialForm(const List &sf, specialforms::SFKind sf_kind);
   // The def special form
@@ -77,7 +76,7 @@ class Treewalker {
   const Object *Bind(const Symbol &sym, const Object &obj);
   // Create a definition and bind the symbol to the object.
   const Object *MakeDef(const Symbol &sym, const Object &obj);
-  const Object *Call(const Function &func, const List &args);
+  const Object *Call(const Callable &func, const List &args);
 
   void Print(void) const;
 

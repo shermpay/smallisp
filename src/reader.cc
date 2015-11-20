@@ -122,7 +122,8 @@ const Object *Reader::ReadInt(const std::string &int_str) {
 // SymbolStart = '[a-zA-Z\+\-\*\/!]'
 // Symbol = '([0-9]|SymbolStart)*'
 inline static bool IsSymbolStartChar(char c) {
-  return isalpha(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '!';
+  return isalpha(c) || c == '+' || c == '-' || c == '*' || c == '/' ||
+         c == '!' || c == '%' || c == '&' || c == '|';
 }
 
 inline static bool IsSymbolChar(char c) {
