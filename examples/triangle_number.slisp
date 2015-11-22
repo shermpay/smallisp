@@ -1,0 +1,11 @@
+(def aux
+  (lambda (n r)
+    (if (eq 0 n)
+      r
+      (aux (sub n 1) (add n r)))))
+
+(def tri-num 
+  (lambda (n)
+    (aux n 0)))
+
+(tri-num 1000)

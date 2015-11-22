@@ -1,0 +1,7 @@
+(def fact 
+  (lambda (n)
+    (if (eq 1 n)
+      1
+      (mul n (fact (sub n 1))))))
+
+(fact 20)
