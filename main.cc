@@ -1,7 +1,30 @@
-#include <boost/program_options.hpp>
+#include <fstream>
 
+#include "objects.h"
+#include "reader.h"
 #include "repl.h"
+#include "interpreter.h"
+#include "treewalk_interp.h"
 
 namespace sl {}
 
-int main(int argc, char *argv[]) { return sl::repl::Start(); }
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
+    return sl::repl::Start();
+  } else if (argc == 2) {
+    const char *filename = argv[1];
+    std::ifstream stream(filename);
+    sl::Reader reader(stream);
+    sl::interp::Treewalker interp;
+    const sl::Object *expr = nullptr;
+    while ((expr = reader.ReadExpr())) {
+      const sl::Object *obj = interp.Eval(*expr);
+      if (obj->GetType() == sl::Type::kError) {
+        std::cout << "Error on line " << reader.linum() << ", col "
+                  << reader.colnum() << ": " << reader.curr_line() << std::endl;
+      }
+      std::cout << obj->Str() << std::endl;
+    }
+  }
+  return 0;
+}
