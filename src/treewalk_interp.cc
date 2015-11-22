@@ -86,6 +86,10 @@ const Object *Treewalker::HandleSpecialForm(const List &sf,
       ret = Lambda(sf);
       break;
     }
+    case SFKind::kFunc: {
+      ret = Func(sf);
+      break;
+    }
     case SFKind::kIf: {
       ret = If(sf);
       break;
@@ -137,21 +141,43 @@ const Object *Treewalker::UnsafeSet(const List &sf) {
   }
 }
 
-const Object *Treewalker::Lambda(const sl::List &sf) {
-  const List &lambda_expr = *static_cast<const List *>(sf.Rest());
-  if (lambda_expr.Count() != 2)
-    return new Error(
-        "syntax error: lambda expresion should be of the form "
-        "(lambda (params) body)");
-  if (lambda_expr.First()->GetType() == Type::kList) {
-    const List &param_list = *static_cast<const List *>(lambda_expr.First());
+static const Object *MakeFunction(Interpreter *interp, const std::string &name,
+                                  const sl::List &form) {
+  if (form.First()->GetType() == Type::kList) {
+    const List &param_list = *static_cast<const List *>(form.First());
     // TODO: check this
     // Environment &curr_env = frame() ? frame()->locals : globals();
-    const List *body = static_cast<const List *>(lambda_expr.Rest());
-    return new Function(this, "<lambda>", param_list, *body);
+    const List *body = static_cast<const List *>(form.Rest());
+    return new Function(interp, name, param_list, *body);
   } else {
-    return new Error("lambda invalid: expects param list");
+    return new Error("function expression invalid: expects param list");
   }
+}
+
+const Object *Treewalker::Lambda(const sl::List &sf) {
+  const List &lambda_expr = *static_cast<const List *>(sf.Rest());
+  if (lambda_expr.Count() < 2)
+    return new Error(
+        "syntax error: lambda expression should be of the form "
+        "(lambda (params) body)");
+  return MakeFunction(this, "<lambda>", lambda_expr);
+}
+
+const Object *Treewalker::Func(const sl::List &sf) {
+  const List &func_expr = *static_cast<const List *>(sf.Rest());
+  if (func_expr.Count() < 3)
+    return new Error(
+        "syntax error: func statement should be of the form "
+        "(func name (params) body)");
+  if (func_expr.First()->GetType() == Type::kSymbol) {
+    const Symbol &func_sym = *static_cast<const Symbol *>(func_expr.First());
+    const List &func_body = *static_cast<const List *>(func_expr.Rest());
+    const Object *func = MakeFunction(this, func_sym.name(), func_body);
+    return MakeDef(func_sym, *func);
+  }
+  return new Error(
+      "syntax error: func declaration missing name"
+      "\nexpects (func name (param) body)");
 }
 
 const Object *Treewalker::If(const List &sf) {

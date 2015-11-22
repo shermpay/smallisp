@@ -5,18 +5,17 @@
 namespace sl {
 
 namespace specialforms {
-
 using SFTable = std::unordered_map<const Symbol *, SFKind>;
 const Symbol &kDef = Symbol::Val("def");
 const Symbol &kUnsafeSet = Symbol::Val("set!");
 const Symbol &kLambda = Symbol::Val("lambda");
 const Symbol &kIf = Symbol::Val("if");
+const Symbol &kFunc = Symbol::Val("func");
 
 static SFTable kSFTable = {
-    {&kDef, SFKind::kDef},
-    {&kUnsafeSet, SFKind::kUnsafeSet},
-    {&kLambda, SFKind::kLambda},
-    {&kIf, SFKind::kIf},
+    {&kDef, SFKind::kDef},       {&kUnsafeSet, SFKind::kUnsafeSet},
+    {&kLambda, SFKind::kLambda}, {&kIf, SFKind::kIf},
+    {&kFunc, SFKind::kFunc},
 };
 
 bool IsSpecialForm(const Symbol &sym) {

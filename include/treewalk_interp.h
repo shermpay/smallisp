@@ -63,6 +63,8 @@ class Treewalker : public Interpreter {
   const Object *UnsafeSet(const List &sf);
   // This should return a sl::Function
   const Object *Lambda(const List &sf);
+  // This should return a sl::Function
+  const Object *Func(const List &sf);
   // The 'if' special form
   const Object *If(const List &sf);
 
