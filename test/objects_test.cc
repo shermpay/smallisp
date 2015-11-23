@@ -147,8 +147,8 @@ TEST(Int, Operators) {
   EXPECT_EQ(Int::Val(2), Int::Val(2) / Int::Val(1));
   EXPECT_EQ(Int::Val(2), Int::Val(4) / Int::Val(2));
   EXPECT_EQ(Int::Val(0), Int::Val(0) / Int::Val(2));
-  // TODO: Divide by zero
-  // TODO: Fractions
+  // Divide by zero is an assertion error, should be checked in library
+  // Fraction division is not handled on this level
 }
 
 ///////////////////

@@ -42,8 +42,6 @@ class Error {
 // The reader provides various read functions to read smallisp syntax.
 // The functions usually return pointers to smallisp objects.
 // However, they return nullptrs if they encounter an EOF.
-// TODO: Consider returning a 'void' value.
-// TODO: Consider implementing Reader using a stream interface(use operator>>).
 class Reader {
  public:
   static const long kStartLinum;

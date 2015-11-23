@@ -113,6 +113,7 @@ class Int : public Object {
   };
 
   inline const Int &operator/(const Int &oi) const {
+    assert(oi.value() != 0 && "div by 0");
     return Int::Val(this->value() / oi.value());
   };
 
