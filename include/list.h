@@ -16,10 +16,6 @@
 
 namespace sl {
 
-// The smallisp cons function
-// Construct a cons cell containing object o1 and object o2
-// If object o2 is a list, wrap the cons cell into a list
-
 // The definition of a Cons Cell in Smallisp
 class ConsC : public Object {
  public:
@@ -161,6 +157,11 @@ bool operator!=(const List &lhs, const List &rhs);
 // TODO: Remove when bug in gtest is fixed
 inline void PrintTo(const List &o, std::ostream *os) { *os << o.Str(); };
 
+// The smallisp cons function
+// Construct a cons cell containing object o1 and object o2
+// If object o2 is a list, wrap the cons cell into a list
+// To ensure correct dispatch. Before calling cons
+// A runtime type check has to be done, and proper casting is required
 const ConsC *Cons(const Object *o1, const Object *o2);
 const List *Cons(const Object *o1, const List *o2);
 inline bool IsNil(const Object *o) { return o == NIL; };

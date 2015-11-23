@@ -32,6 +32,24 @@ TEST(BuiltinFunction, Ne) {
   ASSERT_EQ(FALSE, *Ne()(List{Int::Get(4), Int::Get(4)}));
 }
 
+TEST(BuiltinFunction, Cons) {
+  ASSERT_EQ(List{Int::Get(0)}, *Cons()(List{Int::Get(0), NIL}));
+  ASSERT_EQ(List({Int::Get(0), Int::Get(1)}),
+            *Cons()(List({Int::Get(0), Cons()(List{Int::Get(1), NIL})})));
+  ASSERT_EQ(ConsC(Int::Get(0), Int::Get(1)),
+            *Cons()(List{Int::Get(0), Int::Get(1)}));
+}
+
+TEST(BuiltinFunction, Car) {
+  ASSERT_EQ(*Int::Get(0), *Car()(List{sl::Cons(Int::Get(0), Int::Get(1))}));
+  ASSERT_EQ(*Int::Get(0), *Car()(List{sl::Cons(Int::Get(0), NIL)}));
+}
+
+TEST(BuiltinFunction, Cdr) {
+  ASSERT_EQ(*Int::Get(1), *Cdr()(List{sl::Cons(Int::Get(0), Int::Get(1))}));
+  ASSERT_EQ(NIL, Cdr()(List{sl::Cons(Int::Get(0), NIL)}));
+}
+
 }  // namespace builtins
 }  // namespace sl
 
