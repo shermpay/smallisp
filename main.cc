@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     sl::Reader reader(stream);
     sl::interp::Treewalker interp;
     const sl::Object *expr = nullptr;
-    while ((expr = reader.ReadExpr())) {
+    while (!sl::IsType<sl::EOFError>(expr = &reader.ReadExpr())) {
       const sl::Object *obj = interp.Eval(*expr);
       if (sl::IsType<sl::Error>(obj)) {
         std::cout << "Error on line " << reader.linum() << ", col "

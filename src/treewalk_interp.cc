@@ -211,7 +211,10 @@ const Object *Treewalker::Visit(const Symbol &obj) {
   }
   return Lookup(*sym);
 }
-const Object *Treewalker::Visit(const Void &) { assert(false && "Error"); }
+const Object *Treewalker::Visit(const Void &) {
+  assert(false && "Error");
+  return kVoid;
+}
 const Object *Treewalker::Visit(const Error &o) { return &o; }
 
 const Object *Treewalker::Visit(const ConsC &) {

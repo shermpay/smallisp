@@ -186,8 +186,10 @@ const Object &Reader::ReadSexp(void) {
 const Object &Reader::ReadExpr(void) {
   char c = PeekChar();
   switch (c) {
-    case EOF:
+    case EOF: {
+      GetChar();
       return *(new EOFError("EOF"));  // This must be handled in all cases
+    }
     case Delim::kLParen: {
       return ReadSexp();
     }

@@ -21,19 +21,19 @@ int Start() {
     interp.Print();  // For debugging
     std::cout << kPrompt;
     Reader reader(std::cin);
-    const Object *expr = reader.ReadExpr();
-    if (!expr) {
-      if (!reader.error()) return 0;
-      std::cout << reader.error() << std::endl;
+    const Object &expr = reader.ReadExpr();
+    if (IsType<EOFError>(expr)) break;
+    if (IsType<Error>(expr)) {
+      std::cout << reader.error().Str() << std::endl;
       continue;
     }
-    const Object *obj = interp.Eval(*expr);
+    const Object *obj = interp.Eval(expr);
     if (!obj) {
       continue;
     }
     std::cout << obj->Str() << std::endl;
   }
-  return 1;
+  return 0;
 }
 
 }  // namespace repl
