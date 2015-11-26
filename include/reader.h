@@ -57,7 +57,7 @@ class Reader {
   inline int colnum(void) const { return colnum_; }
   inline std::istream &stream(void) { return stream_; }
   inline const std::string &curr_line(void) const { return curr_line_; }
-  inline const reader::Error *error(void) const { return error_; }
+  inline const reader::Error &error(void) const { return *error_; }
 
   inline void inc_linum(void) { ++linum_; }
   inline void inc_colnum(void) { ++colnum_; }
@@ -70,7 +70,7 @@ class Reader {
 
   // Declare that the reader has failed and stores the error
   // Returns a sl::Error object
-  const Error *Failed(const reader::Error &err);
+  const Error &Failed(const reader::Error &err);
   // Return the next character in the stream
   char PeekChar(void);
   // Get the next character in the stream
@@ -83,12 +83,12 @@ class Reader {
   const std::string Str(void) const;
   // Reading
   void ReadWhitespace(void);
-  const Object *ReadInt(void);
-  const Object *ReadInt(const std::string &);
-  const Object *ReadSymbol(void);
-  const Object *ReadSymbol(const std::string &);
-  const Object *ReadSexp(void);
-  const Object *ReadExpr(void);
+  const Object &ReadInt(void);
+  const Object &ReadInt(const std::string &);
+  const Object &ReadSymbol(void);
+  const Object &ReadSymbol(const std::string &);
+  const Object &ReadSexp(void);
+  const Object &ReadExpr(void);
   const std::vector<const Object *> ReadExprList(void);
 
  private:
@@ -100,8 +100,8 @@ class Reader {
 };
 
 // Read is the standard interface to reading smallisp expressions
-const Object *Read(std::istream &input_stream);
+const Object &Read(std::istream &input_stream);
 
 // Read with stdin as the input_stream
-const Object *Read(void);
+const Object &Read(void);
 };

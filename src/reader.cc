@@ -34,9 +34,9 @@ enum Delim : char { kLParen = '(', kRParen = ')' };
 const long Reader::kStartLinum = 1;
 const int Reader::kStartColnum = 1;
 
-const Error *Reader::Failed(const reader::Error &err) {
+const Error &Reader::Failed(const reader::Error &err) {
   this->error_ = &err;
-  return new Error(err.msg());
+  return *(new Error(err.msg()));
 }
 
 char Reader::PeekChar(void) { return stream().peek(); }
@@ -74,7 +74,7 @@ std::string Reader::Next(void) {
 const std::string Reader::Str(void) const {
   std::stringstream sstream;
   sstream << "Line: " << linum() << ", Col: " << colnum() << std::endl;
-  if (error_ != nullptr) sstream << "Error: " << error()->Str() << std::endl;
+  if (error_ != nullptr) sstream << "Error: " << error().Str() << std::endl;
   sstream << '\t' << curr_line() << std::endl;
   sstream << '\t';
   for (int i = 0; i < colnum() - 1; ++i) {
@@ -89,7 +89,7 @@ void Reader::ReadWhitespace(void) {
     GetChar();
   }
 }
-const Object *Reader::ReadInt(void) {
+const Object &Reader::ReadInt(void) {
   std::string int_str;
   char c = PeekChar();
   if (isdigit(c) || c == '-') {
@@ -107,7 +107,7 @@ const Object *Reader::ReadInt(void) {
 }
 
 // TODO: Optimize this to one pass. This requires two passes.
-const Object *Reader::ReadInt(const std::string &int_str) {
+const Object &Reader::ReadInt(const std::string &int_str) {
   size_t ptr;
   int base = 10;
   long value = std::stol(int_str, &ptr, base);
@@ -115,7 +115,7 @@ const Object *Reader::ReadInt(const std::string &int_str) {
     return Failed(
         reader::Error(linum(), colnum(), "Unable to read int " + int_str));
   } else {
-    return Int::Get(value);
+    return Int::Val(value);
   }
 }
 
@@ -130,7 +130,7 @@ inline static bool IsSymbolChar(char c) {
   return IsSymbolStartChar(c) || isdigit(c);
 }
 
-const Object *Reader::ReadSymbol(void) {
+const Object &Reader::ReadSymbol(void) {
   std::string symbol_name;
   char c = PeekChar();
   if (IsSymbolStartChar(c)) {
@@ -140,14 +140,14 @@ const Object *Reader::ReadSymbol(void) {
       GetChar();
       symbol_name.push_back(c);
     }
-    return Symbol::Get(symbol_name);
+    return Symbol::Val(symbol_name);
   } else {
     return Failed(reader::Error(
         linum(), colnum(), "Symbol must start with alphabet character or '-'"));
   }
 }
 
-const Object *Reader::ReadSymbol(const std::string &symbol_name) {
+const Object &Reader::ReadSymbol(const std::string &symbol_name) {
   for (const char &c : symbol_name) {
     if (!IsSymbolChar(c)) {
       return Failed(reader::Error(
@@ -155,7 +155,7 @@ const Object *Reader::ReadSymbol(const std::string &symbol_name) {
           "Symbol must contain only alphanumeric characters or '-'"));
     }
   }
-  return Symbol::Get(symbol_name);
+  return Symbol::Val(symbol_name);
 }
 
 // Reads zero or more exprs until closing paren
@@ -166,28 +166,28 @@ static const List *ReadSexpHelper(Reader *reader) {
   } else if (reader->PeekChar() == EOF) {
     return nullptr;
   } else {
-    const Object *obj = reader->ReadExpr();
+    const Object &obj = reader->ReadExpr();
     reader->ReadWhitespace();
     const List *rest = ReadSexpHelper(reader);
-    return (rest ? Cons(obj, rest) : nullptr);
+    return (rest ? Cons(&obj, rest) : nullptr);
   }
 }
 
-const Object *Reader::ReadSexp(void) {
+const Object &Reader::ReadSexp(void) {
   GetChar();
   ReadWhitespace();
   const List *list = ReadSexpHelper(this);
   if (!list)
     return Failed(
         reader::Error(linum(), colnum(), "Unable to read S-Expression."));
-  return list;
+  return *list;
 }
 
-const Object *Reader::ReadExpr(void) {
+const Object &Reader::ReadExpr(void) {
   char c = PeekChar();
   switch (c) {
     case EOF:
-      return nullptr;  // This must be handled in all cases
+      return *(new EOFError("EOF"));  // This must be handled in all cases
     case Delim::kLParen: {
       return ReadSexp();
     }
@@ -222,18 +222,18 @@ const std::vector<const Object *> Reader::ReadExprList(void) {
   std::vector<const Object *> vec;
   ReadWhitespace();
   while (PeekChar() != EOF) {
-    const Object *obj = ReadExpr();
-    vec.push_back(obj);
+    const Object &obj = ReadExpr();
+    vec.push_back(&obj);
     ReadWhitespace();
   }
   return vec;
 }
 
-const Object *Read(std::istream &input_stream) {
+const Object &Read(std::istream &input_stream) {
   Reader reader(input_stream);
   return reader.ReadExpr();
 }
 
-const Object *Read(void) { return Read(std::cin); }
+const Object &Read(void) { return Read(std::cin); }
 
 }  // namespace sl

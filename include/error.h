@@ -27,10 +27,17 @@ class Error : public Object {
   bool operator!=(const Error &rhs) { return !((*this) == rhs); }
   const Object *Accept(Visitor &) const override;
 
- private:
+ protected:
   const std::string msg_;
 };
 inline void PrintTo(const Error &o, std::ostream *os) { *os << o.Str(); };
+
+class EOFError : public Error {
+ public:
+  TYPE_OBJ_FN("EOFError")
+  const sl::Type &GetType() const override { return EOFError::TypeObj(); };
+  EOFError(const std::string &msg) : Error(msg){};
+};
 
 }  // namespace sl
 #endif
