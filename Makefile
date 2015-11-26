@@ -40,10 +40,13 @@ CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
 ################
 SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))
 
-OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
+# OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
 SL_OBJS := $(BUILD_DIR)/int.o $(BUILD_DIR)/bool.o $(BUILD_DIR)/symbol.o \
 $(BUILD_DIR)/error.o $(BUILD_DIR)/void.o $(BUILD_DIR)/list.o $(BUILD_DIR)/function.o
 BASE_OBJS := $(BUILD_DIR)/objects.o $(BUILD_DIR)/utils.o 
+# All the key object files
+OBJS := $(BASE_OBJS) $(BUILD_DIR)/treewalk_interp.o $(BUILD_DIR)/repl.o \
+$(BUILD_DIR)/reader.o $(BUILD_DIR)/builtins.o $(BUILD_DIR)/specialforms.o
 ###########
 # Testing #
 ###########
@@ -68,7 +71,7 @@ HTMLDIR := $(TEST_DIR)/html
 TEST_SRCS := $(wildcard $(TEST_DIR)/*.$(SRC_EXT))
 TEST_BINS := $(patsubst $(TEST_DIR)/%.$(SRC_EXT), $(BIN_DIR)/%, $(TEST_SRCS))
 
-main: main.cc $(OBJS)
+main: main.cc $(OBJS) 
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BIN_DIR)/$@
 
 $(BIN_DIR)/main: main.cc $(OBJS)
@@ -77,8 +80,6 @@ $(BIN_DIR)/main: main.cc $(OBJS)
 run_main: $(BIN_DIR)/main
 	-make clean_cov
 	$(BIN_DIR)/main
-
-allobjs: $(OBJS)
 
 ###########################
 # Building an object file #
