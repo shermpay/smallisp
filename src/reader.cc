@@ -192,6 +192,7 @@ const Object *Reader::ReadExpr(void) {
       return ReadSexp();
     }
     case Delim::kRParen: {
+      GetChar();
       return Failed(reader::Error(linum(), colnum(), "Unmatched ')'"));
     }
     default: {
