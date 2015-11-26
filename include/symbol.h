@@ -11,7 +11,7 @@ namespace sl {
 class Symbol : public Object {
  public:
   // static std::unordered_map<std::string, Symbol *> pool_;
-  TYPE_OBJ_FN("Symbol");
+  DEF_TYPE_OBJ("Symbol");
 
   virtual ~Symbol(){};
 

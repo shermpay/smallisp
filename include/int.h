@@ -10,7 +10,7 @@ namespace sl {
 // Int representation
 class Int : public Object {
  public:
-  TYPE_OBJ_FN("Int");
+  DEF_TYPE_OBJ("Int");
 
   virtual ~Int(){};
 

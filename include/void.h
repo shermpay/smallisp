@@ -8,7 +8,7 @@
 namespace sl {
 
 struct Void : public Object {
-  TYPE_OBJ_FN("void")
+  DEF_TYPE_OBJ("void")
   // Return the type of the object for introspection.
   Type &GetType() const override { return Void::TypeObj(); };
   // Value equality between 2 smallisp objects.

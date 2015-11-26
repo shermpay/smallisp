@@ -13,7 +13,7 @@ class List;  // Forward declaration
 // Callable is an Abstract Base Class for all function types in smallisp.
 class Callable : public Object {
  public:
-  TYPE_OBJ_FN("Function")
+  DEF_TYPE_OBJ("Function")
   virtual ~Callable(void){};
   const Type &GetType(void) const override { return Callable::TypeObj(); };
   bool IsEqual(const Object *o) const override { return this == o; };

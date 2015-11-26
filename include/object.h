@@ -107,7 +107,7 @@ inline bool IsType(const Object *obj) {
   return IsType<T>(*obj);
 };
 
-#define TYPE_OBJ_FN(_name_)                 \
+#define DEF_TYPE_OBJ(_name_)                \
   static Type &TypeObj(void) {              \
     static Type *_inst_ = new Type(_name_); \
     return *_inst_;                         \

@@ -9,7 +9,7 @@ namespace sl {
 
 class Bool : public Object {
  public:
-  TYPE_OBJ_FN("Bool");
+  DEF_TYPE_OBJ("Bool");
 
   // Return the type of the object for introspection.
   const Type &GetType() const override { return Bool::TypeObj(); };

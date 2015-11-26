@@ -19,7 +19,7 @@ namespace sl {
 // The definition of a Cons Cell in Smallisp
 class ConsC : public Object {
  public:
-  TYPE_OBJ_FN("Cons")
+  DEF_TYPE_OBJ("Cons")
   ConsC(const Object *o1, const Object *o2) : car_(o1), cdr_(o2){};
   ~ConsC() noexcept {};
 
@@ -86,7 +86,7 @@ class List : public Object {
   typedef ListIterator iterator;
 
   // Function: List::TypeObj
-  TYPE_OBJ_FN("List")
+  DEF_TYPE_OBJ("List")
 
   // The constant nil.
   static const List *kEmpty;

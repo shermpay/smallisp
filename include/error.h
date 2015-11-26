@@ -9,7 +9,7 @@ namespace sl {
 // Error class
 class Error : public Object {
  public:
-  TYPE_OBJ_FN("Error")
+  DEF_TYPE_OBJ("Error")
   Error(const std::string &msg) : msg_(msg){};
   // Return the type of the object for introspection.
   const sl::Type &GetType() const override { return Error::TypeObj(); };
@@ -34,7 +34,7 @@ inline void PrintTo(const Error &o, std::ostream *os) { *os << o.Str(); };
 
 class EOFError : public Error {
  public:
-  TYPE_OBJ_FN("EOFError")
+  DEF_TYPE_OBJ("EOFError")
   const sl::Type &GetType() const override { return EOFError::TypeObj(); };
   EOFError(const std::string &msg) : Error(msg){};
 };
