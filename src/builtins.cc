@@ -4,11 +4,24 @@ namespace sl {
 
 namespace builtins {
 
+static inline const Error *TypeCheck(const BuiltinFunction *func,
+                                     const Object *obj, Type &expected) {
+  if (obj->GetType() != expected)
+    return new Error("Error in " + func->Str() +
+                     "\n   error: type mismatch\n  expect: " + expected.Str() +
+                     "\n  actual: " + obj->GetType().Str());
+  return nullptr;
+}
+
 const Object *Add::operator()(const List &args) const {
   // TODO: Type check
+  assert(!IsNil(&args) && "param/arg counting happens prior");
+  const Error *err;
+  if ((err = TypeCheck(this, args.First(), Int::TypeObj()))) return err;
   const Int *left = static_cast<const Int *>(args.First());
-  const Int *right =
-      static_cast<const Int *>(static_cast<const List *>(args.Rest())->First());
+  const List &rest = *static_cast<const List *>(args.Rest());
+  if ((err = TypeCheck(this, rest.First(), Int::TypeObj()))) return err;
+  const Int *right = static_cast<const Int *>(rest.First());
   return &(*left + *right);
 }
 
@@ -53,7 +66,7 @@ const Object *Ne::operator()(const List &args) const {
 const Object *Cons::operator()(const List &args) const {
   const Object *left = args.First();
   const Object *right = static_cast<const List *>(args.Rest())->First();
-  if (right->GetType() == Type::kList) {
+  if (IsType<List>(right)) {
     return sl::Cons(left, static_cast<const List *>(right));
   } else {
     return sl::Cons(left, right);
@@ -62,9 +75,9 @@ const Object *Cons::operator()(const List &args) const {
 
 const Object *Car::operator()(const List &args) const {
   const Object *obj = args.First();
-  if (obj->GetType() == Type::kList) {
+  if (IsType<List>(obj)) {
     return static_cast<const List *>(obj)->First();
-  } else if (obj->GetType() == Type::kCons) {
+  } else if (IsType<ConsC>(obj)) {
     return static_cast<const ConsC *>(obj)->car();
   } else {
     return new Error("Error: 'car' can only be applied to cons or list");
@@ -73,9 +86,9 @@ const Object *Car::operator()(const List &args) const {
 
 const Object *Cdr::operator()(const List &args) const {
   const Object *obj = args.First();
-  if (obj->GetType() == Type::kList) {
+  if (IsType<List>(obj)) {
     return static_cast<const List *>(obj)->Rest();
-  } else if (obj->GetType() == Type::kCons) {
+  } else if (IsType<ConsC>(obj)) {
     return static_cast<const ConsC *>(obj)->cdr();
   } else {
     return new Error("Error: 'car' can only be applied to cons or list");

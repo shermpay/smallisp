@@ -14,58 +14,7 @@ namespace sl {
 
 namespace interp {
 
-const Object *Treewalker::Eval(const Object &obj) {
-  const Object *result = nullptr;
-  switch (obj.GetType()) {
-    case Type::kInt: {
-      return &obj;
-    }
-    case Type::kBool: {
-      return &obj;
-    }
-    case Type::kSymbol: {
-      const Symbol *sym = static_cast<const Symbol *>(&obj);
-      if (specialforms::IsSpecialForm(*sym)) {
-        result = new Error("Cannot evaluate special form: " + sym->Str());
-      }
-      result = Lookup(*sym);
-      break;
-    }
-    case Type::kList: {
-      // TODO: Change this once we have Sexprs.
-      // For now we do not have quoted lists, so a list is a S-Expression.
-      if (IsNil(&obj)) return new Error("Cannot evaluate nil");
-
-      const List &lst = static_cast<const List &>(obj);
-      const Object *head = lst.First();
-      if (head->GetType() == Type::kSymbol) {
-        const Symbol &head_sym = *static_cast<const Symbol *>(head);
-        specialforms::SFKind sf_kind = specialforms::GetKind(head_sym);
-        if (sf_kind != specialforms::SFKind::kInvalidSF) {
-          return HandleSpecialForm(lst, sf_kind);
-        }
-      }
-      const List &func_lst = *EvalList(lst);
-      if (func_lst.First()->GetType() == Type::kFunction) {
-        result = Call(*static_cast<const Function *>(func_lst.First()),
-                      *static_cast<const List *>(func_lst.Rest()));
-      } else {
-        result = new Error("Cannot call non-function in expression " +
-                           func_lst.Str());
-      }
-
-      break;
-    }
-    default: {
-      // Error
-      result = new Error(
-          "Unable to recognize type."
-          "\n   object: " +
-          obj.Str());
-    }
-  }
-  return result;
-}
+const Object *Treewalker::Eval(const Object &obj) { return obj.Accept(*this); }
 
 const Object *Treewalker::HandleSpecialForm(const List &sf,
                                             specialforms::SFKind sf_kind) {
@@ -108,7 +57,7 @@ const Object *Treewalker::Def(const List &sf) {
     return new Error(
         "syntax error: define expression should be of the form "
         "(define symbol expr)");
-  if (define_expr.First()->GetType() == Type::kSymbol) {
+  if (IsType<Symbol>(define_expr.First())) {
     const Symbol &define_sym =
         *static_cast<const Symbol *>(define_expr.First());
     const List &define_body = *static_cast<const List *>(define_expr.Rest());
@@ -126,7 +75,7 @@ const Object *Treewalker::UnsafeSet(const List &sf) {
     return new Error(
         "syntax error: set! expression should be of the form "
         "(set! symbol expr)");
-  if (set_expr.First()->GetType() == Type::kSymbol) {
+  if (IsType<Symbol>(set_expr.First())) {
     const Symbol &set_sym = *static_cast<const Symbol *>(set_expr.First());
     if (*Lookup(set_sym) != Error("")) {
       const List &set_body = *static_cast<const List *>(set_expr.Rest());
@@ -143,7 +92,7 @@ const Object *Treewalker::UnsafeSet(const List &sf) {
 
 static const Object *MakeFunction(Interpreter *interp, const std::string &name,
                                   const sl::List &form) {
-  if (form.First()->GetType() == Type::kList) {
+  if (IsType<List>(form.First())) {
     const List &param_list = *static_cast<const List *>(form.First());
     // TODO: check this
     // Environment &curr_env = frame() ? frame()->locals : globals();
@@ -169,7 +118,7 @@ const Object *Treewalker::Func(const sl::List &sf) {
     return new Error(
         "syntax error: func statement should be of the form "
         "(func name (params) body)");
-  if (func_expr.First()->GetType() == Type::kSymbol) {
+  if (IsType<Symbol>(func_expr.First())) {
     const Symbol &func_sym = *static_cast<const Symbol *>(func_expr.First());
     const List &func_body = *static_cast<const List *>(func_expr.Rest());
     const Object *func = MakeFunction(this, func_sym.name(), func_body);
@@ -187,10 +136,10 @@ const Object *Treewalker::If(const List &sf) {
         "syntax error: if expression should be of the form "
         "(if cond then else)");
   const Object &if_cond = *Eval(*if_expr.First());
-  if (if_cond.GetType() == Type::kBool) {
+  if (IsType<Bool>(if_cond)) {
     // Check Syntax
     const List &if_body = *static_cast<const List *>(if_expr.Rest());
-    assert(if_body.GetType() == Type::kList && "if body should be list");
+    assert(IsType<List>(if_body) && "if body should be list");
     if (bool(static_cast<const Bool &>(if_cond))) {
       return Eval(*if_body.First());
     } else {
@@ -249,6 +198,58 @@ const Object *Treewalker::Call(const Callable &func, const List &args) {
   }
 
   return func(args);
+}
+////////////////////////
+// Implements Visitor //
+////////////////////////
+const Object *Treewalker::Visit(const Int &o) { return &o; }
+const Object *Treewalker::Visit(const Bool &o) { return &o; }
+const Object *Treewalker::Visit(const Symbol &obj) {
+  const Symbol *sym = static_cast<const Symbol *>(&obj);
+  if (specialforms::IsSpecialForm(*sym)) {
+    return new Error("Cannot evaluate special form: " + sym->Str());
+  }
+  return Lookup(*sym);
+}
+const Object *Treewalker::Visit(const Void &) { assert(false && "Error"); }
+const Object *Treewalker::Visit(const Error &o) { return &o; }
+
+const Object *Treewalker::Visit(const ConsC &) {
+  assert(false && "NOT IMPLEMENTED");
+  return kVoid;
+}
+
+const Object *Treewalker::Visit(const List &obj) {
+  // TODO: Change this once we have Sexprs.
+  // For now we do not have quoted lists, so a list is a S-Expression.
+  if (IsNil(&obj)) return new Error("Cannot evaluate nil");
+
+  const List &lst = static_cast<const List &>(obj);
+  const Object *head = lst.First();
+  if (IsType<Symbol>(head)) {
+    const Symbol &head_sym = *static_cast<const Symbol *>(head);
+    specialforms::SFKind sf_kind = specialforms::GetKind(head_sym);
+    if (sf_kind != specialforms::SFKind::kInvalidSF) {
+      return HandleSpecialForm(lst, sf_kind);
+    }
+  }
+  const List &func_lst = *EvalList(lst);
+  if (IsType<Function>(func_lst.First())) {
+    return Call(*static_cast<const Function *>(func_lst.First()),
+                *static_cast<const List *>(func_lst.Rest()));
+  } else {
+    return new Error("Cannot call non-function in expression " +
+                     func_lst.Str());
+  }
+}
+const Object *Treewalker::Visit(const Nil &o) {
+  assert(false && "Nil Dereference");
+  return &o;
+}
+
+const Object *Treewalker::Visit(const Callable &o) {
+  assert(false && "NOT IMPLEMENTED");
+  return &o;
 }
 
 void Treewalker::Print(void) const {

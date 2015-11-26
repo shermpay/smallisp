@@ -48,7 +48,7 @@ TEST(SpecialForm, Lambda) {
   const List id_lambda_expr{
       {&specialforms::kLambda, new List{Symbol::Get("x")}, Symbol::Get("x")}};
   const Object *id_fn_obj = interp.Eval(id_lambda_expr);
-  ASSERT_EQ(Type::kFunction, id_fn_obj->GetType());
+  ASSERT_TRUE(IsType<Function>(id_fn_obj));
   const Function &id_fn = *static_cast<const Function *>(id_fn_obj);
   ASSERT_EQ(List{Symbol::Get("x")}, id_fn.params());
   ASSERT_EQ(List{Symbol::Get("x")}, id_fn.body());
@@ -68,7 +68,7 @@ TEST(Functions, Call) {
   const List id_lambda_expr{
       {&specialforms::kLambda, new List{Symbol::Get("x")}, Symbol::Get("x")}};
   const Object *id_fn_obj = interp.Eval(id_lambda_expr);
-  ASSERT_EQ(Type::kFunction, id_fn_obj->GetType());
+  ASSERT_TRUE(IsType<Function>(id_fn_obj));
   const Function &id_fn = *static_cast<const Function *>(id_fn_obj);
   const Object *result = interp.Call(id_fn, List{Int::Get(1)});
   ASSERT_EQ(Int::Val(1), *result);

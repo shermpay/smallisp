@@ -59,6 +59,27 @@ builtin operations that have to be implemented.
 *** Cons and List
 - cons: Construct a cons cell, a pair or a list
 
+** Type System
+   I would like to stick a fairly primitive type system, that does not provide
+   static analysis or verification of programs, but rather runtime checks that
+   prevent undefined behavior.
+   
+   The sl::Type object has to introduced to bring together the type system and
+   the runtime. 
+   
+   A type object has the following properties:
+   - It is a singleton object.
+   - It has a hashcode that is equal to its address.
+     
+*** Ideas
+**** Type Hierarchy
+     Type objects have parent pointers
+**** Dynamic Dispatch (Interface Types)
+     Using interfaces for dynamic dispatch
+**** Multi-methods
+     Multiple dispatch
+**** ADTs (Algebraic Data Types)
+     This would suggest the use of pattern matching
 * Implementation Design
 ** Components
    Smallisp 
@@ -239,3 +260,6 @@ Currently we will take the first approach and redesign this if required.
     But that has proven to be a nuisance, because there are times we want to
     return nullptrs. But using references reduces chances of nullptr
     dereferences and provides nice value syntax on top of pointer semantics.
+    
+    To migrate to completely using references, the key is to use Error objects
+    (subclass of sl::Object).

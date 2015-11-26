@@ -94,11 +94,11 @@ TEST(Reader, ReadExpr) {
   std::stringstream sstream("(foo)1");
   Reader reader(sstream);
   const Object *sexp = reader.ReadExpr();
-  ASSERT_EQ(Type::kList, sexp->GetType());
+  ASSERT_TRUE(IsType<List>(sexp));
   ASSERT_TRUE(sexp->IsEqual(List({Symbol::Get("foo")})));
 
   const Object *num = reader.ReadExpr();
-  ASSERT_EQ(Type::kInt, num->GetType());
+  ASSERT_TRUE(IsType<Int>(num));
   ASSERT_TRUE(num->IsEqual(Int::Get(1)));
 }
 

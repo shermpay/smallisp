@@ -1,10 +1,23 @@
 #include "function.h"
 
+#include "list.h"
+#include "visitor.h"
+
 namespace sl {
+
+const Object *Callable::Accept(Visitor &v) const { return v.Visit(*this); }
+
+Function::Function(Interpreter *interp, const std::string &name,
+                   const List &params, const Object &body)
+    : interp_(interp),
+      name_(name),
+      params_(params),
+      param_count_(params.Count()),
+      body_(body){};
 
 const Object *Function::operator()(const List &args) const {
   const Object *ret_val = nullptr;
-  if (this->body().GetType() == Type::kList) {
+  if (IsType<List>(this->body())) {
     Frame *frame = new Frame{Environment{}, &this->body()};
     const List *rest_params = &this->params();
     // Bind args

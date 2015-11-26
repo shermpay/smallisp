@@ -16,6 +16,7 @@
 #include <iterator>
 
 #include "utils.h"
+#include "visitor.h"
 
 namespace sl {
 
@@ -28,6 +29,8 @@ bool ConsC::IsEqual(const Object *o) const {
   return (*this) == *static_cast<const ConsC *>(o);
 };
 
+const Object *ConsC::Accept(Visitor &v) const { return v.Visit(*this); }
+
 bool operator==(const ConsC &lhs, const ConsC &rhs) {
   return lhs.car()->IsEqual(*(rhs.car())) && lhs.cdr()->IsEqual(*(rhs.cdr()));
 }
@@ -38,7 +41,7 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 
 // ListIterator
 List::ListIterator &List::ListIterator::operator++() {
-  assert(curr_->Rest()->GetType() == sl::Type::kList);
+  assert(IsType<List>(curr_->Rest()));
   curr_ = static_cast<const List *>(curr_->Rest());
   ++curr_count_;
   return *this;
@@ -77,7 +80,7 @@ List::~List(void){
 };
 
 bool List::IsEqual(const Object &o) const {
-  if (o.GetType() != sl::Type::kList) return false;
+  if (!IsType<List>(o)) return false;
   return (*this) == static_cast<const List &>(o);
 }
 
@@ -119,10 +122,7 @@ const Object *List::First() const {
   return this->head_->car();
 }
 
-const Object *List::Rest(void) const {
-  assert(this->head()->cdr()->GetType() == sl::Type::kList);
-  return (static_cast<const List *>(this->head()->cdr()));
-}
+const Object *List::Rest(void) const { return this->head()->cdr(); }
 
 size_t List::Count(void) const {
   size_t count = 0;
@@ -130,6 +130,8 @@ size_t List::Count(void) const {
   if (this != NIL) count += static_cast<const List *>(this->Rest())->Count();
   return count;
 }
+
+const Object *List::Accept(Visitor &v) const { return v.Visit(*this); }
 
 // ---------------- List Operators ----------------
 bool operator==(const List &lhs, const List &rhs) {
@@ -170,5 +172,7 @@ const Object *Nil::First(void) const {
 const Object *Nil::Rest(void) const {
   return debug::ErrorWithTrace(kDerefNilErrorMsg);
 };
+
+const Object *Nil::Accept(Visitor &v) const { return v.Visit(*this); }
 
 }  // namespace sl

@@ -4,8 +4,6 @@
 
 #include <functional>
 #include "environment.h"
-#include "function.h"
-#include "list.h"
 #include "objects.h"
 
 namespace sl {

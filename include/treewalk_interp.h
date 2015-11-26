@@ -19,30 +19,31 @@
 #include "list.h"
 #include "objects.h"
 #include "specialforms.h"
+#include "visitor.h"
 
 namespace sl {
 
 namespace interp {
 
 namespace treewalker {
-class CodeObject : public Object {
- public:
-  Type GetType() const override { return Type::kCodeObject; };
-  // Value equality between 2 smallisp objects.
-  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
-  bool IsEqual(const Object *o) const override { return this == o; };
-  // Hash code of this object
-  std::size_t Hashcode(void) const override {
-    return reinterpret_cast<std::size_t>(this);
-  }
-  // Str should return a human readable std::string object
-  virtual const std::string Str(void) const override = 0;
-  virtual const Object *operator()(const List &lst) const = 0;
-};
+// class CodeObject : public Object {
+//  public:
+//   Type GetType() const override { return Type::kCodeObject; };
+//   // Value equality between 2 smallisp objects.
+//   bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
+//   bool IsEqual(const Object *o) const override { return this == o; };
+//   // Hash code of this object
+//   std::size_t Hashcode(void) const override {
+//     return reinterpret_cast<std::size_t>(this);
+//   }
+//   // Str should return a human readable std::string object
+//   virtual const std::string Str(void) const override = 0;
+//   virtual const Object *operator()(const List &lst) const = 0;
+// };
 
 }  // namespace treewalker
 
-class Treewalker : public Interpreter {
+class Treewalker : public Interpreter, public Visitor {
  public:
   Treewalker() : globals_(builtins::Defns()), frame_(nullptr){};
   // The environment is returned directly and can be manipulated directly.
@@ -79,6 +80,19 @@ class Treewalker : public Interpreter {
   // Create a definition and bind the symbol to the object.
   const Object *MakeDef(const Symbol &sym, const Object &obj);
   const Object *Call(const Callable &func, const List &args);
+
+  ////////////////////////
+  // Implements Visitor //
+  ////////////////////////
+  const Object *Visit(const Int &) override;
+  const Object *Visit(const Bool &) override;
+  const Object *Visit(const Symbol &) override;
+  const Object *Visit(const Void &) override;
+  const Object *Visit(const Error &) override;
+  const Object *Visit(const ConsC &) override;
+  const Object *Visit(const List &) override;
+  const Object *Visit(const Nil &) override;
+  const Object *Visit(const Callable &) override;
 
   void Print(void) const;
 

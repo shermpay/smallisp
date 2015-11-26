@@ -4,6 +4,7 @@
 ARCH := x86
 SHELL := /bin/bash
 CXX :=clang++
+LD := ld
 SRC_EXT := cc
 HDR_EXT := h
 
@@ -30,7 +31,7 @@ CXX_INCLUDE_FLAGS := -I$(INCL_DIR)
 CXX_SAFETY_FLAGS := -Wall
  # -Wl passes arg to linker
 CXX_DEBUG_FLAGS := -g -Wl,--export-dynamic
-CXX_INST_FLAGS := # --coverage
+CXX_INST_FLAGS := --coverage
 CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
 	$(CXX_SAFETY_FLAGS) $(CXX_DEBUG_FLAGS) $(CXX_INST_FLAGS)
 
@@ -40,8 +41,9 @@ CXXFLAGS := -std=c++14 $(CXX_INCLUDE_FLAGS) \
 SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))
 
 OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
-BASE_OBJS := $(BUILD_DIR)/objects.o $(BUILD_DIR)/utils.o
-
+SL_OBJS := $(BUILD_DIR)/int.o $(BUILD_DIR)/bool.o $(BUILD_DIR)/symbol.o \
+$(BUILD_DIR)/error.o $(BUILD_DIR)/void.o $(BUILD_DIR)/list.o $(BUILD_DIR)/function.o
+BASE_OBJS := $(BUILD_DIR)/objects.o $(BUILD_DIR)/utils.o 
 ###########
 # Testing #
 ###########
@@ -52,7 +54,7 @@ TEST_LIBS :=  -lgtest
 #################
 COV := llvm-cov gcov
 COVFLAGS := -f -o $(BUILD_DIR)
-PROFDIR := $(TEST_DIR)/profile
+COVINST_DIR := $(TEST_DIR)/cov_inst
 COVDIR := $(TEST_DIR)/cov
 LCOV := lcov
 LCOVFLAGS := -b . -d $(COVDIR) -d $(BUILD_DIR) -c --gcov-tool llvm-gcov --capture
@@ -81,6 +83,9 @@ allobjs: $(OBJS)
 ###########################
 # Building an object file #
 ###########################
+$(BUILD_DIR)/objects.o: $(SL_OBJS)
+	$(LD) -r $^ -o $@
+
 %.o: $(SRC_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BUILD_DIR)/$@ -c
 
@@ -99,7 +104,7 @@ cov: $(TEST_BINS)
 tests: $(TEST_BINS)
 	for test in $(BIN_DIR)/*; do \
 		./$$test; \
-		-mv *.gcda *.gcno $(PROFDIR); \
+		-mv *.gcda *.gcno $(COVINST_DIR); \
 	done
 
 %.cov: $(BIN_DIR)/%
@@ -110,25 +115,41 @@ tests: $(TEST_BINS)
 %: $(BIN_DIR)/%
 	$<
 	@echo "============ MOVING COVERAGE FILES ============="
-	-mv *.gcda *.gcno $(PROFDIR)
+	-mv *.gcda *.gcno $(COVINST_DIR)
 
 ##################
 # Building Tests #
 ##################
-$(BIN_DIR)/treewalk_interp_test: $(TEST_DIR)/treewalk_interp_test.cc $(BUILD_DIR)/list.o \
+$(BIN_DIR)/builtins_test: $(TEST_DIR)/builtins_test.cc $(BUILD_DIR)/builtins.o \
+$(BASE_OBJS)
+	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
+$(BIN_DIR)/treewalk_interp_test: $(TEST_DIR)/treewalk_interp_test.cc \
 $(BUILD_DIR)/reader.o $(BUILD_DIR)/treewalk_interp.o \
 $(BUILD_DIR)/specialforms.o $(BUILD_DIR)/builtins.o \
 $(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
-$(BIN_DIR)/reader_test: $(TEST_DIR)/reader_test.cc $(BUILD_DIR)/list.o  $(BUILD_DIR)/reader.o \
+$(BIN_DIR)/reader_test: $(TEST_DIR)/reader_test.cc $(BUILD_DIR)/reader.o \
 $(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
-$(BIN_DIR)/list_test: $(TEST_DIR)/list_test.cc $(BUILD_DIR)/list.o $(BASE_OBJS)
+$(BIN_DIR)/objects_test: $(TEST_DIR)/objects_test.cc $(BASE_OBJS)
+	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
+$(BIN_DIR)/list_test: $(TEST_DIR)/list_test.cc $(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
-$(BIN_DIR)/objects_test: $(TEST_DIR)/objects_test.cc $(BASE_OBJS)
+$(BIN_DIR)/void_test: $(TEST_DIR)/void_test.cc $(BUILD_DIR)/void.o
+	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
+$(BIN_DIR)/symbol_test: $(TEST_DIR)/symbol_test.cc $(BUILD_DIR)/symbol.o
+	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
+$(BIN_DIR)/bool_test: $(TEST_DIR)/bool_test.cc $(BUILD_DIR)/bool.o
+	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
+$(BIN_DIR)/int_test: $(TEST_DIR)/int_test.cc $(BUILD_DIR)/int.o
 	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
 $(BIN_DIR)/meta_test: $(TEST_DIR)/meta_test.cc
@@ -144,11 +165,11 @@ clean_tests:
 	-rm -r $(BIN_DIR)/*
 	-rm -r $(COVDIR)/*
 	-rm -r $(HTMLDIR)/*
-	-rm -r $(PROFDIR)/*
+	-rm -r $(COVINST_DIR)/*
 .PHONY: clean_cov
 clean_cov:
 	-rm -r $(BUILD_DIR)/*.gcda $(BUILD_DIR)/*.gcno
 	-rm -r $(COVDIR)/*
 	-rm -r $(HTMLDIR)/*
-	-rm -r $(PROFDIR)/*
+	-rm -r $(COVINST_DIR)/*
 

@@ -3,24 +3,25 @@
 #ifndef _FUNCTION_DEF
 #define _FUNCTION_DEF
 
-#include "environment.h"
 #include "frame.h"
 #include "interpreter.h"
-#include "list.h"
-#include "objects.h"
+#include "object.h"
 
 namespace sl {
+class List;  // Forward declaration
 
 // Callable is an Abstract Base Class for all function types in smallisp.
 class Callable : public Object {
  public:
+  TYPE_OBJ_FN("Function")
   virtual ~Callable(void){};
-  Type GetType(void) const override { return Type::kFunction; };
+  const Type &GetType(void) const override { return Callable::TypeObj(); };
   bool IsEqual(const Object *o) const override { return this == o; };
   bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
   virtual const Object *operator()(const List &) const = 0;
   // Return the number of parameters
   virtual std::size_t param_count(void) const = 0;
+  const Object *Accept(Visitor &v) const override;
 };
 
 // A Smallisp Function Object
@@ -29,14 +30,8 @@ class Callable : public Object {
 // evaluated by the interpreter.
 class Function : public Callable {
  public:
-  // Environment is enclosing environment
   Function(Interpreter *interp, const std::string &name, const List &params,
-           const Object &body)
-      : interp_(interp),
-        name_(name),
-        params_(params),
-        param_count_(params.Count()),
-        body_(body){};
+           const Object &body);
 
   Interpreter *interpreter(void) const { return interp_; };
   const std::string name(void) const { return name_; };

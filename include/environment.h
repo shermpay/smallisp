@@ -3,7 +3,8 @@
 #define _ENVIRONMENT_DEF
 
 #include <unordered_map>
-#include "objects.h"
+#include "object.h"
+#include "symbol.h"
 
 namespace sl {
 

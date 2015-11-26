@@ -16,5 +16,6 @@ void Enable(bool);
 const Error *ErrorWithTrace(const std::string &msg);
 
 }  // namespace debug
+
 }  // namespace sl
 #endif

@@ -12,18 +12,19 @@
 #include <iostream>
 
 #include "utils.h"
-#include "objects.h"
+#include "object.h"
 
 namespace sl {
 
 // The definition of a Cons Cell in Smallisp
 class ConsC : public Object {
  public:
+  TYPE_OBJ_FN("Cons")
   ConsC(const Object *o1, const Object *o2) : car_(o1), cdr_(o2){};
   ~ConsC() noexcept {};
 
   // Implement Object
-  virtual Type GetType() const override { return sl::Type::kCons; };
+  const Type &GetType() const override { return ConsC::TypeObj(); };
   virtual bool IsEqual(const Object &o) const override;
   virtual bool IsEqual(const Object *o) const override;
   virtual std::size_t Hashcode(void) const override {
@@ -35,6 +36,7 @@ class ConsC : public Object {
 
   inline const Object *car() const { return this->car_; };
   inline const Object *cdr() const { return this->cdr_; };
+  const Object *Accept(Visitor &v) const override;
 
  private:
   const Object *car_;
@@ -83,12 +85,15 @@ class List : public Object {
 
   typedef ListIterator iterator;
 
+  // Function: List::TypeObj
+  TYPE_OBJ_FN("List")
+
   // The constant nil.
   static const List *kEmpty;
 
   // Constructor for wrapping a cons cell into a list type.
   List(const ConsC *cell) : head_(cell) {
-    assert(cell->cdr()->GetType() != sl::Type::kCons);
+    assert(!IsType<ConsC>(*(cell->cdr())));
   };
 
   // Constructor for creating lists of objects.
@@ -98,7 +103,7 @@ class List : public Object {
   ~List(void);
 
   // Implement object
-  virtual Type GetType(void) const override { return sl::Type::kList; };
+  const Type &GetType(void) const override { return List::TypeObj(); };
   virtual bool IsEqual(const Object &o) const override;
   virtual bool IsEqual(const Object *o) const override;
   virtual std::size_t Hashcode(void) const override;
@@ -124,6 +129,8 @@ class List : public Object {
   iterator begin(void) const { return iterator(*this); }
   iterator end(void) const { return iterator(*kEmpty); }
 
+  const Object *Accept(Visitor &v) const override;
+
  protected:
   List(){};
 
@@ -140,6 +147,7 @@ struct Nil : public List {
   const Object *Rest(void) const override;
   size_t Count(void) const override { return 0; };
   const std::string Str(void) const override { return "()"; };
+  const Object *Accept(Visitor &v) const override;
 
  private:
   static Nil *instance;
@@ -148,11 +156,11 @@ struct Nil : public List {
   Nil &operator=(Nil const &) = delete;
 };
 
-#define NIL (Nil::Get())
-
 bool operator==(const List &lhs, const List &rhs);
 
 bool operator!=(const List &lhs, const List &rhs);
+
+#define NIL (Nil::Get())
 
 // TODO: Remove when bug in gtest is fixed
 inline void PrintTo(const List &o, std::ostream *os) { *os << o.Str(); };

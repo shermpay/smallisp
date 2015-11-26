@@ -7,3 +7,7 @@
 ** DONE #2: Evaluating (lambda ()) segfaults
    Repro: ((lambda()))
    Fix: Ensure lambda has a body, add assertion if evaluating function without body
+
+* Feature
+** Type System
+*** TODO Design Type System
