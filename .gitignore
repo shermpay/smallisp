@@ -5,7 +5,8 @@ mpc.*
 *.o
 bin/*
 obj/*
-.*
+.#*
+
 
 test/bin/
 
