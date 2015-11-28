@@ -17,9 +17,17 @@ TEST(Int, Allocation) {
   EXPECT_EQ(2, Int::Val(2).value());
   EXPECT_EQ(1, Int::Val(1).value());
 }
+
+TEST(Int, IsEqual) {
+  EXPECT_TRUE(Int::Get(1)->IsEqual(Int::Get(1)));
+  EXPECT_FALSE(Int::Get(1)->IsEqual(Int::Get(2)));
+  EXPECT_TRUE(Int::Get(1)->IsEqual(Int::Val(1)));
+}
+
 TEST(Int, Equality) {
   const Int &integer = Int::Val(5);
   EXPECT_EQ(Int::Val(1), Int::Val(1));
+  EXPECT_EQ(*Int::Get(1), *Int::Get(1));
   EXPECT_EQ(Int::Val(5), integer);
   EXPECT_NE(Int::Val(6), integer);
   EXPECT_EQ(Int::Val(7), Int::Val(7));

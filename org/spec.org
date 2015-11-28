@@ -1,4 +1,12 @@
+# Local Variables:
+# fill-column: 80
+# eval: (auto-fill-mode)
+# End:
 #+TITLE: Specification
+
+*THIS IS A DRAFT*
+The complete version of the specification is under active development alongside
+the design.
 
 * Smallisp
   *Smallisp* is a functional programming language that resembles a Lisp. This

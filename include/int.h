@@ -8,7 +8,6 @@
 namespace sl {
 
 // Int representation
-// TODO: Overflow checks
 class Int : public Number {
  public:
   DEF_TYPE_OBJ("Int");
@@ -21,6 +20,7 @@ class Int : public Number {
   virtual ~Int(){};
 
   static const Int &Val(const long &x);
+  static const Int *Get(const long &x);
   inline long value() const { return this->value_; };
   // Object functions
   virtual Type &GetType() const override { return Int::TypeObj(); };
@@ -38,6 +38,7 @@ class Int : public Number {
   long long_value(void) const override { return value_; }
 
   // Arithmetic Operators
+  // TODO: Overflow check for all arithmetic operations
   inline const Number &operator+(const Number &oi) const override {
     return Int::Val(this->value() + oi.long_value());
   };
@@ -55,6 +56,7 @@ class Int : public Number {
     return Int::Val(this->value() / oi.long_value());
   };
 
+  // TODO: Overflow check
   inline int Cmp(const Number &o) const override {
     return this->long_value() - o.long_value();
   }

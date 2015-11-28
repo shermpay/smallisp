@@ -202,6 +202,7 @@ const Object *Treewalker::Call(const Callable &func, const List &args) {
 ////////////////////////
 // Implements Visitor //
 ////////////////////////
+const Object *Treewalker::Visit(const Byte &o) { return &o; }
 const Object *Treewalker::Visit(const Int &o) { return &o; }
 const Object *Treewalker::Visit(const Bool &o) { return &o; }
 const Object *Treewalker::Visit(const Symbol &obj) {

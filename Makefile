@@ -105,7 +105,7 @@ cov: $(TEST_BINS)
 tests: $(TEST_BINS)
 	for test in $(BIN_DIR)/*; do \
 		./$$test; \
-		-mv *.gcda *.gcno $(COVINST_DIR); \
+		mv *.gcda *.gcno $(COVINST_DIR); \
 	done
 
 %.cov: $(BIN_DIR)/%

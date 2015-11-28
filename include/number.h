@@ -23,7 +23,7 @@ class Number : public Object {
  public:
   DEF_TYPE_OBJ("Number");
 
-  virtual Type &GetType() const override { return Number::TypeObj(); };
+  virtual const Type &GetType() const override { return Number::TypeObj(); };
 
   // Number Interface
   // Accessors

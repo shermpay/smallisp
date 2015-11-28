@@ -10,4 +10,9 @@
 
 * Feature
 ** Type System
-*** TODO Design Type System
+*** DONE Design Basic Type System
+** Error System
+*** TODO Design Error system
+
+* Misc
+** TODO Refactor all pointers away

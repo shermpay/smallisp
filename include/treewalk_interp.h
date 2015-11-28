@@ -84,6 +84,7 @@ class Treewalker : public Interpreter, public Visitor {
   ////////////////////////
   // Implements Visitor //
   ////////////////////////
+  const Object *Visit(const Byte &) override;
   const Object *Visit(const Int &) override;
   const Object *Visit(const Bool &) override;
   const Object *Visit(const Symbol &) override;

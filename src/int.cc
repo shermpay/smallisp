@@ -5,10 +5,13 @@
 
 namespace sl {
 // -------- Definitions for Int -----------
-const Int &Int::Val(const long &x) { return *new Int(x); };
+const Int &Int::Val(const long &x) { return *Int::Get(x); };
+const Int *Int::Get(const long &x) { return new Int(x); };
+
 bool Int::IsEqual(const Object &o) const {
-  if (IsType<Number>(o)) {
-    return this->Cmp(static_cast<const Number &>(o));
+  // Generalize to Number
+  if (IsType<Int>(o)) {
+    return this->Cmp(static_cast<const Int &>(o)) == 0;
   }
   return false;
 }
