@@ -1,4 +1,4 @@
-#include "objects.h"
+#include "int.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <sstream>
@@ -59,6 +59,16 @@ TEST(Int, Operators) {
   EXPECT_EQ(Int::Val(0), Int::Val(0) / Int::Val(2));
   // Divide by zero is an assertion error, should be checked in library
   // Fraction division is not handled on this level
+}
+
+////////////////
+// Comparable //
+////////////////
+TEST(Int, Comparable) {
+  EXPECT_GT(0, Int::Val(1).Cmp(Int::Val(2)));
+  EXPECT_LT(0, Int::Val(2).Cmp(Int::Val(1)));
+  EXPECT_EQ(0, Int::Val(1).Cmp(Int::Val(1)));
+  EXPECT_NE(0, Int::Val(2).Cmp(Int::Val(1)));
 }
 }
 

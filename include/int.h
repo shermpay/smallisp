@@ -3,69 +3,67 @@
 #ifndef _INT_DEF
 #define _INT_DEF
 
-#include "object.h"
+#include "number.h"
 
 namespace sl {
 
 // Int representation
-class Int : public Object {
+// TODO: Overflow checks
+class Int : public Number {
  public:
   DEF_TYPE_OBJ("Int");
 
+  Int(const Number &x) : value_(x.long_value()){};
+  Int(const Int &x) : value_(x.value()){};
+  Int(const Int &&x) : value_(x.value()){};
+  Int(const long &x) : value_(x){};
+
   virtual ~Int(){};
 
+  static const Int &Val(const long &x);
+  inline long value() const { return this->value_; };
   // Object functions
   virtual Type &GetType() const override { return Int::TypeObj(); };
-  // We do address equality because Ints are pooled.
-  virtual bool IsEqual(const Object &o) const override {
-    return this->IsEqual(&o);
-  };
-  virtual bool IsEqual(const Object *o) const override { return this == o; };
-  virtual std::size_t Hashcode(void) const override {
+  bool IsEqual(const Object &o) const override;
+  bool IsEqual(const Object *o) const override;
+  std::size_t Hashcode(void) const override {
     std::hash<long> fn;
     return fn(value());
   }
-  virtual const std::string Str(void) const override {
+  const std::string Str(void) const override {
     return std::to_string(this->value_);
   };
-
-  inline long value() const { return this->value_; };
-  static const Int *Get(const long &x);
-  static const Int &Val(const long &x);
-
-  // operators
-  inline const Int &operator+(const Int &oi) const {
-    return Int::Val(this->value() + oi.value());
-  };
-
-  inline const Int &operator-(const Int &oi) const {
-    return Int::Val(this->value() - oi.value());
-  };
-
-  inline const Int &operator*(const Int &oi) const {
-    return Int::Val(this->value() * oi.value());
-  };
-
-  inline const Int &operator/(const Int &oi) const {
-    assert(oi.value() != 0 && "div by 0");
-    return Int::Val(this->value() / oi.value());
-  };
   const Object *Accept(Visitor &) const override;
+
+  long long_value(void) const override { return value_; }
+
+  // Arithmetic Operators
+  inline const Number &operator+(const Number &oi) const override {
+    return Int::Val(this->value() + oi.long_value());
+  };
+
+  inline const Number &operator-(const Number &oi) const override {
+    return Int::Val(this->value() - oi.long_value());
+  };
+
+  inline const Number &operator*(const Number &oi) const override {
+    return Int::Val(this->value() * oi.long_value());
+  };
+
+  inline const Number &operator/(const Number &oi) const override {
+    assert(oi.long_value() != 0 && "div by 0");
+    return Int::Val(this->value() / oi.long_value());
+  };
+
+  inline int Cmp(const Number &o) const override {
+    return this->long_value() - o.long_value();
+  }
 
  private:
   const long value_;
   Int() = delete;
-  Int(const Int &) = delete;               // Copy ctor
-  Int(const Int &&x) = delete;             // Move ctor
-  Int &operator=(const Int &) = delete;    // Copy assignment
-  Int &operator=(const Int &&x) = delete;  // Move assignment
-  Int(const long &x) : value_(x){};
-};
-
-inline bool operator==(const Int &lhs, const Int &rhs) { return &lhs == &rhs; };
-
-inline bool operator!=(const Int &lhs, const Int &rhs) {
-  return !(lhs == rhs);
+  Int &operator=(const Int &) = delete;    // Copy Assignment
+  Int &operator=(const Int &&x) = delete;  // Move Assignment
 };
 
 // TODO: Remove when bug in gtest is fixed
