@@ -10,6 +10,7 @@ namespace sl {
 class Visitor {
  public:
   virtual ~Visitor(){};
+  virtual const Object *Visit(const Byte &) = 0;
   virtual const Object *Visit(const Int &) = 0;
   virtual const Object *Visit(const Bool &) = 0;
   virtual const Object *Visit(const Symbol &) = 0;

@@ -153,6 +153,9 @@ $(BIN_DIR)/bool_test: $(TEST_DIR)/bool_test.cc $(BUILD_DIR)/bool.o
 $(BIN_DIR)/int_test: $(TEST_DIR)/int_test.cc $(BUILD_DIR)/int.o
 	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
+$(BIN_DIR)/byte_test: $(TEST_DIR)/byte_test.cc $(BUILD_DIR)/byte.o
+	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
 $(BIN_DIR)/meta_test: $(TEST_DIR)/meta_test.cc
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 

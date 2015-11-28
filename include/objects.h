@@ -4,6 +4,7 @@
 #define _OBJECTS_DEF
 
 #include "object.h"
+#include "byte.h"
 #include "int.h"
 #include "bool.h"
 #include "symbol.h"
