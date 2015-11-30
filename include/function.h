@@ -16,12 +16,11 @@ class Callable : public Object {
   DEF_TYPE_OBJ("Function")
   virtual ~Callable(void){};
   const Type &GetType(void) const override { return Callable::TypeObj(); };
-  bool IsEqual(const Object *o) const override { return this == o; };
-  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
-  virtual const Object *operator()(const List &) const = 0;
+  bool IsEqual(const Object &o) const override { return this == &o; };
+  virtual const Object &operator()(const List &) const = 0;
   // Return the number of parameters
   virtual std::size_t param_count(void) const = 0;
-  const Object *Accept(Visitor &v) const override;
+  const Object &Accept(Visitor &v) const override;
 };
 
 // A Smallisp Function Object
@@ -30,6 +29,10 @@ class Callable : public Object {
 // evaluated by the interpreter.
 class Function : public Callable {
  public:
+  static const Function &Val(Interpreter *interp, const std::string &name,
+                             const List &params, const Object &body) {
+    return *(new Function(interp, name, params, body));
+  }
   Function(Interpreter *interp, const std::string &name, const List &params,
            const Object &body);
 
@@ -46,7 +49,7 @@ class Function : public Callable {
     return "<function: " + name() + ">";
   };
 
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 
  private:
   Interpreter *interp_;

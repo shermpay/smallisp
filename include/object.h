@@ -19,13 +19,12 @@ class Object {
   virtual const class Type &GetType() const = 0;
   // Value equality between 2 smallisp objects.
   virtual bool IsEqual(const Object &) const = 0;
-  virtual bool IsEqual(const Object *) const = 0;
   // Hash code of this object
   virtual std::size_t Hashcode(void) const = 0;
   // Str should return a human readable std::string object
   virtual const std::string Str(void) const = 0;
   // Visitor method
-  virtual const Object *Accept(class Visitor &) const = 0;
+  virtual const Object &Accept(class Visitor &) const = 0;
 };
 
 template <class T>
@@ -67,8 +66,7 @@ class Type : public Object {
   }
   Type(const std::string &name) : name_(name){};
   const Type &GetType(void) const override { return Type::Inst(); }
-  bool IsEqual(const Object *obj) const override { return this == obj; }
-  bool IsEqual(const Object &obj) const override { return this->IsEqual(&obj); }
+  bool IsEqual(const Object &obj) const override { return this == &obj; }
   std::size_t Hashcode(void) const override {
     return reinterpret_cast<std::size_t>(this);
   }
@@ -76,9 +74,9 @@ class Type : public Object {
     return "<'" + name() + "' type object>";
   };
   const std::string &name(void) const { return name_; };
-  const Object *Accept(Visitor &) const override {
+  const Object &Accept(Visitor &) const override {
     assert(false && "NOT IMPLEMENTED");
-    return nullptr;
+    return *this;
   };
 
  protected:

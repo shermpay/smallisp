@@ -11,8 +11,6 @@ bool Byte::IsEqual(const Object &o) const {
   return false;
 }
 
-bool Byte::IsEqual(const Object *o) const { return this->IsEqual(*o); }
-
-const Object *Byte::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &Byte::Accept(Visitor &v) const { return v.Visit(*this); }
 
 }  // namespace sl

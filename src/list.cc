@@ -25,14 +25,10 @@ bool ConsC::IsEqual(const Object &o) const {
   return (*this) == static_cast<const ConsC &>(o);
 };
 
-bool ConsC::IsEqual(const Object *o) const {
-  return (*this) == *static_cast<const ConsC *>(o);
-};
-
-const Object *ConsC::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &ConsC::Accept(Visitor &v) const { return v.Visit(*this); }
 
 bool operator==(const ConsC &lhs, const ConsC &rhs) {
-  return lhs.car()->IsEqual(*(rhs.car())) && lhs.cdr()->IsEqual(*(rhs.cdr()));
+  return lhs.car().IsEqual(rhs.car()) && lhs.cdr().IsEqual(rhs.cdr());
 }
 
 bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
@@ -41,8 +37,11 @@ bool operator!=(const ConsC &lhs, const ConsC &rhs) { return !(lhs == rhs); }
 
 // ListIterator
 List::ListIterator &List::ListIterator::operator++() {
-  assert(IsType<List>(curr_->Rest()));
-  curr_ = static_cast<const List *>(curr_->Rest());
+  // TODO: Nil case?
+  if (!(IsType<List>(curr_->Rest()) && IsType<Nil>(curr_->Rest())))
+    std::cout << curr_->Rest().GetType().Str() << std::endl;
+  assert(IsType<List>(curr_->Rest()) || IsType<Nil>(curr_->Rest()));
+  curr_ = &static_cast<const List &>(curr_->Rest());
   ++curr_count_;
   return *this;
 }
@@ -60,13 +59,13 @@ const Nil *Nil::Get(void) {
   return instance;
 }
 
-const List *List::kEmpty = NIL;
+const List &List::kEmpty = NIL;
 
 const List *InitHelperPtr(std::initializer_list<const Object *> il) {
-  const List *curr = NIL;
+  const List *curr = &NIL;
   for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
-    const Object *o = (*ptr);
-    curr = Cons(o, curr);
+    const Object &o = *(*ptr);
+    curr = &Cons(o, *curr);
   }
   return curr;
 }
@@ -83,8 +82,6 @@ bool List::IsEqual(const Object &o) const {
   if (!IsType<List>(o)) return false;
   return (*this) == static_cast<const List &>(o);
 }
-
-bool List::IsEqual(const Object *o) const { return this->IsEqual(*o); }
 
 std::size_t List::Hashcode(void) const {
   std::size_t multiplier = 1;
@@ -115,28 +112,28 @@ const std::string List::Str(void) const {
   return sstream.str();
 }
 
-const Object *List::First() const {
-  if (this == NIL) {
+const Object &List::First() const {
+  if (IsNil(this)) {
     return NIL;
   }
-  return this->head_->car();
+  return this->head().car();
 }
 
-const Object *List::Rest(void) const { return this->head()->cdr(); }
+const Object &List::Rest(void) const { return this->head().cdr(); }
 
 size_t List::Count(void) const {
   size_t count = 0;
   count++;
-  if (this != NIL) count += static_cast<const List *>(this->Rest())->Count();
+  if (!IsNil(this)) count += static_cast<const List &>(this->Rest()).Count();
   return count;
 }
 
-const Object *List::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &List::Accept(Visitor &v) const { return v.Visit(*this); }
 
 // ---------------- List Operators ----------------
 bool operator==(const List &lhs, const List &rhs) {
   if (!IsNil(&lhs) && !IsNil(&rhs)) {
-    return lhs.head()->IsEqual(*(rhs.head()));
+    return lhs.head().IsEqual(rhs.head());
   } else if (IsNil(&lhs) && IsNil(&rhs)) {
     return true;
   } else {
@@ -147,32 +144,31 @@ bool operator==(const List &lhs, const List &rhs) {
 bool operator!=(const List &lhs, const List &rhs) { return !(lhs == rhs); }
 
 // Cons function
-const ConsC *Cons(const Object *o1, const Object *o2) {
-  const ConsC *cell = new ConsC(o1, o2);
-  return cell;
+const ConsC &Cons(const Object &o1, const Object &o2) {
+  return ConsC::Val(o1, o2);
 }
 
-const List *Cons(const Object *o1, const List *o2) {
-  const ConsC *cell = new ConsC(o1, o2);
-  return new List(cell);
+const List &Cons(const Object &o1, const List &o2) {
+  const ConsC &cell = ConsC::Val(o1, o2);
+  return *(new List(std::move(cell)));
 }
 
 // ---------------- Nil Definitions ----------------
 static const std::string kDerefNilErrorMsg = "cannot dereference nil";
 
-const ConsC *Nil::head(void) const {
+const ConsC &Nil::head(void) const {
   debug::ErrorWithTrace(kDerefNilErrorMsg);
-  return nullptr;
+  return List::head();
 };
 
-const Object *Nil::First(void) const {
+const Object &Nil::First(void) const {
   return debug::ErrorWithTrace(kDerefNilErrorMsg);
 };
 
-const Object *Nil::Rest(void) const {
+const Object &Nil::Rest(void) const {
   return debug::ErrorWithTrace(kDerefNilErrorMsg);
 };
 
-const Object *Nil::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &Nil::Accept(Visitor &v) const { return v.Visit(*this); }
 
 }  // namespace sl

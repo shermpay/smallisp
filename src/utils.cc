@@ -41,7 +41,7 @@ static bool ExecAddr2Line(const std::string &filename, void *addr) {
   return true;
 }
 
-const Error *ErrorWithTrace(const std::string &msg) {
+const Error &ErrorWithTrace(const std::string &msg) {
   if (Enabled) {
     fprintf(stderr, "Error: %s\n", msg.c_str());
     void *backtrace_buf[kStackTraceSize];
@@ -58,7 +58,7 @@ const Error *ErrorWithTrace(const std::string &msg) {
       delete trace_strs;
     }
   }
-  return new Error(msg);
+  return Error::Val(msg);
 }
 }  // namespace debug
 }  // namespace sl

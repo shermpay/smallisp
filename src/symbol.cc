@@ -29,6 +29,6 @@ const Symbol &Symbol::Val(const std::string &name) {
   return *Symbol::Get(name);
 }
 
-const Object *Symbol::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &Symbol::Accept(Visitor &v) const { return v.Visit(*this); }
 
 }  // namespace sl

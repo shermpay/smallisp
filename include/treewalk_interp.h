@@ -53,54 +53,54 @@ class Treewalker : public Interpreter, public Visitor {
   // Set the frame of the interpreter to the frame passed in.
   void set_frame(Frame *f) override { frame_ = f; };
   // Eval the object passed in.
-  const Object *Eval(const Object &) override;
+  const Object &Eval(const Object &) override;
   // Handle a special form given the form and the kind of form.
-  const Object *HandleSpecialForm(const List &sf, specialforms::SFKind sf_kind);
+  const Object &HandleSpecialForm(const List &sf, specialforms::SFKind sf_kind);
   // The def special form
-  const Object *Def(const List &sf);
+  const Object &Def(const List &sf);
   // The set! special form
   // set! is defined to change the bindings of variables of the smallest scope.
   // It requires the symbol to have an existing definition.
-  const Object *UnsafeSet(const List &sf);
+  const Object &UnsafeSet(const List &sf);
   // This should return a sl::Function
-  const Object *Lambda(const List &sf);
+  const Object &Lambda(const List &sf);
   // This should return a sl::Function
-  const Object *Func(const List &sf);
+  const Object &Func(const List &sf);
   // The 'if' special form
-  const Object *If(const List &sf);
+  const Object &If(const List &sf);
 
   // Lookup a variable in all scopes.
-  const Object *Lookup(const Symbol &);
+  const Object &Lookup(const Symbol &);
   // Lookup a symbol in the current scope.
-  const Object *LocalLookup(const Symbol &sym);
+  const Object &LocalLookup(const Symbol &sym);
   // Bind symbol to object in current frame. If no frame, bind to global
   // Every scope/frame can only have a single binding
   // This is the most primitive binding operation.
-  const Object *Bind(const Symbol &sym, const Object &obj);
+  const Object &Bind(const Symbol &sym, const Object &obj);
   // Create a definition and bind the symbol to the object.
-  const Object *MakeDef(const Symbol &sym, const Object &obj);
-  const Object *Call(const Callable &func, const List &args);
+  const Object &MakeDef(const Symbol &sym, const Object &obj);
+  const Object &Call(const Callable &func, const List &args);
 
   ////////////////////////
   // Implements Visitor //
   ////////////////////////
-  const Object *Visit(const Byte &) override;
-  const Object *Visit(const Int &) override;
-  const Object *Visit(const Bool &) override;
-  const Object *Visit(const Symbol &) override;
-  const Object *Visit(const Void &) override;
-  const Object *Visit(const Error &) override;
-  const Object *Visit(const ConsC &) override;
-  const Object *Visit(const List &) override;
-  const Object *Visit(const Nil &) override;
-  const Object *Visit(const Callable &) override;
+  const Object &Visit(const Byte &) override;
+  const Object &Visit(const Int &) override;
+  const Object &Visit(const Bool &) override;
+  const Object &Visit(const Symbol &) override;
+  const Object &Visit(const Void &) override;
+  const Object &Visit(const Error &) override;
+  const Object &Visit(const ConsC &) override;
+  const Object &Visit(const List &) override;
+  const Object &Visit(const Nil &) override;
+  const Object &Visit(const Callable &) override;
 
   void Print(void) const;
 
  private:
   Environment globals_;  // Global bindings symbol table
   Frame *frame_;         // Current stack frame
-  const List *EvalList(const List &);
+  const List &EvalList(const List &);
 };
 }  // namespace interp
 

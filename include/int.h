@@ -25,7 +25,6 @@ class Int : public Number {
   // Object functions
   virtual Type &GetType() const override { return Int::TypeObj(); };
   bool IsEqual(const Object &o) const override;
-  bool IsEqual(const Object *o) const override;
   std::size_t Hashcode(void) const override {
     std::hash<long> fn;
     return fn(value());
@@ -33,7 +32,7 @@ class Int : public Number {
   const std::string Str(void) const override {
     return std::to_string(this->value_);
   };
-  const Object *Accept(Visitor &) const override;
+  const Object &Accept(Visitor &) const override;
 
   long long_value(void) const override { return value_; }
 

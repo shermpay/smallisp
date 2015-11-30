@@ -4,94 +4,101 @@ namespace sl {
 
 namespace builtins {
 
+static inline const std::string TypeErrorMsg(const BuiltinFunction *func,
+                                             const Object &obj,
+                                             Type &expected) {
+  std::string msg = "Error in " + func->Str() +
+                    "\n   error: type mismatch\n  expect: " + expected.Str() +
+                    "\n  actual: " + obj.GetType().Str();
+  return msg;
+}
+
 static inline const Error *TypeCheck(const BuiltinFunction *func,
-                                     const Object *obj, Type &expected) {
-  if (obj->GetType() != expected)
-    return new Error("Error in " + func->Str() +
-                     "\n   error: type mismatch\n  expect: " + expected.Str() +
-                     "\n  actual: " + obj->GetType().Str());
+                                     const Object &obj, Type &expected) {
+  if (obj.GetType() != expected)
+    return new Error(TypeErrorMsg(func, obj, expected));
   return nullptr;
 }
 
-const Object *Add::operator()(const List &args) const {
+const Object &Add::operator()(const List &args) const {
   // TODO: Type check
   assert(!IsNil(&args) && "param/arg counting happens prior");
   const Error *err;
-  if ((err = TypeCheck(this, args.First(), Int::TypeObj()))) return err;
-  const Int *left = static_cast<const Int *>(args.First());
-  const List &rest = *static_cast<const List *>(args.Rest());
-  if ((err = TypeCheck(this, rest.First(), Int::TypeObj()))) return err;
-  const Int *right = static_cast<const Int *>(rest.First());
-  return &(*left + *right);
+  if ((err = TypeCheck(this, args.First(), Int::TypeObj()))) return *err;
+  const Int &left = static_cast<const Int &>(args.First());
+  const List &rest = static_cast<const List &>(args.Rest());
+  if ((err = TypeCheck(this, rest.First(), Int::TypeObj()))) return *err;
+  const Int &right = static_cast<const Int &>(rest.First());
+  return (left + right);
 }
 
-const Object *Sub::operator()(const List &args) const {
+const Object &Sub::operator()(const List &args) const {
   // TODO: Type check
-  const Int *left = static_cast<const Int *>(args.First());
-  const Int *right =
-      static_cast<const Int *>(static_cast<const List *>(args.Rest())->First());
-  return &(*left - *right);
+  const Int &left = static_cast<const Int &>(args.First());
+  const Int &right =
+      static_cast<const Int &>(static_cast<const List &>(args.Rest()).First());
+  return (left - right);
 }
 
-const Object *Mul::operator()(const List &args) const {
+const Object &Mul::operator()(const List &args) const {
   // TODO: Type check
-  const Int *left = static_cast<const Int *>(args.First());
-  const Int *right =
-      static_cast<const Int *>(static_cast<const List *>(args.Rest())->First());
-  return &(*left * *right);
+  const Int &left = static_cast<const Int &>(args.First());
+  const Int &right =
+      static_cast<const Int &>(static_cast<const List &>(args.Rest()).First());
+  return (left * right);
 }
 
-const Object *Div::operator()(const List &args) const {
+const Object &Div::operator()(const List &args) const {
   // TODO: Type check
-  const Int *left = static_cast<const Int *>(args.First());
-  const Int *right =
-      static_cast<const Int *>(static_cast<const List *>(args.Rest())->First());
-  return &(*left / *right);
+  const Int &left = static_cast<const Int &>(args.First());
+  const Int &right =
+      static_cast<const Int &>(static_cast<const List &>(args.Rest()).First());
+  return (left / right);
 }
 
-const Object *Eq::operator()(const List &args) const {
+const Object &Eq::operator()(const List &args) const {
   // TODO: Type check
-  const Object *left = args.First();
-  const Object *right = static_cast<const List *>(args.Rest())->First();
-  return Bool::Get(left->IsEqual(right));
+  const Object &left = args.First();
+  const Object &right = static_cast<const List &>(args.Rest()).First();
+  return Bool::Val(left.IsEqual(right));
 }
 
-const Object *Ne::operator()(const List &args) const {
+const Object &Ne::operator()(const List &args) const {
   // TODO: Type check
-  const Object *left = args.First();
-  const Object *right = static_cast<const List *>(args.Rest())->First();
-  return Bool::Get(!(left->IsEqual(right)));
+  const Object &left = args.First();
+  const Object &right = static_cast<const List &>(args.Rest()).First();
+  return Bool::Val(!(left.IsEqual(right)));
 }
 
-const Object *Cons::operator()(const List &args) const {
-  const Object *left = args.First();
-  const Object *right = static_cast<const List *>(args.Rest())->First();
+const Object &Cons::operator()(const List &args) const {
+  const Object &left = args.First();
+  const Object &right = static_cast<const List &>(args.Rest()).First();
   if (IsType<List>(right)) {
-    return sl::Cons(left, static_cast<const List *>(right));
+    return sl::Cons(left, static_cast<const List &>(right));
   } else {
     return sl::Cons(left, right);
   }
 }
 
-const Object *Car::operator()(const List &args) const {
-  const Object *obj = args.First();
+const Object &Car::operator()(const List &args) const {
+  const Object &obj = args.First();
   if (IsType<List>(obj)) {
-    return static_cast<const List *>(obj)->First();
+    return static_cast<const List &>(obj).First();
   } else if (IsType<ConsC>(obj)) {
-    return static_cast<const ConsC *>(obj)->car();
+    return static_cast<const ConsC &>(obj).car();
   } else {
-    return new Error("Error: 'car' can only be applied to cons or list");
+    return Error::Val(TypeErrorMsg(this, obj, List::TypeObj()));
   }
 }
 
-const Object *Cdr::operator()(const List &args) const {
-  const Object *obj = args.First();
+const Object &Cdr::operator()(const List &args) const {
+  const Object &obj = args.First();
   if (IsType<List>(obj)) {
-    return static_cast<const List *>(obj)->Rest();
+    return static_cast<const List &>(obj).Rest();
   } else if (IsType<ConsC>(obj)) {
-    return static_cast<const ConsC *>(obj)->cdr();
+    return static_cast<const ConsC &>(obj).cdr();
   } else {
-    return new Error("Error: 'car' can only be applied to cons or list");
+    return Error::Val(TypeErrorMsg(this, obj, List::TypeObj()));
   }
 }
 
@@ -113,7 +120,7 @@ STATIC_INIT_BUILTIN(Cdr);
 
 Environment Defns(void) {
   static Environment defns = {
-      {Symbol::Get("nil"), NIL},      {Symbol::Get("true"), &TRUE},
+      {Symbol::Get("nil"), &NIL},     {Symbol::Get("true"), &TRUE},
       {Symbol::Get("false"), &FALSE}, {Symbol::Get("add"), &Add()},
       {Symbol::Get("sub"), &Sub()},   {Symbol::Get("mul"), &Mul()},
       {Symbol::Get("div"), &Div()},   {Symbol::Get("eq"), &Eq()},

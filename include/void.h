@@ -12,11 +12,11 @@ struct Void : public Object {
   // Return the type of the object for introspection.
   Type &GetType() const override { return Void::TypeObj(); };
   // Value equality between 2 smallisp objects.
-  bool IsEqual(const Object &) const override {
+  bool IsEqual(const Object &o) const override {
+    std::cout << o.GetType().Str() << std::endl;
     assert(false && "IsEqual: void object");
     return false;
   };
-  bool IsEqual(const Object *o) const override { return this->IsEqual(*o); };
   // Hash code of this object
   std::size_t Hashcode(void) const override {
     assert(false && "Hashcode: void object");
@@ -25,7 +25,7 @@ struct Void : public Object {
   // Str should return a human readable std::string object
   const std::string Str(void) const override { return "void"; };
   static const Void *Get(void);
-  const Object *Accept(Visitor &) const override;
+  const Object &Accept(Visitor &) const override;
 
  private:
   static Void *instance;
@@ -34,11 +34,11 @@ struct Void : public Object {
 
 inline void PrintTo(const Void &o, std::ostream *os) { *os << "void"; };
 
-extern const Void *kVoid;
+extern const Void &kVoid;
 
-inline bool IsVoid(const Object &obj) { return &obj == kVoid; };
+inline bool IsVoid(const Object &obj) { return &obj == &kVoid; };
 
-inline bool IsVoid(const Object *obj) { return obj == kVoid; };
+inline bool IsVoid(const Object *obj) { return obj == &kVoid; };
 
 }  // namespace sl
 #endif

@@ -14,10 +14,7 @@ class Bool : public Object {
   // Return the type of the object for introspection.
   const Type &GetType() const override { return Bool::TypeObj(); };
   // Value equality between 2 smallisp objects.
-  virtual bool IsEqual(const Object &o) const override {
-    return this->IsEqual(&o);
-  };
-  virtual bool IsEqual(const Object *o) const override { return this == o; };
+  virtual bool IsEqual(const Object &o) const override { return this == &o; };
   // Hash code of this object
   std::size_t Hashcode(void) const override {
     std::hash<bool> fn;
@@ -37,8 +34,9 @@ class Bool : public Object {
     return *f;
   };
   static const Bool *Get(bool val) { return val ? &True() : &False(); };
+  static const Bool &Val(bool val) { return val ? True() : False(); };
   explicit operator bool() const { return this->value(); };
-  const Object *Accept(Visitor &) const override;
+  const Object &Accept(Visitor &) const override;
 
  private:
   Bool(bool val) : value_(val){};

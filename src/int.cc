@@ -16,8 +16,6 @@ bool Int::IsEqual(const Object &o) const {
   return false;
 }
 
-bool Int::IsEqual(const Object *o) const { return this->IsEqual(*o); }
-
-const Object *Int::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &Int::Accept(Visitor &v) const { return v.Visit(*this); }
 
 }  // namespace sl

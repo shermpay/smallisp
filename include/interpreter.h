@@ -12,7 +12,7 @@ class Interpreter {
   // A pointer to current frame and nullptr if there is not frame.
   virtual Frame *frame(void) const = 0;
   virtual void set_frame(Frame *) = 0;
-  virtual const Object *Eval(const Object &) = 0;
+  virtual const Object &Eval(const Object &) = 0;
 };
 }  // namespace sl
 #endif

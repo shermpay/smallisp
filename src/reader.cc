@@ -162,14 +162,14 @@ const Object &Reader::ReadSymbol(const std::string &symbol_name) {
 static const List *ReadSexpHelper(Reader *reader) {
   if (reader->PeekChar() == Delim::kRParen) {
     reader->GetChar();
-    return NIL;
+    return &NIL;
   } else if (reader->PeekChar() == EOF) {
     return nullptr;
   } else {
     const Object &obj = reader->ReadExpr();
     reader->ReadWhitespace();
     const List *rest = ReadSexpHelper(reader);
-    return (rest ? Cons(&obj, rest) : nullptr);
+    return (rest ? &Cons(obj, *rest) : nullptr);
   }
 }
 

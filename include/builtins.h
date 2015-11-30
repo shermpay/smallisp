@@ -23,7 +23,7 @@ class BuiltinFunction : public Callable {
   };
 
   virtual std::size_t param_count(void) const override = 0;
-  virtual const Object *operator()(const List &args) const override = 0;
+  virtual const Object &operator()(const List &args) const override = 0;
 };
 
 // TODO: Implement builtin functions with templates
@@ -32,63 +32,63 @@ class Add : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "add"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Sub : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "sub"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Mul : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "mul"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Div : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "div"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Eq : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "eq"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Ne : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "ne"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Cons : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "cons"; }
   std::size_t param_count(void) const override { return 2; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Car : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "car"; }
   std::size_t param_count(void) const override { return 1; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 class Cdr : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "cdr"; }
   std::size_t param_count(void) const override { return 1; };
-  const Object *operator()(const List &args) const override;
+  const Object &operator()(const List &args) const override;
 };
 
 const class Add &Add(void);

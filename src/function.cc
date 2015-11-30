@@ -5,7 +5,7 @@
 
 namespace sl {
 
-const Object *Callable::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &Callable::Accept(Visitor &v) const { return v.Visit(*this); }
 
 Function::Function(Interpreter *interp, const std::string &name,
                    const List &params, const Object &body)
@@ -15,17 +15,17 @@ Function::Function(Interpreter *interp, const std::string &name,
       param_count_(params.Count()),
       body_(body){};
 
-const Object *Function::operator()(const List &args) const {
+const Object &Function::operator()(const List &args) const {
   const Object *ret_val = nullptr;
   if (IsType<List>(this->body())) {
     Frame *frame = new Frame{Environment{}, &this->body()};
     const List *rest_params = &this->params();
     // Bind args
     for (const Object &obj : args) {
-      const Symbol *curr_param =
-          static_cast<const Symbol *>(rest_params->First());
-      frame->locals.insert({curr_param, &obj});
-      rest_params = static_cast<const List *>(rest_params->Rest());
+      const Symbol &curr_param =
+          static_cast<const Symbol &>(rest_params->First());
+      frame->locals.insert({&curr_param, &obj});
+      rest_params = &static_cast<const List &>(rest_params->Rest());
     }
     if (IsNil(frame->body)) {
       assert(false && "FUNCTION BODY CANNOT BE EMPTY");
@@ -33,7 +33,7 @@ const Object *Function::operator()(const List &args) const {
     } else {
       interpreter()->set_frame(frame);
       for (const Object &expr : *static_cast<const List *>(frame->body)) {
-        ret_val = interpreter()->Eval(expr);
+        ret_val = &(interpreter()->Eval(expr));
       }
       interpreter()->set_frame(nullptr);
     }
@@ -43,7 +43,7 @@ const Object *Function::operator()(const List &args) const {
   }
   // unwind stack
   // TODO: change this to use static link
-  return ret_val;
+  return *ret_val;
 }
 
 }  // namespace sl

@@ -6,5 +6,5 @@ namespace sl {
 ///////////////////////
 // Error definitions //
 ///////////////////////
-const Object *Error::Accept(Visitor &v) const { return v.Visit(*this); }
+const Object &Error::Accept(Visitor &v) const { return v.Visit(*this); }
 }  // namespace sl

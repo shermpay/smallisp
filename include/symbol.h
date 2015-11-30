@@ -18,8 +18,7 @@ class Symbol : public Object {
   // Implement Object
   const Type &GetType(void) const override { return Symbol::TypeObj(); };
   // We do address equality because Symbols are pooled.
-  bool IsEqual(const Object &o) const override { return this->IsEqual(&o); };
-  bool IsEqual(const Object *o) const override { return this == o; };
+  bool IsEqual(const Object &o) const override { return this == &o; };
   std::size_t Hashcode(void) const override {
     std::hash<std::string> hash_fn;
     return hash_fn(name());
@@ -30,7 +29,7 @@ class Symbol : public Object {
   // Use this for constructing symbols.
   static const Symbol *Get(const std::string &name);
   static const Symbol &Val(const std::string &name);
-  const Object *Accept(Visitor &) const override;
+  const Object &Accept(Visitor &) const override;
 
  private:
   const std::string name_;

@@ -4,7 +4,7 @@
 #define _UTILS_DEF
 
 #include <string>
-#include "objects.h"
+#include "error.h"
 
 namespace sl {
 
@@ -13,7 +13,7 @@ namespace debug {
 // Enable debugging if passed in true, else disable debugging.
 void Enable(bool);
 
-const Error *ErrorWithTrace(const std::string &msg);
+const Error &ErrorWithTrace(const std::string &msg);
 
 }  // namespace debug
 

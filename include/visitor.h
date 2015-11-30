@@ -10,16 +10,16 @@ namespace sl {
 class Visitor {
  public:
   virtual ~Visitor(){};
-  virtual const Object *Visit(const Byte &) = 0;
-  virtual const Object *Visit(const Int &) = 0;
-  virtual const Object *Visit(const Bool &) = 0;
-  virtual const Object *Visit(const Symbol &) = 0;
-  virtual const Object *Visit(const Void &) = 0;
-  virtual const Object *Visit(const Error &) = 0;
-  virtual const Object *Visit(const ConsC &) = 0;
-  virtual const Object *Visit(const List &) = 0;
-  virtual const Object *Visit(const Nil &) = 0;
-  virtual const Object *Visit(const Callable &) = 0;
+  virtual const Object &Visit(const Byte &) = 0;
+  virtual const Object &Visit(const Int &) = 0;
+  virtual const Object &Visit(const Bool &) = 0;
+  virtual const Object &Visit(const Symbol &) = 0;
+  virtual const Object &Visit(const Void &) = 0;
+  virtual const Object &Visit(const Error &) = 0;
+  virtual const Object &Visit(const ConsC &) = 0;
+  virtual const Object &Visit(const List &) = 0;
+  virtual const Object &Visit(const Nil &) = 0;
+  virtual const Object &Visit(const Callable &) = 0;
 };
 
 }  // namespace sl

@@ -19,9 +19,9 @@ TEST(Int, Allocation) {
 }
 
 TEST(Int, IsEqual) {
-  EXPECT_TRUE(Int::Get(1)->IsEqual(Int::Get(1)));
-  EXPECT_FALSE(Int::Get(1)->IsEqual(Int::Get(2)));
-  EXPECT_TRUE(Int::Get(1)->IsEqual(Int::Val(1)));
+  EXPECT_TRUE(Int::Val(1).IsEqual(Int::Val(1)));
+  EXPECT_FALSE(Int::Val(1).IsEqual(Int::Val(2)));
+  EXPECT_TRUE(Int::Val(1).IsEqual(Int::Val(1)));
 }
 
 TEST(Int, Equality) {

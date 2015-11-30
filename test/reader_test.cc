@@ -33,16 +33,16 @@ TEST(Reader, ReadInt) {
   EXPECT_EQ(Reader::kStartLinum, reader.linum());
   EXPECT_EQ(Reader::kStartColnum, reader.colnum());
   const Object &neg_one = reader.ReadInt();
-  ASSERT_EQ(*Int::Get(-1), neg_one);
+  ASSERT_EQ(Int::Val(-1), neg_one);
   reader.ReadWhitespace();
   const Object &two = reader.ReadInt();
-  ASSERT_EQ(*Int::Get(2), two);
+  ASSERT_EQ(Int::Val(2), two);
   reader.ReadWhitespace();
   const Object &short_max = reader.ReadInt();
-  ASSERT_EQ(*Int::Get(65536), short_max);
+  ASSERT_EQ(Int::Val(65536), short_max);
   reader.ReadWhitespace();
   const Object &zero = reader.ReadInt();
-  ASSERT_EQ(*Int::Get(0), zero);
+  ASSERT_EQ(Int::Val(0), zero);
 }
 
 TEST(Reader, ReadSymbol) {
@@ -50,20 +50,20 @@ TEST(Reader, ReadSymbol) {
   Reader reader(sstream);
   reader.ReadWhitespace();
   const Object &foo = reader.ReadSymbol();
-  ASSERT_EQ(*Symbol::Get("foo"), foo);
+  ASSERT_EQ(Symbol::Val("foo"), foo);
   reader.ReadWhitespace();
   const Object &bar = reader.ReadSymbol();
-  ASSERT_EQ(*Symbol::Get("bar-1"), bar);
+  ASSERT_EQ(Symbol::Val("bar-1"), bar);
   reader.ReadWhitespace();
   const Object &baz = reader.ReadSymbol();
-  ASSERT_EQ(*Symbol::Get("-baz"), baz);
+  ASSERT_EQ(Symbol::Val("-baz"), baz);
 }
 
 TEST(Reader, ReadSexp) {
   std::stringstream sstream("(foo)");
   Reader reader(sstream);
   const Object &sexp = reader.ReadSexp();
-  const List expected = List{Symbol::Get("foo")};
+  const List expected{Symbol::Get("foo")};
   ASSERT_EQ(expected, sexp);
 
   std::stringstream sstream_2("(foo 1 2)");
@@ -87,7 +87,7 @@ TEST(Reader, ReadSexp) {
   std::stringstream ss_empty("()");
   Reader reader_empty(ss_empty);
   const Object &sexp_5 = reader_empty.ReadSexp();
-  ASSERT_EQ(*NIL, sexp_5);
+  ASSERT_EQ(NIL, sexp_5);
 }
 
 TEST(Reader, ReadExpr) {
