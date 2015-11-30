@@ -18,6 +18,7 @@ class Visitor {
   virtual const Object &Visit(const Error &) = 0;
   virtual const Object &Visit(const ConsC &) = 0;
   virtual const Object &Visit(const List &) = 0;
+  virtual const Object &Visit(const Array &) = 0;
   virtual const Object &Visit(const Nil &) = 0;
   virtual const Object &Visit(const Callable &) = 0;
 };

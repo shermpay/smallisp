@@ -92,6 +92,7 @@ class Treewalker : public Interpreter, public Visitor {
   const Object &Visit(const Error &) override;
   const Object &Visit(const ConsC &) override;
   const Object &Visit(const List &) override;
+  const Object &Visit(const Array &) override;
   const Object &Visit(const Nil &) override;
   const Object &Visit(const Callable &) override;
 

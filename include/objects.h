@@ -12,5 +12,6 @@
 #include "error.h"
 #include "list.h"
 #include "function.h"
+#include "array.h"
 
 #endif

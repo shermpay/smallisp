@@ -42,7 +42,8 @@ SRCS := $(wildcard  $(SRC_DIR)/*.$(SRC_EXT))
 
 # OBJS := $(patsubst $(SRC_DIR)/%.$(SRC_EXT), $(BUILD_DIR)/%.o, $(SRCS))
 SL_OBJS := $(BUILD_DIR)/int.o $(BUILD_DIR)/bool.o $(BUILD_DIR)/symbol.o \
-$(BUILD_DIR)/error.o $(BUILD_DIR)/void.o $(BUILD_DIR)/list.o $(BUILD_DIR)/function.o
+$(BUILD_DIR)/error.o $(BUILD_DIR)/void.o $(BUILD_DIR)/list.o $(BUILD_DIR)/function.o \
+$(BUILD_DIR)/array.o
 BASE_OBJS := $(BUILD_DIR)/objects.o $(BUILD_DIR)/utils.o 
 # All the key object files
 OBJS := $(BASE_OBJS) $(BUILD_DIR)/treewalk_interp.o $(BUILD_DIR)/repl.o \
@@ -139,6 +140,9 @@ $(BIN_DIR)/objects_test: $(TEST_DIR)/objects_test.cc $(BASE_OBJS)
 	 $(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
 $(BIN_DIR)/list_test: $(TEST_DIR)/list_test.cc $(BASE_OBJS)
+	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
+
+$(BIN_DIR)/array_test: $(TEST_DIR)/array_test.cc $(BASE_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_LIBS) $^ -o $@
 
 $(BIN_DIR)/void_test: $(TEST_DIR)/void_test.cc $(BUILD_DIR)/void.o
