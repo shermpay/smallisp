@@ -104,7 +104,9 @@ const Object &Cdr::operator()(const List &args) const {
 
 const Object &ListFn::operator()(const List &args) const { return args; }
 
-const Object &ArrayFn::operator()(const List &args) const { return NIL; }
+const Object &ArrayFn::operator()(const List &args) const {
+  return *(new Array(args));
+}
 
 #define STATIC_INIT_BUILTIN(name_)             \
   const class name_ &name_(void) {             \

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include "int.h"
+#include "list.h"
 
 namespace sl {
 TEST(Array, BasicOperations) {
@@ -39,6 +40,25 @@ TEST(Array, Indexing) {
   Array arr({Int::Get(1), Int::Get(2)});
   ASSERT_EQ(Int::Val(1), arr[0]);
   ASSERT_TRUE(IsType<Error>(arr[-1]));
+}
+
+TEST(Array, Str) {
+  EXPECT_EQ("[1 2]", Array({Int::Get(1), Int::Get(2)}).Str());
+  EXPECT_EQ("[]", Array({}).Str());
+  EXPECT_EQ("[0]", Array({Int::Get(0)}).Str());
+}
+
+TEST(Array, MoveCtor) {
+  Array arr({Int::Get(1), Int::Get(2)});
+  ASSERT_EQ(arr, Array(arr));
+}
+
+TEST(Array, FromList) {
+  List list({Int::Get(1), Int::Get(42)});
+  const Array &expected({Int::Get(1), Int::Get(42)});
+  const Array &t1 = Array::FromList(list);
+  ASSERT_EQ(expected, t1);
+  ASSERT_EQ(expected, Array(list));
 }
 
 }  // namespace sl
