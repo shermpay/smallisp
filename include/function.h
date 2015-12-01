@@ -29,6 +29,7 @@ class Callable : public Object {
 // evaluated by the interpreter.
 class Function : public Callable {
  public:
+  static const std::size_t kVarArgs;
   static const Function &Val(Interpreter *interp, const std::string &name,
                              const List &params, const Object &body) {
     return *(new Function(interp, name, params, body));

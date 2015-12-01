@@ -184,7 +184,7 @@ const Object &Treewalker::MakeDef(const Symbol &sym, const Object &obj) {
 const Object &Treewalker::Call(const Callable &func, const List &args) {
   std::size_t param_count = func.param_count();
   std::size_t arg_count = args.Count();
-  if (param_count != arg_count) {
+  if (param_count != Function::kVarArgs && param_count != arg_count) {
     return Error::Val("Calling " + func.Str() +
                       " with invalid number of args." + "\n  expected: " +
                       std::to_string(param_count) + "\n  actual:   " +
@@ -240,6 +240,8 @@ const Object &Treewalker::Visit(const List &obj) {
                       func_lst.Str());
   }
 }
+
+const Object &Treewalker::Visit(const Array &obj) { return obj; }
 const Object &Treewalker::Visit(const Nil &o) {
   assert(false && "Nil Dereference");
   return o;

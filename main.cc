@@ -18,12 +18,12 @@ int main(int argc, char *argv[]) {
     sl::interp::Treewalker interp;
     const sl::Object *expr = nullptr;
     while (!sl::IsType<sl::EOFError>(expr = &reader.ReadExpr())) {
-      const sl::Object *obj = interp.Eval(*expr);
+      const sl::Object &obj = interp.Eval(*expr);
       if (sl::IsType<sl::Error>(obj)) {
         std::cout << "Error on line " << reader.linum() << ", col "
                   << reader.colnum() << ": " << reader.curr_line() << std::endl;
       }
-      std::cout << obj->Str() << std::endl;
+      std::cout << obj.Str() << std::endl;
     }
   }
   return 0;

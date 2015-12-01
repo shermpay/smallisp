@@ -70,7 +70,7 @@ const Object &Ne::operator()(const List &args) const {
   return Bool::Val(!(left.IsEqual(right)));
 }
 
-const Object &Cons::operator()(const List &args) const {
+const Object &ConsFn::operator()(const List &args) const {
   const Object &left = args.First();
   const Object &right = static_cast<const List &>(args.Rest()).First();
   if (IsType<List>(right)) {
@@ -102,6 +102,10 @@ const Object &Cdr::operator()(const List &args) const {
   }
 }
 
+const Object &ListFn::operator()(const List &args) const { return args; }
+
+const Object &ArrayFn::operator()(const List &args) const { return NIL; }
+
 #define STATIC_INIT_BUILTIN(name_)             \
   const class name_ &name_(void) {             \
     static class name_ *f = new class name_(); \
@@ -114,18 +118,21 @@ STATIC_INIT_BUILTIN(Mul);
 STATIC_INIT_BUILTIN(Div);
 STATIC_INIT_BUILTIN(Eq);
 STATIC_INIT_BUILTIN(Ne);
-STATIC_INIT_BUILTIN(Cons);
+STATIC_INIT_BUILTIN(ConsFn);
 STATIC_INIT_BUILTIN(Car);
 STATIC_INIT_BUILTIN(Cdr);
+STATIC_INIT_BUILTIN(ListFn);
+STATIC_INIT_BUILTIN(ArrayFn);
 
 Environment Defns(void) {
   static Environment defns = {
-      {Symbol::Get("nil"), &NIL},     {Symbol::Get("true"), &TRUE},
-      {Symbol::Get("false"), &FALSE}, {Symbol::Get("add"), &Add()},
-      {Symbol::Get("sub"), &Sub()},   {Symbol::Get("mul"), &Mul()},
-      {Symbol::Get("div"), &Div()},   {Symbol::Get("eq"), &Eq()},
-      {Symbol::Get("ne"), &Ne()},     {Symbol::Get("cons"), &Cons()},
-      {Symbol::Get("car"), &Car()},   {Symbol::Get("cdr"), &Cdr()},
+      {Symbol::Get("nil"), &NIL},       {Symbol::Get("true"), &TRUE},
+      {Symbol::Get("false"), &FALSE},   {Symbol::Get("add"), &Add()},
+      {Symbol::Get("sub"), &Sub()},     {Symbol::Get("mul"), &Mul()},
+      {Symbol::Get("div"), &Div()},     {Symbol::Get("eq"), &Eq()},
+      {Symbol::Get("ne"), &Ne()},       {Symbol::Get("cons"), &ConsFn()},
+      {Symbol::Get("car"), &Car()},     {Symbol::Get("cdr"), &Cdr()},
+      {Symbol::Get("list"), &ListFn()}, {Symbol::Get("array"), &ArrayFn()},
   };
   return defns;
 }

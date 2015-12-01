@@ -32,12 +32,12 @@ TEST(BuiltinFunction, Ne) {
   ASSERT_EQ(FALSE, Ne()(List{Int::Get(4), Int::Get(4)}));
 }
 
-TEST(BuiltinFunction, Cons) {
-  ASSERT_EQ(List{Int::Get(0)}, Cons()(List{Int::Get(0), &NIL}));
+TEST(BuiltinFunction, ConsFn) {
+  ASSERT_EQ(List{Int::Get(0)}, ConsFn()(List{Int::Get(0), &NIL}));
   ASSERT_EQ(List({Int::Get(0), Int::Get(1)}),
-            Cons()(List{Int::Get(0), &Cons()(List{Int::Get(1), &NIL})}));
+            ConsFn()(List{Int::Get(0), &ConsFn()(List{Int::Get(1), &NIL})}));
   ASSERT_EQ(ConsC(Int::Val(0), Int::Val(1)),
-            Cons()(List{Int::Get(0), Int::Get(1)}));
+            ConsFn()(List{Int::Get(0), Int::Get(1)}));
 }
 
 TEST(BuiltinFunction, Car) {

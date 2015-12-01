@@ -7,6 +7,8 @@ namespace sl {
 
 const Object &Callable::Accept(Visitor &v) const { return v.Visit(*this); }
 
+const std::size_t Function::kVarArgs = -1;
+
 Function::Function(Interpreter *interp, const std::string &name,
                    const List &params, const Object &body)
     : interp_(interp),

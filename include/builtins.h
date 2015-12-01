@@ -70,7 +70,7 @@ class Ne : public BuiltinFunction {
   const Object &operator()(const List &args) const override;
 };
 
-class Cons : public BuiltinFunction {
+class ConsFn : public BuiltinFunction {
  public:
   const std::string name(void) const override { return "cons"; }
   std::size_t param_count(void) const override { return 2; };
@@ -91,15 +91,31 @@ class Cdr : public BuiltinFunction {
   const Object &operator()(const List &args) const override;
 };
 
+class ListFn : public BuiltinFunction {
+ public:
+  const std::string name(void) const override { return "list"; }
+  std::size_t param_count(void) const override { return Function::kVarArgs; };
+  const Object &operator()(const List &args) const override;
+};
+
+class ArrayFn : public BuiltinFunction {
+ public:
+  const std::string name(void) const override { return "array"; }
+  std::size_t param_count(void) const override { return Function::kVarArgs; };
+  const Object &operator()(const List &args) const override;
+};
+
 const class Add &Add(void);
 const class Sub &Sub(void);
 const class Mul &Mul(void);
 const class Div &Div(void);
 const class Eq &Eq(void);
 const class Ne &Ne(void);
-const class Cons &Cons(void);
+const class ConsFn &ConsFn(void);
 const class Car &Car(void);
 const class Cdr &Cdr(void);
+const class ListFn &ListFn(void);
+const class ArrayFn &ArrayFn(void);
 
 // Initialize builtin environment
 Environment Defns(void);

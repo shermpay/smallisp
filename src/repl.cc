@@ -27,11 +27,8 @@ int Start() {
       std::cout << reader.error().Str() << std::endl;
       continue;
     }
-    const Object *obj = interp.Eval(expr);
-    if (!obj) {
-      continue;
-    }
-    std::cout << obj->Str() << std::endl;
+    const Object &obj = interp.Eval(expr);
+    std::cout << obj.Str() << std::endl;
   }
   return 0;
 }
