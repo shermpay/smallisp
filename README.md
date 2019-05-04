@@ -1,22 +1,21 @@
 Smallisp
 =====
 
-Lisp Implementation in C.
+Lisp Implementation in C++.
 
 
 ## Intro
 
-Simple Lisp implementation in C.
-
-Currently following www.buildyourownlisp.com
-Transistion Phase, reimplementing language to various personal preferences.
+Simple Lisp implementation in C++.
 
 
-## Requirements
-MPC library required to build.
-Download mpc.h and mpc.c from the following url
+## Dependencies
+### Building 
+ * clang++
+ * C++ 14
+ * libedit
+ * googletest (for testing)
 
-https://github.com/orangeduck/mpc
 
 ## Usage
 run `$ make all`. This should generate a `repl` executable.

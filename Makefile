@@ -48,6 +48,7 @@ BASE_OBJS := $(BUILD_DIR)/objects.o $(BUILD_DIR)/utils.o
 # All the key object files
 OBJS := $(BASE_OBJS) $(BUILD_DIR)/treewalk_interp.o $(BUILD_DIR)/repl.o \
 $(BUILD_DIR)/reader.o $(BUILD_DIR)/builtins.o $(BUILD_DIR)/specialforms.o
+
 ###########
 # Testing #
 ###########
@@ -66,6 +67,20 @@ GENHTML := genhtml
 GENHTMLFLAGS := --ignore-errors source
 HTMLDIR := $(TEST_DIR)/html
 
+###################
+# Setup Workspace #
+###################
+.PHONY: setup
+
+setup: $(BIN_DIR) $(BUILD_DIR)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+
 ##############
 # Test files #
 ##############
@@ -75,7 +90,7 @@ TEST_BINS := $(patsubst $(TEST_DIR)/%.$(SRC_EXT), $(BIN_DIR)/%, $(TEST_SRCS))
 main: main.cc $(OBJS) 
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BIN_DIR)/$@
 
-$(BIN_DIR)/main: main.cc $(OBJS)
+$(BIN_DIR)/main: $(BIN_DIR) main.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
 run_main: $(BIN_DIR)/main
@@ -85,13 +100,14 @@ run_main: $(BIN_DIR)/main
 ###########################
 # Building an object file #
 ###########################
+
 $(BUILD_DIR)/objects.o: $(SL_OBJS)
 	$(LD) -r $^ -o $@
 
 %.o: $(SRC_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $(BUILD_DIR)/$@ -c
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc
+$(BUILD_DIR)/%.o: $(BUILD_DIR) $(SRC_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@ -c
 
 ##############################
