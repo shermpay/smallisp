@@ -6,6 +6,7 @@
 
 #include "treewalk_interp.h"
 #include "reader.h"
+#include "error.h"
 
 namespace sl {
 

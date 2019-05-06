@@ -3,12 +3,10 @@
 #define _ENVIRONMENT_DEF
 
 #include <unordered_map>
-#include "object.h"
-#include "symbol.h"
 
 namespace sl {
 
-typedef std::unordered_map<const Symbol *, const Object *> Environment;
+typedef std::unordered_map<const class Symbol *, const class Object *> Environment;
 }
 
 #endif

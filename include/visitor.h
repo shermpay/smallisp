@@ -2,25 +2,23 @@
 #ifndef _VISITOR_DEF
 #define _VISITOR_DEF
 
-#include "objects.h"
-
 namespace sl {
 
 // TODO: Make the return a template type
 class Visitor {
  public:
   virtual ~Visitor(){};
-  virtual const Object &Visit(const Byte &) = 0;
-  virtual const Object &Visit(const Int &) = 0;
-  virtual const Object &Visit(const Bool &) = 0;
-  virtual const Object &Visit(const Symbol &) = 0;
-  virtual const Object &Visit(const Void &) = 0;
-  virtual const Object &Visit(const Error &) = 0;
-  virtual const Object &Visit(const ConsC &) = 0;
-  virtual const Object &Visit(const List &) = 0;
-  virtual const Object &Visit(const Array &) = 0;
-  virtual const Object &Visit(const Nil &) = 0;
-  virtual const Object &Visit(const Callable &) = 0;
+  virtual const class Object &Visit(const class Byte &) = 0;
+  virtual const class Object &Visit(const class Int &) = 0;
+  virtual const class Object &Visit(const class Bool &) = 0;
+  virtual const class Object &Visit(const class Symbol &) = 0;
+  virtual const class Object &Visit(const struct Void &) = 0;
+  virtual const class Object &Visit(const class Error &) = 0;
+  virtual const class Object &Visit(const class ConsC &) = 0;
+  virtual const class Object &Visit(const class List &) = 0;
+  virtual const class Object &Visit(const class Array &) = 0;
+  virtual const class Object &Visit(const struct Nil &) = 0;
+  virtual const class Object &Visit(const class Callable &) = 0;
 };
 
 }  // namespace sl

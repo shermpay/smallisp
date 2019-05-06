@@ -1,12 +1,13 @@
 #include <fstream>
 
-#include "objects.h"
+#include "error.h"
 #include "reader.h"
 #include "repl.h"
-#include "interpreter.h"
 #include "treewalk_interp.h"
 
 namespace sl {}
+
+class Object;
 
 int main(int argc, char *argv[]) {
   if (argc == 1) {

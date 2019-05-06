@@ -4,6 +4,7 @@
 #define _UTILS_DEF
 
 #include <string>
+
 #include "error.h"
 
 namespace sl {

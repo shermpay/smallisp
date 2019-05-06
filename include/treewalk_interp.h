@@ -14,10 +14,7 @@
 #include "builtins.h"
 #include "environment.h"
 #include "frame.h"
-#include "function.h"
 #include "interpreter.h"
-#include "list.h"
-#include "objects.h"
 #include "specialforms.h"
 #include "visitor.h"
 

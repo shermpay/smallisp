@@ -32,7 +32,7 @@ struct Void : public Object {
   Void(){};
 };
 
-inline void PrintTo(const Void &o, std::ostream *os) { *os << "void"; };
+inline void PrintTo(const Void &o, std::ostream *os) { *os << o.Str(); };
 
 extern const Void &kVoid;
 

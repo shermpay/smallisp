@@ -7,6 +7,11 @@
 #include <string>
 #include <vector>
 
+#include "int.h"
+#include "list.h"
+#include "symbol.h"
+#include "object.h"
+
 /*
   Smallisp Grammar
   ----------------

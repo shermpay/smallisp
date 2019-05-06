@@ -4,11 +4,14 @@
 #include <list>
 #include <utility>
 
-#include "builtins.h"
-#include "function.h"
+#include "array.h"
+#include "bool.h"
+#include "byte.h"
+#include "int.h"
+#include "error.h"
 #include "list.h"
-#include "objects.h"
-#include "specialforms.h"
+#include "symbol.h"
+#include "void.h"
 
 namespace sl {
 

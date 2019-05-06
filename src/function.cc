@@ -1,5 +1,6 @@
 #include "function.h"
 
+#include "symbol.h"
 #include "list.h"
 #include "visitor.h"
 

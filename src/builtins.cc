@@ -1,5 +1,12 @@
 #include "builtins.h"
 
+#include "array.h"
+#include "bool.h"
+#include "error.h"
+#include "int.h"
+#include "list.h"
+#include "symbol.h"
+
 namespace sl {
 
 namespace builtins {

@@ -1,8 +1,9 @@
 #include "array.h"
 
-#include "visitor.h"
-
 #include <vector>
+
+#include "list.h"
+#include "visitor.h"
 
 namespace sl {
 

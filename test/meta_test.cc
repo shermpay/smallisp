@@ -1,7 +1,7 @@
 // This is a test to ensure that we were able to compile and link with our
 // testing framework.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 namespace {
 // The fixture for testing class Foo.

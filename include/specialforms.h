@@ -3,9 +3,10 @@
 #define _SPECIALFORMS_DEF
 
 #include "environment.h"
-#include "objects.h"
 
 namespace sl {
+
+class Symbol;
 
 namespace specialforms {
 

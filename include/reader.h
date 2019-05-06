@@ -1,11 +1,12 @@
 //===- smallisp/reader.h - Smallisp reader definition --*- mode: C++ -*-=== //
 
 #include <iostream>
+#include <vector>
 
-#include "list.h"
-#include "objects.h"
 
 namespace sl {
+
+class Object;
 
 namespace reader {
 
@@ -70,7 +71,7 @@ class Reader {
 
   // Declare that the reader has failed and stores the error
   // Returns a sl::Error object
-  const Error &Failed(const reader::Error &err);
+  const class Error &Failed(const reader::Error &err);
   // Return the next character in the stream
   char PeekChar(void);
   // Get the next character in the stream

@@ -1,6 +1,5 @@
 #include "specialforms.h"
-
-#include "objects.h"
+#include "symbol.h"
 
 namespace sl {
 
