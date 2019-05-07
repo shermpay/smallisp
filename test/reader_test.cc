@@ -5,6 +5,10 @@
 
 #include <gtest/gtest.h>
 
+#include "int.h"
+#include "list.h"
+#include "symbol.h"
+
 namespace sl {
 
 namespace {

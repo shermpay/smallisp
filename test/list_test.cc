@@ -1,6 +1,9 @@
+#include "list.h"
+
 #include <gtest/gtest.h>
 
-#include "objects.h"
+#include "int.h"
+#include "object.h"
 #include "utils.h"
 
 namespace sl {

@@ -4,6 +4,10 @@
 #include "builtins.h"
 #include <gtest/gtest.h>
 
+#include "bool.h"
+#include "int.h"
+#include "list.h"
+
 namespace sl {
 namespace builtins {
 TEST(BuiltinFunction, Add) {

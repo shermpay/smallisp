@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 VISITOR_INCLS = [
     "include/visitor.h",
     "include/objects.h",

@@ -1,8 +1,15 @@
 #include "treewalk_interp.h"
 
 #include <gtest/gtest.h>
+
+#include "bool.h"
 #include "environment.h"
+#include "error.h"
+#include "function.h"
+#include "int.h"
+#include "list.h"
 #include "specialforms.h"
+#include "symbol.h"
 
 namespace sl {
 
