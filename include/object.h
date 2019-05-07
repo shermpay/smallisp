@@ -93,7 +93,10 @@ inline void PrintTo(const Type &o, std::ostream *os) { *os << o.Str(); };
 
 inline const Type &TypeOf(const Object &obj) { return obj.GetType(); };
 
-inline const Type &TypeOf(const Object *obj) { return TypeOf(*obj); };
+inline const Type &TypeOf(const Object *obj) {
+  assert(obj != nullptr && "obj is null");
+  return TypeOf(*obj);
+};
 
 template <typename T>
 inline bool IsType(const Object &obj) {

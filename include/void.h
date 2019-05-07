@@ -34,11 +34,11 @@ struct Void : public Object {
 
 inline void PrintTo(const Void &o, std::ostream *os) { *os << o.Str(); };
 
-extern const Void &kVoid;
+#define VOID (*Void::Get())
 
-inline bool IsVoid(const Object &obj) { return &obj == &kVoid; };
+inline bool IsVoid(const Object &obj) { return &obj == &VOID; };
 
-inline bool IsVoid(const Object *obj) { return obj == &kVoid; };
+inline bool IsVoid(const Object *obj) { return obj == &VOID; };
 
 }  // namespace sl
 #endif

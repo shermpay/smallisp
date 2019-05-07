@@ -100,7 +100,9 @@ class List : public Object {
   // The List object being constructed depends on the lifetime of the Cons Cell
   // passed in.
   // TODO: Ensure this design works
-  List(const ConsC &cell) : head_(cell) { assert(!IsType<ConsC>(cell.cdr())); }
+  List(const ConsC &cell) : head_(cell) {
+    assert(!IsType<ConsC>(cell.cdr()));
+  }
 
   // Constructor for creating lists of objects.
   List(std::initializer_list<const Object *> il);
@@ -157,7 +159,7 @@ struct Nil : public List {
 
  private:
   static Nil *instance;
-  Nil() : List(ConsC::Val(kVoid, kVoid)){};
+  Nil() : List(ConsC::Val(VOID, VOID)){};
   Nil(Nil const &) = delete;
   Nil &operator=(Nil const &) = delete;
 };

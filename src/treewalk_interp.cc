@@ -44,7 +44,7 @@ const Object &Treewalker::HandleSpecialForm(const List &sf,
       assert(false && "Special Form not handled, this is a programming error!");
     }
   }
-  return kVoid;
+  return VOID;
 }
 
 const Object &Treewalker::Def(const List &sf) {
@@ -153,7 +153,7 @@ const Object &Treewalker::LocalLookup(const Symbol &sym) {
   Environment local_env = frame() ? frame()->locals : globals();
   auto iter = local_env.find(&sym);
   if (iter != local_env.end()) return *(iter->second);
-  return kVoid;  // Nothing found
+  return VOID;  // Nothing found
 }
 
 // Lookup bindings in all scopes
@@ -175,7 +175,7 @@ const Object &Treewalker::Lookup(const Symbol &sym) {
 const Object &Treewalker::Bind(const Symbol &sym, const Object &obj) {
   Environment &curr_env = frame() ? frame()->locals : globals();
   curr_env[&sym] = &obj;
-  return kVoid;
+  return VOID;
 }
 
 const Object &Treewalker::MakeDef(const Symbol &sym, const Object &obj) {
@@ -211,13 +211,13 @@ const Object &Treewalker::Visit(const Symbol &obj) {
 }
 const Object &Treewalker::Visit(const Void &) {
   assert(false && "Error");
-  return kVoid;
+  return VOID;
 }
 const Object &Treewalker::Visit(const Error &o) { return o; }
 
 const Object &Treewalker::Visit(const ConsC &) {
   assert(false && "NOT IMPLEMENTED");
-  return kVoid;
+  return VOID;
 }
 
 const Object &Treewalker::Visit(const List &obj) {

@@ -8,7 +8,6 @@ const Void *Void::Get(void) {
   if (!Void::instance) Void::instance = new Void();
   return Void::instance;
 }
-const Void &kVoid = *Void::Get();
 
 const Object &Void::Accept(Visitor &v) const { return v.Visit(*this); }
 
