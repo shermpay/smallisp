@@ -8,11 +8,18 @@
    Repro: ((lambda()))
    Fix: Ensure lambda has a body, add assertion if evaluating function without body
 
-* Feature
+* Features
 ** Type System
 *** DONE Design Basic Type System
 ** Error System
 *** TODO Design Error system
 
-* Misc
+* Cleanup
+** DONE Figure out relationship between Void, Nil, ConsC and List
+   Fixed(#9208af6): Empty List == Nil. However, Nil <> List with a Single ConsC of Void 
+** TODO Add missing tests
+   Missing tests are commented out in test/BUILD
 ** TODO Refactor all pointers away
+* Infrastructure
+** TODO Use bazel toolchain to specify compiler, and target C++ version
+** TODO Use doxygen
