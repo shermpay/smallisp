@@ -8,6 +8,7 @@
 #include <cstdio>
 
 #include <iterator>
+#include <memory>
 #include <vector>
 #include <iostream>
 
@@ -96,11 +97,12 @@ class List : public Object {
   // The constant nil.
   static const List &kEmpty;
 
+
   // Constructor for wrapping a cons cell into a list type.
   // The List object being constructed depends on the lifetime of the Cons Cell
   // passed in.
   // TODO: Ensure this design works
-  List(const ConsC &cell) : head_(cell) {
+  List(const ConsC &cell) : head_(&cell) {
     assert(!IsType<ConsC>(cell.cdr()));
   }
 
@@ -116,7 +118,7 @@ class List : public Object {
   virtual std::size_t Hashcode(void) const override;
   virtual const std::string Str(void) const override;
 
-  virtual inline const ConsC &head() const { return (this->head_); };
+  virtual inline const ConsC &head() const { return (*this->head_); };
   virtual const Object &First() const;
 
   // Returns the rest of the list
@@ -138,8 +140,12 @@ class List : public Object {
 
   const Object &Accept(Visitor &v) const override;
 
+ protected:
+  List();
+
  private:
-  const ConsC &head_;
+  const std::shared_ptr<const ConsC> head_;
+
   List(const List &) = delete;
   List &operator=(const List &) = delete;
   // List(const List &&) = delete;
@@ -159,7 +165,7 @@ struct Nil : public List {
 
  private:
   static Nil *instance;
-  Nil() : List(ConsC::Val(VOID, VOID)){};
+  Nil() : List(){};
   Nil(Nil const &) = delete;
   Nil &operator=(Nil const &) = delete;
 };

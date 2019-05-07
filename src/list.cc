@@ -61,6 +61,9 @@ const Nil *Nil::Get(void) {
 
 const List &List::kEmpty = NIL;
 
+// Do nothing
+List::List() {}
+
 const List *InitHelperPtr(std::initializer_list<const Object *> il) {
   const List *curr = &NIL;
   for (auto ptr = il.end() - 1; ptr != il.begin() - 1; --ptr) {
@@ -71,7 +74,7 @@ const List *InitHelperPtr(std::initializer_list<const Object *> il) {
 }
 
 List::List(std::initializer_list<const Object *> il)
-    : head_(InitHelperPtr(il)->head()) {}
+    : head_(&InitHelperPtr(il)->head()) {}
 
 List::~List(void){
     // const List *rest = this->Rest();
