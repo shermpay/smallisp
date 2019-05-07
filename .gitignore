@@ -1,14 +1,15 @@
+# binaries
 repl
 main
 mpc.*
-#*
 *.o
 bin/*
 obj/*
 .#*
-
-
 test/bin/
+
+# bazel output
+bazel-*
 
 # Remove when done
 src/parser/parser
